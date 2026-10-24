@@ -917,6 +917,10 @@ function detMark(lv){
 }
 function bindDetailCards(){
   if (MODE !== "chain") return;
+  if (!window.__keyBound){
+    window.__keyBound = 1;
+    document.addEventListener("keydown", mKeydown, true);
+  }
   if (!window.__detBound){
     window.__detBound = 1;
     svg.addEventListener("click", function(e){
