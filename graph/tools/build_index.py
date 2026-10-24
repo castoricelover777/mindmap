@@ -217,7 +217,7 @@ html_head = """<!DOCTYPE html>
     <div class="seg">
       <a class="on">全链路图</a>
       <a href="graph.html?tab=mysql" title="MySQL 知识栏目">MySQL</a>
-      <a href="blog.html">博客源码</a>
+      <a href="https://castoricelover777.github.io/blog/" target="_blank" rel="noopener">博客源码</a>
     </div>
     <div class="btns">
       <button id="btn-expand">全部展开</button>
