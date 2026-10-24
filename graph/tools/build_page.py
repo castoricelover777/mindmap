@@ -250,7 +250,7 @@ BODY = r"""
     <div class="seg">
       <a class="on" id="tab-graph">知识图谱</a>
       <a id="tab-mysql">MySQL</a>
-      <a href="blog.html">博客源码</a>
+      <a href="https://castoricelover777.github.io/blog/" target="_blank" rel="noopener">博客源码</a>
     </div>
     <div class="chips" id="chips"></div>
     <div class="stats" id="stats"></div>
