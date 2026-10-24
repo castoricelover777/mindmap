@@ -863,56 +863,41 @@ function flipFrom(oldPts){
   });
 }
 
-/* ================= 细节卡标记（长链图，走 data-p） ================= */
-let DET_MARKS = {};
-try { DET_MARKS = JSON.parse(localStorage.getItem("mm-detail-marks-v1") || "{}"); } catch (e) { DET_MARKS = {}; }
-const DET_COLORS = ["#DC2626", "#D97706", "#047857"];
+/* ================= 细节卡标记（复用原有 marks 系统） ================= */
 let detSelP = null;
 function detRect(p){ return document.querySelector('#scene rect[data-p="' + p + '"]'); }
-function detPaint(p){
-  const r = detRect(p);
-  if (!r) return;
-  const lv = DET_MARKS[p];
-  if (lv === undefined){
-    r.setAttribute("stroke", gDStroke(p));
-    r.setAttribute("stroke-width", ".8");
-  } else {
-    r.setAttribute("stroke", DET_COLORS[lv]);
-    r.setAttribute("stroke-width", "2.2");
-  }
-}
-function gDStroke(p){
-  const r = detRect(p);
-  return (r && r.getAttribute("data-s") ) || "#94a3b8";
-}
-function detRepaintAll(){
-  document.querySelectorAll('#scene rect[data-p]').forEach(r => {
-    const p = r.getAttribute("data-p");
-    if (!r.getAttribute("data-s")) r.setAttribute("data-s", r.getAttribute("stroke") || "#94a3b8");
-    const lv = DET_MARKS[p];
-    if (lv === undefined){ r.setAttribute("stroke", r.getAttribute("data-s")); r.setAttribute("stroke-width", ".8"); }
-    else { r.setAttribute("stroke", DET_COLORS[lv]); r.setAttribute("stroke-width", "2.2"); }
-  });
-}
 function detSelect(p){
   detSelP = p;
   document.querySelectorAll('#scene rect[data-p]').forEach(r => {
-    const on = r.getAttribute("data-p") === p;
-    if (on) r.setAttribute("stroke-dasharray", "0");
-    r.setAttribute("opacity", on ? "1" : r.getAttribute("opacity") || "1");
+    if (r.getAttribute("data-sel") === "1"){
+      r.setAttribute("data-sel", "0");
+      if (r.getAttribute("data-s0") !== null){
+        r.setAttribute("stroke", r.getAttribute("data-s0"));
+        r.setAttribute("stroke-width", r.getAttribute("data-w0") || ".8");
+      }
+    }
   });
   const r = detRect(p);
-  if (r){ r.setAttribute("stroke-width", "2.6"); r.setAttribute("stroke", DET_COLORS[DET_MARKS[p] === undefined ? 2 : DET_MARKS[p]]); }
-  detRepaintAll();
-  if (r && DET_MARKS[p] === undefined){ r.setAttribute("stroke", "#2563eb"); r.setAttribute("stroke-width", "2.6"); }
+  if (r){
+    r.setAttribute("data-s0", r.getAttribute("stroke") || "#94a3b8");
+    r.setAttribute("data-w0", r.getAttribute("stroke-width") || ".8");
+    r.setAttribute("data-sel", "1");
+    r.setAttribute("stroke", "#2563eb");
+    r.setAttribute("stroke-width", "2.6");
+  }
 }
 function detMark(lv){
   if (!detSelP) return false;
-  if (DET_MARKS[detSelP] === lv) delete DET_MARKS[detSelP]; else DET_MARKS[detSelP] = lv;
-  try { localStorage.setItem("mm-detail-marks-v1", JSON.stringify(DET_MARKS)); } catch (e) {}
-  detRepaintAll();
-  const r = detRect(detSelP);
-  if (r && DET_MARKS[detSelP] === undefined){ r.setAttribute("stroke", "#2563eb"); r.setAttribute("stroke-width", "2.6"); }
+  const cur = markGet(detSelP);
+  if (cur === lv) delete marks[detSelP]; else marks[detSelP] = lv;   // 走原有标记
+  saveMarks();
+  const keep = detSelP;
+  redraw(true);          // 重画链：圆钮、底色、边框、统计一起更新
+  updateStats();
+  setTimeout(function(){
+    bindDetailCards();
+    if (keep) detSelect(keep);
+  }, 30);
   return true;
 }
 function bindDetailCards(){
@@ -944,7 +929,7 @@ function bindDetailCards(){
       if (p) detSelect(p);
     });
   }
-  detRepaintAll();
+  if (detSelP && detRect(detSelP)) detSelect(detSelP);
 }
 /* ---------- 连贯变形：旧画面整体缩放/位移并溶解到新画面 ---------- */
 function crossMorph(paint, ms){
