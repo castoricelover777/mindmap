@@ -205,6 +205,28 @@ CSS = r"""
   .pb pre{margin:7px 0 0;padding:8px 10px;background:#1f2937;color:#e5e7eb;border-radius:6px;
     font-family:ui-monospace,Consolas,"Courier New",monospace;font-size:10.4px;line-height:1.66;
     overflow:auto;white-space:pre-wrap}
+  .mvmask{position:fixed;inset:0;background:rgba(250,249,247,.80);z-index:1;display:none;
+    opacity:0;transition:opacity .22s ease}
+  .mvmask.show{display:block;opacity:1}
+  .mvpop{position:fixed;top:92px;right:30px;bottom:44px;width:min(460px,42vw);z-index:2;display:none;
+    flex-direction:column;background:#fff;border:1px solid #e8e5de;border-radius:13px;
+    box-shadow:0 18px 50px rgba(17,24,39,.20);overflow:hidden;
+    transform:translateX(26px);opacity:0;transition:transform .24s cubic-bezier(.34,.02,.2,1),opacity .2s}
+  .mvpop.show{display:flex;transform:translateX(0);opacity:1}
+  .mvpop .ph-head{display:flex;align-items:flex-start;gap:10px;padding:14px 16px 11px;border-bottom:1px solid #f1eee8}
+  .mvpop .ph-head h4{margin:0;font-size:13.5px;font-weight:800;color:#111827;line-height:1.45;flex:1}
+  .mvpop .ph-head .x{border:0;background:none;font-size:19px;line-height:1;color:#9ca3af;cursor:pointer;padding:0 2px}
+  .mvpop .ph-head .x:hover{color:#111827}
+  .mvpop .ph-body{padding:13px 16px 18px;overflow:auto;flex:1}
+  .mvpop .ms{font-size:11.8px;color:#4b5563;line-height:1.75;margin-bottom:7px}
+  .mvpop .mo{font-size:11.2px;color:#b45309;line-height:1.65;margin:8px 0 4px;
+    background:#fffbeb;border:1px solid #fde68a;border-radius:7px;padding:7px 9px}
+  .mvpop pre{margin:8px 0 0;padding:9px 11px;background:#1f2937;color:#e5e7eb;border-radius:7px;
+    font-family:ui-monospace,Consolas,"Courier New",monospace;font-size:11px;line-height:1.7;
+    overflow:auto;white-space:pre-wrap}
+  .mvpop .tag{display:inline-block;font-size:9.5px;font-weight:800;color:#2563eb;background:#eff6ff;
+    border-radius:4px;padding:1px 5px;margin-bottom:9px}
+  .pt.on{background:#eff6ff;box-shadow:0 1px 3px rgba(37,99,235,.18)}
   .arw{flex:0 0 16px;display:flex;align-items:center;justify-content:center;color:#cfcac0;
     font-size:15px;margin-top:16px;user-select:none}
 """
@@ -220,7 +242,7 @@ BODY = r"""
     <div class="seg">
       <a class="on" id="tab-graph">知识图谱</a>
       <a id="tab-mysql">MySQL</a>
-      <a href="https://castoricelover777.github.io/blog/" target="_blank" rel="noopener">博客源码</a>
+      <a href="blog.html">博客源码</a>
     </div>
     <div class="chips" id="chips"></div>
     <div class="stats" id="stats"></div>
@@ -247,6 +269,8 @@ BODY = r"""
     <div class="mvs" id="mv-stat"></div>
   </div>
   <div class="mv-cols" id="mv-body"></div>
+  <div class="mvmask" id="mvmask"></div>
+  <div class="mvpop" id="mvpop"></div>
 </div>
 """
 
@@ -939,7 +963,30 @@ let mysqlBuilt = false;
 function mEsc(x){
   return String(x).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
 }
+let MV_ALL = [];
 function mToggle(el){ el.parentNode.classList.toggle("open"); }
+function mOpen(el){
+  const row = el.parentNode;
+  const p = MV_ALL[+row.dataset.i];
+  if (!p) return;
+  document.querySelectorAll(".pt.on").forEach(x => x.classList.remove("on"));
+  row.classList.add("on");
+  const body = (p.text || []).map(t => `<div class="ms">${mEsc(t)}</div>`).join("")
+    + (p.tips || []).map(t => `<div class="mo">⚠ ${mEsc(t)}</div>`).join("")
+    + (p.code && p.code.length
+        ? `<div class="tag">代码示例 · ${p.code.length} 段</div>` + p.code.map(c => `<pre>${mEsc(c)}</pre>`).join("")
+        : "");
+  const pop = $("mvpop");
+  pop.innerHTML = `<div class="ph-head"><h4>${mEsc(p.label)}</h4><button class="x" onclick="mClose()">×</button></div>`
+    + `<div class="ph-body">${body || '<div class="ms">—</div>'}</div>`;
+  $("mvmask").classList.add("show");
+  requestAnimationFrame(() => pop.classList.add("show"));
+}
+function mClose(){
+  $("mvpop").classList.remove("show");
+  $("mvmask").classList.remove("show");
+  document.querySelectorAll(".pt.on").forEach(x => x.classList.remove("on"));
+}
 function buildMysql(){
   if (mysqlBuilt) return;
   mysqlBuilt = true;
@@ -948,13 +995,10 @@ function buildMysql(){
     const groups = ch.groups.map((g, gi) => {
       const pts = g.points.map(p => {
         const n = (p.code || []).length;
-        const body = (p.text || []).slice(0, 2).map(t => `<div class="ms">${mEsc(t)}</div>`).join("")
-          + (p.tips || []).slice(0, 1).map(t => `<div class="mo">⚠ ${mEsc(t)}</div>`).join("")
-          + (p.code || []).map(c => `<pre>${mEsc(c)}</pre>`).join("");
-        return `<div class="pt" style="color:${col}">`
-          + `<div class="ph" onclick="mToggle(this)"><span>${mEsc(p.label)}</span>`
-          + (n ? `<i>${n} 段</i>` : "") + `</div>`
-          + `<div class="pb">${body || '<div class="ms">—</div>'}</div></div>`;
+        const idx = MV_ALL.push(Object.assign({ color: col }, p)) - 1;
+        return `<div class="pt" style="color:${col}" data-i="${idx}">`
+          + `<div class="ph" onclick="mOpen(this)"><span>${mEsc(p.label)}</span>`
+          + (n ? `<i>${n} 段</i>` : "") + `</div></div>`;
       }).join("");
       return `<div class="gp" style="color:${col}">`
         + `<div class="gh" onclick="mToggle(this)"><b>${mEsc(g.label)}</b><em>${g.points.length}</em></div>`
@@ -970,6 +1014,7 @@ function buildMysql(){
     + MYSQL.meta.points + " 个知识点 · " + MYSQL.meta.withCode + " 段代码 · 来源：" + MYSQL.meta.source;
 }
 function setMysqlView(on){
+  if (typeof mClose === "function") mClose();
   $("mysqlview").classList.toggle("show", on);
   $("tab-mysql").classList.toggle("on", on);
   $("tab-graph").classList.toggle("on", !on);
@@ -1104,6 +1149,8 @@ function toggleTheme(id){
 
 $("btn-back").onclick = backToNet;
 $("tab-mysql").onclick = () => setMysqlView(true);
+$("mvmask").onclick = mClose;
+document.addEventListener("keydown", e => { if (e.key === "Escape") mClose(); });
 $("tab-graph").onclick = () => setMysqlView(false);
 
 $("btn-fit").onclick = () => redraw(false);
