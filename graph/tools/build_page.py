@@ -291,6 +291,11 @@ CSS = r"""
   .mvab{font-family:var(--font);font-size:11px;font-weight:700;color:#374151;background:#fff;
     border:1px solid #e2ded6;border-radius:999px;padding:5px 11px;cursor:pointer;transition:.15s}
   .mvab:hover{background:#f7f5f1;border-color:#c9c4ba}
+
+  .mkbtn .key{display:inline-block;margin-left:5px;font-style:normal;font-size:9px;font-weight:800;
+    color:#9ca3af;background:#f4f2ed;border-radius:3px;padding:0 3px;line-height:14px;vertical-align:1px}
+  .mkbtn.on0 .key,.mkbtn.on1 .key,.mkbtn.on2 .key{color:inherit;background:rgba(255,255,255,.65)}
+  .mkbar .keyhint{margin-left:6px;font-size:9.5px;color:#c2bdb4}
 """
 
 BODY = r"""
@@ -1115,9 +1120,10 @@ function mvPopHtml(p){
   const lv = MV_MARKS[p.id];
   const bar = `<div class="mkbar"><b>标记</b>`
     + MV_MNAME.map((nm, k) =>
-        `<button class="mkbtn${lv === k ? " on" + k : ""}" onclick="mMark('${p.id}',${k})">${nm}</button>`
+        `<button class="mkbtn${lv === k ? " on" + k : ""}" onclick="mMark('${p.id}',${k})">`
+        + `${nm}<em class="key">${"ASD"[k]}</em></button>`
       ).join("")
-    + `</div>`;
+    + `<span class="keyhint">按 A / S / D 也可标记</span></div>`;
   return `<div class="ph-head"><h4>${mEsc(p.label)}</h4><button class="x" onclick="mClose()">×</button></div>`
     + `<div class="ph-body">${bar}${body || '<div class="ms">—</div>'}</div>`;
 }
@@ -1132,7 +1138,9 @@ function mOpen(el){
   pop.dataset.i = String(idx);
   pop.innerHTML = mvPopHtml(p);
   $("mvmask").classList.add("show");
-  requestAnimationFrame(() => pop.classList.add("show"));
+  pop.setAttribute("tabindex", "-1");
+  pop.onkeydown = mKeydown;
+  requestAnimationFrame(() => { pop.classList.add("show"); try { pop.focus(); } catch (e) {} });
 }
 
 function mClose(){
@@ -1166,6 +1174,7 @@ function buildMysql(){
   });
   $("mv-body").innerHTML = cols.join('<div class="arw">→</div>');
   mStat();
+  window.addEventListener("keydown", mKeydown, true);
 }
 function mSave(){
   try { localStorage.setItem("mm-mysql-marks-v1", JSON.stringify(MV_MARKS)); } catch (e) {}
@@ -1215,6 +1224,21 @@ function mImport(file){
   };
   fr.readAsText(file);
 }
+function mKeydown(e){
+  if (!e || e.ctrlKey || e.metaKey || e.altKey) return;
+  const tag = (e.target && e.target.tagName || "").toLowerCase();
+  if (tag === "input" || tag === "textarea") return;
+  const pop = $("mvpop");
+  if (!pop || !pop.dataset.i) return;
+  const map = { a: 0, s: 1, d: 2 };
+  const k = (e.key || "").toLowerCase();
+  if (!(k in map)) return;
+  const p = MV_ALL[+pop.dataset.i];
+  if (!p) return;
+  e.preventDefault();
+  mMark(p.id, map[k]);
+}
+window.addEventListener("keydown", mKeydown, true);
 function setMysqlView(on){
   if (typeof mClose === "function") mClose();
   $("mysqlview").classList.toggle("show", on);
@@ -1360,6 +1384,7 @@ $("mv-file").onchange = e => {
 $("tab-mysql").onclick = () => setMysqlView(true);
 $("mvmask").onclick = mClose;
 document.addEventListener("keydown", e => { if (e.key === "Escape") mClose(); });
+document.addEventListener("keydown", mKeydown);
 $("tab-graph").onclick = () => setMysqlView(false);
 
 $("btn-fit").onclick = () => redraw(false);
