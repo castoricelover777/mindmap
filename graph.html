@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>前后端知识图谱 · 网状 / 链状</title>
+<style>
+  :root{
+    --bg:#faf9f6; --ink:#111827; --muted:#6b7280;
+    --font:"PingFang SC","Microsoft YaHei","Hiragino Sans GB","Noto Sans CJK SC",system-ui,-apple-system,"Segoe UI",sans-serif;
+    --shadow:0 1px 2px rgba(17,24,39,.05),0 10px 30px rgba(17,24,39,.07);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;overflow:hidden}
+  body{background:var(--bg);color:var(--ink);font-family:var(--font);
+    background-image:radial-gradient(circle at 1px 1px,#e6e3dc 1px,transparent 0);background-size:24px 24px}
+  #app{position:fixed;inset:0}
+  .topbar{position:fixed;top:0;left:0;right:0;min-height:58px;z-index:20;display:flex;align-items:center;
+    gap:12px;padding:8px 20px;flex-wrap:wrap;row-gap:6px;
+    background:linear-gradient(180deg,rgba(250,249,246,.97),rgba(250,249,246,.82));
+    backdrop-filter:blur(10px);border-bottom:1px solid #e8e5de}
+  .brand{display:flex;align-items:baseline;gap:9px}
+  .brand h1{margin:0;font-size:15.5px;font-weight:800;letter-spacing:.3px}
+  .brand .sub{font-size:11px;color:var(--muted);letter-spacing:.3px}
+  @media (max-width:1500px){ .brand .sub{display:none} }
+  .spacer{flex:1}
+  button{font-family:inherit;font-size:12px;font-weight:600;color:#374151;background:#fff;
+    border:1px solid #dedad2;padding:6px 10px;border-radius:7px;cursor:pointer;transition:.14s;
+    box-shadow:0 1px 1px rgba(17,24,39,.03);white-space:nowrap}
+  button:hover{background:#f2efe9;border-color:#c9c4ba}
+  .seg{display:flex;background:#efece6;border:1px solid #dedad2;border-radius:8px;padding:2px;gap:2px;flex:none}
+  .seg a{font-size:12px;font-weight:600;color:#6b7280;text-decoration:none;padding:5px 11px;border-radius:6px;transition:.15s;white-space:nowrap}
+  .seg a:hover{color:#374151;background:rgba(255,255,255,.6)}
+  .seg a.on{background:#fff;color:#111827;box-shadow:0 1px 3px rgba(17,24,39,.14)}
+  .chips{display:flex;gap:6px;flex:none}
+  .chip{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#374151;
+    background:#fff;border:1px solid #dedad2;padding:6px 12px;border-radius:999px;cursor:pointer;transition:.15s;white-space:nowrap}
+  .chip i{width:8px;height:8px;border-radius:50%;display:block}
+  .chip:hover{border-color:#c9c4ba;background:#f7f5f1}
+  .chip.on{color:#fff;border-color:transparent}
+  .chip.on i{background:#fff!important}
+  .stats{display:flex;gap:11px;align-items:center;font-size:11.5px;color:var(--muted);white-space:nowrap;flex:none}
+  .stats b{color:#374151;font-weight:700}
+  .stats .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
+  .zoom{display:flex;align-items:center;border:1px solid #dedad2;border-radius:7px;overflow:hidden;background:#fff}
+  .zoom button{border:0;border-radius:0;box-shadow:none;padding:6px 9px}
+  .zoom .val{font-size:11px;color:var(--muted);padding:0 7px;min-width:42px;text-align:center}
+  svg#map{width:100%;height:100%;display:block;cursor:grab}
+  svg#map.dragging{cursor:grabbing}
+  text{font-family:var(--font);dominant-baseline:middle;pointer-events:none}
+  .hint{position:fixed;left:20px;bottom:14px;z-index:20;font-size:11px;color:var(--muted);
+    background:rgba(255,255,255,.88);border:1px solid #e8e5de;padding:6px 11px;border-radius:8px;box-shadow:var(--shadow)}
+  .hint b{color:#374151}
+  .legend{position:fixed;right:20px;bottom:66px;z-index:20;display:flex;gap:11px;flex-wrap:wrap;max-width:56vw;
+    font-size:10.5px;color:var(--muted);background:rgba(255,255,255,.88);border:1px solid #e8e5de;
+    padding:6px 11px;border-radius:8px;box-shadow:var(--shadow)}
+  .legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px}
+  .backbtn{position:fixed;right:20px;bottom:14px;z-index:22;display:none;align-items:center;gap:8px;
+    font-family:var(--font);font-size:12.5px;font-weight:700;color:#fff;background:#111827;border:1px solid #111827;
+    padding:9px 16px;border-radius:999px;cursor:pointer;box-shadow:0 6px 18px rgba(17,24,39,.20);transition:.16s}
+  .backbtn:hover{background:#1f2937;transform:translateY(-1px)}
+  .backbtn.show{display:flex}
+  /* 侧栏 */
+  .panel{position:fixed;top:0;right:0;bottom:0;width:380px;max-width:86vw;z-index:30;background:#fff;
+    border-left:1px solid #e8e5de;box-shadow:-12px 0 40px rgba(17,24,39,.10);
+    transform:translateX(102%);transition:transform .26s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column}
+  .panel.show{transform:none}
+  .panel .ph{padding:18px 20px 14px;border-bottom:1px solid #eee}
+  .panel .ph .lay{font-size:10.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase}
+  .panel .ph h2{margin:6px 0 2px;font-size:17px;font-weight:800;letter-spacing:.2px}
+  .panel .ph .aka{font-size:11.5px;color:var(--muted);font-family:ui-monospace,Menlo,Consolas,monospace}
+  .panel .pb{padding:16px 20px;overflow:auto;flex:1;font-size:12.5px;line-height:1.72;color:#374151}
+  .panel .pb h3{margin:18px 0 8px;font-size:12px;font-weight:800;color:#111827;letter-spacing:.4px}
+  .panel .pb h3:first-child{margin-top:0}
+  .panel .kv{display:flex;gap:8px;font-size:11.5px;color:var(--muted);margin:3px 0}
+  .panel .kv b{color:#374151;font-weight:700}
+  .panel .sc{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 9px;
+    border-radius:999px;margin:0 5px 5px 0;background:#f2efe9;color:#374151}
+  .panel .sc i{width:7px;height:7px;border-radius:50%}
+  .panel .close{position:absolute;top:14px;right:16px;border:0;background:none;font-size:20px;color:#9ca3af;
+    cursor:pointer;line-height:1;padding:4px}
+  .panel .close:hover{color:#111827}
+  .panel ul{margin:0;padding-left:18px}
+  .panel li{margin:4px 0}
+  /* 母题 */
+  .themes{position:fixed;left:20px;bottom:56px;z-index:20;display:flex;gap:6px;flex-wrap:wrap;max-width:54vw}
+  .tchip{display:flex;align-items:center;gap:6px;font-family:var(--font);font-size:11px;font-weight:700;
+    color:#374151;background:rgba(255,255,255,.92);border:1px solid #dedad2;padding:5px 10px;border-radius:999px;
+    cursor:pointer;transition:.15s;box-shadow:0 1px 2px rgba(17,24,39,.05);white-space:nowrap}
+  .tchip i{width:7px;height:7px;border-radius:50%;display:block}
+  .tchip:hover{border-color:#c9c4ba;background:#f7f5f1}
+  .tchip.on{color:#fff;border-color:transparent}
+  .tcard{position:fixed;left:20px;bottom:96px;z-index:21;width:320px;max-width:80vw;background:#fff;
+    border:1px solid #e8e5de;border-radius:10px;box-shadow:0 10px 30px rgba(17,24,39,.13);
+    padding:14px 16px 12px;display:none}
+  .tcard.show{display:block}
+  .tcard h4{margin:0 0 4px;font-size:13.5px;font-weight:800;letter-spacing:.2px}
+  .tcard .note{font-size:11px;color:#6b7280;line-height:1.65;margin:0 0 10px}
+  .tcard ol{margin:0;padding-left:18px;font-size:11.5px;line-height:1.95;color:#374151}
+  .tcard li b{font-weight:700}
+  .tcard .ly{font-size:9.5px;color:#9ca3af;margin-left:5px}
+  .tcard .x{position:absolute;top:8px;right:10px;border:0;background:none;font-size:16px;color:#9ca3af;cursor:pointer}
+  .themes a.tchip{text-decoration:none;color:#6b7280;font-weight:700}
+  /* 环节面板里的知识点 chip */
+  .panel .kchips{display:flex;flex-wrap:wrap;gap:6px}
+  .panel .kchip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:#374151;
+    background:#f7f5f1;border:1px solid #e8e5de;padding:4px 9px;border-radius:999px;cursor:pointer;transition:.14s}
+  .panel .kchip:hover{background:#fff;border-color:#c9c4ba;color:#111827}
+  .panel .kchip i{width:7px;height:7px;border-radius:50%;display:block}
+
+  /* MySQL 知识栏目（卡片墙，样式对齐长链图） */
+  .mysqlview{position:fixed;left:0;right:0;top:58px;bottom:0;z-index:40;display:none;overflow:auto;
+    padding:22px 26px 90px;background:#faf9f7;background-image:radial-gradient(#e6e3dc .8px,transparent .8px);
+    background-size:20px 20px}
+  .mysqlview.show{display:block}
+  .mv-bar{display:flex;align-items:baseline;gap:14px;margin:0 0 18px 2px}
+  .mv-bar h2{margin:0;font-size:17px;font-weight:800;color:#111827}
+  .mv-bar .mvs{font-size:11px;color:#a8a29a;font-weight:600}
+  .mv-cols{display:flex;gap:6px;align-items:flex-start}
+  .mv-col{flex:1 1 300px;min-width:264px;max-width:430px}
+  .mh{display:flex;align-items:center;gap:9px;border-radius:11px;padding:11px 13px;color:#fff;
+    box-shadow:0 3px 12px rgba(17,24,39,.13)}
+  .mh i{width:19px;height:19px;border-radius:50%;background:rgba(255,255,255,.26);flex:0 0 19px;
+    display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;font-style:normal}
+  .mh h3{margin:0;font-size:12.5px;font-weight:800;flex:1;line-height:1.3}
+  .mh u{width:19px;height:19px;border-radius:50%;background:rgba(255,255,255,.26);flex:0 0 19px;
+    display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;text-decoration:none}
+  .mg{margin-top:7px}
+  .gh{display:flex;align-items:center;gap:8px;padding:9px 11px;background:#fff;border-radius:8px;
+    margin-bottom:6px;cursor:pointer;user-select:none;box-shadow:0 1px 3px rgba(17,24,39,.05);
+    transition:box-shadow .15s}
+  .gh:hover{box-shadow:0 2px 8px rgba(17,24,39,.10)}
+  .gh b{font-size:11.5px;font-weight:700;color:#1f2937;flex:1;line-height:1.4}
+  .gh em{width:18px;height:18px;border-radius:50%;border:1.3px solid currentColor;flex:0 0 18px;
+    display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;font-style:normal}
+  .gb{display:none;padding:2px 0 2px 10px}
+  .gp.open>.gb{display:block}
+  .pt{background:#fff;border-radius:0 7px 7px 0;margin-bottom:5px;border-left:2.5px solid currentColor;
+    box-shadow:0 1px 2px rgba(17,24,39,.04)}
+  .ph{display:flex;align-items:center;gap:7px;padding:7px 9px;cursor:pointer;font-size:11px;
+    font-weight:600;color:#374151;user-select:none;line-height:1.42}
+  .ph:hover{background:#faf9f6}
+  .ph span{flex:1}
+  .ph i{flex:0 0 auto;font-style:normal;font-size:9px;font-weight:800;color:#2563eb;background:#eff6ff;
+    border-radius:4px;padding:1px 5px}
+  .pb{display:none;padding:0 9px 9px}
+  .pt.open>.pb{display:block}
+  .pb .ms{font-size:10.5px;color:#6b7280;line-height:1.62;margin-top:3px}
+  .pb .mo{font-size:10.5px;color:#b45309;line-height:1.55;margin-top:4px}
+  .pb pre{margin:7px 0 0;padding:8px 10px;background:#1f2937;color:#e5e7eb;border-radius:6px;
+    font-family:ui-monospace,Consolas,"Courier New",monospace;font-size:10.4px;line-height:1.66;
+    overflow:auto;white-space:pre-wrap}
+  .arw{flex:0 0 16px;display:flex;align-items:center;justify-content:center;color:#cfcac0;
+    font-size:15px;margin-top:16px;user-select:none}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="topbar">
+    <div class="brand">
+      <h1>前后端知识图谱</h1>
+      <span class="sub" id="brandsub">点场景高亮 → 再点一次排成长链</span>
+    </div>
+    <div class="spacer"></div>
+    <div class="seg">
+      <a class="on" id="tab-graph">知识图谱</a>
+      <a id="tab-mysql">MySQL</a>
+      <a href="blog.html">博客源码</a>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div class="stats" id="stats"></div>
+    <button id="btn-fit">适应窗口</button>
+    <div class="zoom">
+      <button id="btn-out">−</button><span class="val" id="zoomval">100%</span><button id="btn-in">+</button>
+    </div>
+  </div>
+  <svg id="map"><g id="scene"></g></svg>
+  <div class="hint" id="hint"><b>点场景</b>高亮相关知识点 · <b>再点一次</b>排成长链 · <b>点知识点</b>看详情 · <b>滚轮</b>缩放</div>
+  <div class="legend" id="legend"></div>
+  <div class="themes" id="themes"></div>
+  <div class="tcard" id="themecard"></div>
+  <button class="backbtn" id="btn-back">↩ 返回知识网络</button>
+  <div class="panel" id="panel">
+    <button class="close" id="panel-close">×</button>
+    <div class="ph" id="panel-head"></div>
+    <div class="pb" id="panel-body"></div>
+  </div>
+</div>
+<div class="mysqlview" id="mysqlview">
+  <div class="mv-bar">
+    <h2>MySQL 知识栏目</h2>
+    <div class="mvs" id="mv-stat"></div>
+  </div>
+  <div class="mv-cols" id="mv-body"></div>
+</div>
+
+<script>
+const NS = "http://www.w3.org/2000/svg";
+const svg = document.getElementById("map");
+const scene = document.getElementById("scene");
+const $ = id => document.getElementById(id);
+function el(tag, attrs){ const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; }
+
+const MYSQL = {"meta":{"title":"MySQL","chapters":4,"groups":8,"points":54,"withCode":24,"source":"课件 05-数据库 / 06-java操作数据库 + 笔记 day6~7"},"chapters":[{"id":"ca1","label":"MySQL概述","groups":[{"id":"ga2.2","label":"连接","points":[{"id":"pa2.2.1","label":"介绍","text":["MySQL服务器启动完毕后，然后再使用如下指令，来连接MySQL服务器：","Java / mysql -u用户名 -p密码 [-h数据库服务器的IP地址 -P端口号]","-h  参数不加，默认连接的是本地 127.0.0.1 的MySQL服务器"],"code":[],"tips":[]},{"id":"pa2.2.2","label":"企业使用方式(了解)","text":["上述的MySQL服务器我们是安装在本地的，这个仅仅是在我们学习阶段，在真实的企业开发中，MySQL数据库服务器是不会在我们本地安装的，是在公司的服务器上安装的，而服务器还需要放置在专门的IDC机房中的，IDC机房呢，就需要保证恒温、恒湿、恒压，而且还要保证网络、电源的可靠性(备用电源及网络)。","那我们要想使用服务器上的这台MySQL服务器，就需要在我们的电脑上去远程连接这台MySQL 。 而服务器上安装的MySQL数据库呢，并不是你一个人在访问，我们项目组的其他开发人员也是需要访问这台MySQL的。","接下来，就来演示一下，通过MySQL的客户端命令行，如何来连接服务器上部署的MySQL ："],"code":[],"tips":[]}]},{"id":"ga2.3","label":"数据模型","points":[{"id":"pa2.3.1","label":"关系型数据库（RDBMS）","text":["使用表存储数据，格式统一，便于维护","使用SQL语言操作，标准统一，使用方便，可用于复杂查询","我们之前提到的MySQL、Oracle、DB2、SQLServer这些都是属于关系型数据库，里面都是基于二维表存储数据的。 / 结论：基于二维表存储数据的数据库就成为关系型数据库，不是基于二维表存储数据的数据库，就是非关系型数据库（比如大家后面要学习的Redis，就属于非关系型数据库）。"],"code":[],"tips":["概念：建立在关系模型基础上，由多张相互连接的二维表组成的数据库。而所谓二维表，指的是由行和列组成的表，如下图："]},{"id":"pa2.3.2","label":"数据模型","text":["介绍完了关系型数据库之后，接下来我们再来看一看在Mysql数据库当中到底是如何来存储数据的，也就是Mysql 的数据模型。","MySQL是关系型数据库，是基于二维表进行数据存储的，具体的结构图下:","通过MySQL客户端连接数据库管理系统DBMS，然后通过DBMS操作数据库。"],"code":[],"tips":[]}]}]},{"id":"ca2","label":"SQL语句","groups":[{"id":"ga3.1","label":"DDL语句","points":[{"id":"pa3.1.1","label":"数据库操作","text":["我们在进行数据库设计，需要使用到刚才所介绍SQL分类中的DDL语句。","DDL英文全称是Data Definition Language(数据定义语言)，用来定义数据库对象(数据库、表)。","DDL中数据库的常见操作：查询、创建、使用、删除。"],"code":[],"tips":[]},{"id":"pa3.1.1.1","label":"查询数据库","text":["命令行中执行效果如下：","命令行中执行效果如果：","我们要操作某一个数据库，必须要切换到对应的数据库中。  / 通过指令：select  database() ，就可以查询到当前所处的数据库"],"code":["show databases;","select database();"],"tips":[]},{"id":"pa3.1.1.2","label":"创建数据库","text":["创建数据库时，可以不指定字符集。 因为在MySQL8版本之后，默认的字符集就是 utf8mb4。","案例： 创建一个itcast数据库。","命令行执行效果如下："],"code":["create database [ if not exists ] 数据库名  [default charset utf8mb4];","create database itcast;","-- 数据库不存在,则创建该数据库；如果存在则不创建\ncreate database if not exists itcast;"],"tips":["注意：在同一个数据库服务器中，不能创建两个名称相同的数据库，否则将会报错。"]},{"id":"pa3.1.1.3","label":"使用数据库","text":["我们要操作某一个数据库下的表时，就需要通过该指令，切换到对应的数据库下，否则不能操作。","案例：切换到itcast数据","命令执行效果如下："],"code":["use 数据库名 ;","use itcast;"],"tips":[]},{"id":"pa3.1.1.4","label":"删除数据库","text":["如果删除一个不存在的数据库，将会报错。","可以加上参数 if exists ，如果数据库存在，再执行删除，否则不执行删除。","案例：删除itcast数据库"],"code":["drop database [ if exists ] 数据库名 ;","drop database if exists itcast; -- itcast数据库存在时删除"],"tips":["说明：上述语法中的database，也可以替换成 schema / 如：create schema db01; / 如：show schemas;"]},{"id":"pa3.1.2.1","label":"介绍","text":["前面我们讲解了DDL中关于数据库操作的SQL语句，在我们编写这些SQL时，都是在命令行当中完成的。大家在练习的时候应该也感受到了，在命令行当中来敲这些SQL语句很不方便，主要的原因有以下 3 点：","没有任何代码提示。（全靠记忆，容易敲错字母造成执行报错）","操作繁琐，影响开发效率。（所有的功能操作都是通过SQL语句来完成的）"],"code":[],"tips":[]},{"id":"pa3.1.2.2","label":"安装","text":["安装： 参考资料中提供的《DataGrip安装手册》"],"code":[],"tips":["说明：DataGrip这款工具可以不用安装，因为Jetbrains公司已经将DataGrip这款工具的功能已经集成到了 IDEA当中，所以我们就可以使用IDEA来作为一款图形化界面工具来操作Mysql数据库。"]},{"id":"pa3.1.2.3","label":"连接数据库","text":["1). 创建Project","下载驱动, 可能会比较耗时, 耐心等待一会儿。","下载完驱动之后，可以点击 Test Connection 来测试一下是否可以正常的连接数据库。"],"code":[],"tips":[]},{"id":"pa3.1.3","label":"表操作","text":["学习完了DDL语句当中关于数据库的操作之后，接下来我们继续学习DDL语句当中关于表结构的操作。","关于表结构的操作也是包含四个部分：创建表、查询表、修改表、删除表。"],"code":[],"tips":[]},{"id":"pa3.1.3.1","label":"创建","text":["案例：创建tb_user表","数据表创建完成，接下来我们还需要测试一下是否可以往这张表结构当中来存储数据。","双击打开tb_user表结构，大家会发现里面没有数据："],"code":["create table  表名(\n字段1  字段1类型 [约束]  [comment  字段1注释 ],\n字段2  字段2类型 [约束]  [comment  字段2注释 ],\n......\n字段n  字段n类型 [约束]  [comment  字段n注释 ]\n) [ comment  表注释 ] ;","create table tb_user (\nid int comment 'ID,唯一标识',   # id是一行数据的唯一标识（不能重复）\nusername varchar(20) comment '用户名',\nname varchar(10) comment '姓名',\nage int comment '年龄',\ngender char(1) comment '性别'\n) comment '用户表';"],"tips":["注意： [ ] 中的内容为可选参数； 最后一个字段后面没有逗号"]},{"id":"pa3.1.3.2","label":"约束","text":["在MySQL数据库当中，提供了以下5种约束：","案例：创建tb_user表，对应的结构如下：","在上述的表结构中:"],"code":["create table tb_user (\nid int primary key comment 'ID,唯一标识',\nusername varchar(20) not null unique comment '用户名',\nname varchar(10) not null comment '姓名',\nage int comment '年龄',\ngender char(1) default '男' comment '性别'\n) comment '用户表';","create table tb_user (\nid int primary key auto_increment comment 'ID,唯一标识', #主键自动增长\nusername varchar(20) not null unique comment '用户名',\nname varchar(10) not null comment '姓名',\nage int comment '年龄',\ngender char(1) default '男' comment '性别'\n) comment '用户表';"],"tips":["概念：所谓约束就是作用在表中字段上的规则，用于限制存储在表中的数据。","作用：就是来保证数据库当中数据的正确性、有效性和完整性。（后面的学习会验证这些）","注意：约束是作用于表中字段上的，可以在创建表/修改表的时候添加约束。"]},{"id":"pa3.1.3.3","label":"数据类型","text":["在上面建表语句中，我们在指定字段的数据类型时，用到了int 、varchar、char，那么在MySQL中除了以上的数据类型，还有哪些常见的数据类型呢？ 接下来,我们就来详细介绍一下MySQL的数据类型。","MySQL中的数据类型有很多，主要分为三类：数值类型、字符串类型、日期时间类型。","2). 字符串类型"],"code":["-- 年龄字段 ---不会出现负数, 而且人的年龄不会太大\nage tinyint unsigned\n-- 分数 ---总分100分, 最多出现一位小数\nscore double(4,1)","示例：\n用户名 username ---长度不定, 最长不会超过50\nusername varchar(50)\n手机号 phone ---固定长度为11\nphone char(11)","示例:\n生日字段  birthday ---生日只需要年月日\nbirthday date\n创建时间 createtime --- 需要精确到时分秒\ncreatetime  datetime"],"tips":[]},{"id":"pa3.1.3.4","label":"表结构设计-案例","text":["需求：根据产品原型/需求创建表((设计合理的数据类型、长度、约束)","参考资料中提供的《黑马-tlias智能学习辅助系统》页面原型，设计员工管理模块的表结构。  暂不考虑所属部门及工作经历字段。","产品原型及需求如下："],"code":["create table emp(\nid int unsigned primary key auto_increment comment 'ID,主键',\nusername varchar(20) not null unique comment '用户名',\npassword varchar(32) not null comment '密码',\nname varchar(10) not null comment '姓名',\ngender tinyint unsigned not null comment '性别, 1:男, 2:女',\nphone char(11) not null unique comment '手机号',\njob tinyint unsigned comment '职位, 1:班主任,2:讲师,3:学工主管,4:教研主管,5:咨询师',\nsalary int unsigned comment '薪资',\nimage varchar(255) comment '头像',\nentry_date date comment '入职日期',\ncreate_time datetime comment '创建时间',\nupdate_time datetime comment '修改时间'\n) comment '员工表';"],"tips":[]},{"id":"pa3.1.3.5","label":"表操作-其他操作","text":["上面讲解了表结构的创建、数据类型、设计表的流程，接下来，再来讲解表结构的查询、修改、删除操作 。","查询数据库表的具体的语法：","修改数据库表结构的具体语法："],"code":["-- 查询当前数据库的所有表\nshow tables;\n-- 查看指定的表结构\ndesc 表名 ;   -- 可以查看指定表的字段、字段的类型、是否可以为NULL、是否存在默认值等信息\n-- 查询指定表的建表语句\nshow create table 表名 ;","-- 添加字段\nalter table 表名 add  字段名  类型(长度)  [comment 注释]  [约束];\n-- 比如： 为tb_emp表添加字段qq，字段类型为 varchar(11)\nalter table tb_emp add  qq  varchar(11) comment 'QQ号码';","-- 修改字段类型\nalter table 表名 modify  字段名  新数据类型(长度);\n-- 比如： 修改qq字段的字段类型，将其长度由11修改为13\nalter table tb_emp modify qq varchar(13) comment 'QQ号码';","-- 修改字段名，字段类型\nalter table 表名 change  旧字段名  新字段名  类型(长度)  [comment 注释]  [约束];\n-- 比如： 修改qq字段名为 qq_num，字段类型varchar(13)\nalter table tb_emp change qq qq_num varchar(13) comment 'QQ号码';","-- 删除字段\nalter table 表名 drop 字段名;\n-- 比如： 删除tb_emp表中的qq_num字段\nalter table tb_emp drop qq_num;","-- 修改表名\nrename table 表名 to  新表名;\n-- 比如: 将当前的emp表的表名修改为tb_emp\nrename table emp to tb_emp;","-- 删除表\ndrop  table [ if exists ]  表名;\n-- 比如：如果tb_emp表存在，则删除tb_emp表\ndrop table if exists tb_emp;  -- 在删除表时，表中的全部数据也会被删除。"],"tips":[]}]},{"id":"ga3.2","label":"DML语句","points":[{"id":"pa3.2.1.1","label":"语法","text":["向指定字段添加数据","批量添加数据（指定字段）","批量添加数据（全部字段）"],"code":["insert into 表名 (字段名1, 字段名2) values (值1, 值2);","insert into 表名 values (值1, 值2, ...);","insert into 表名 (字段名1, 字段名2) values (值1, 值2), (值1, 值2);","insert into 表名 values (值1, 值2, ...), (值1, 值2, ...);"],"tips":[]},{"id":"pa3.2.1.2","label":"案例演示","text":["案例1：向emp表的username, name, gender, phone, create_time, update_time字段插入数据","案例2：向temp表的所有字段插入数据","案例3：批量向emp表的username、name、gender字段插入数据"],"code":["-- 因为设计表时create_time, update_time两个字段不能为NULL，所以也做为要插入的字段\ninsert into emp(username, name, gender, phone, create_time, update_time)\nvalues ('wuji', '张无忌', 1, '13309091231', now(), now());","insert into emp2(id, username, password, name, gender, phone, job, salary, image, entry_date, create_time, update_time)\nvalues (1,'shinaian','123456','施耐庵',1,'13309090001',4,15000,'1.jpg','2000-01-01',now(),now()),","insert into emp(username, name, gender, phone, create_time, update_time)\nvalues ('Tom1', '汤姆1', 1, '13309091231', now(), now()),\n('Tom2', '汤姆2', 1, '13309091232', now(), now());"],"tips":[]},{"id":"pa3.2.2.1","label":"语法","text":[],"code":["update 表名 set 字段名1 = 值1 , 字段名2 = 值2 , .... [where 条件] ;"],"tips":[]},{"id":"pa3.2.2.2","label":"案例演示","text":["案例1：将emp表中id为1的员工，姓名name字段更新为'张三'","案例2：将emp表的所有员工入职日期更新为'2010-01-01'"],"code":["update emp set name='张三', update_time=now() where id=1;","update emp set entry_date='2010-01-01', update_time=now();"],"tips":["注意事项: / 修改语句的条件可以有，也可以没有，如果没有条件，则会修改整张表的所有数据。 / 在修改数据时，一般需要同时修改公共字段update_time，将其修改为当前操作时间。"]},{"id":"pa3.2.3.1","label":"语法","text":[],"code":["delete from 表名  [where  条件] ;"],"tips":[]},{"id":"pa3.2.3.2","label":"案例演示","text":["案例1：删除emp表中id为1的员工","案例2：删除emp表中所有员工"],"code":["delete from emp where id = 1;","delete from tb_emp;"],"tips":["注意事项: / DELETE 语句的条件可以有，也可以没有，如果没有条件，则会删除整张表的所有数据。 / DELETE 语句不能删除某一个字段的值(可以使用UPDATE，将该字段值置为NULL即可)。 / 当进行删除全部数据操作时，会提示询"]}]},{"id":"ga3.3","label":"DQL语句","points":[{"id":"pa3.3.1","label":"介绍","text":["DQL英文全称是Data Query Language(数据查询语言)，用来查询数据库表中的记录。","查询关键字：SELECT","查询操作是所有SQL语句当中最为常见，也是最为重要的操作。在一个正常的业务系统中，查询操作的使用频次是要远高于增删改操作的。当我们打开某个网站或APP所看到的展示信息，都是通过从数据库中查询得到的，而在这个查询过程中，还会涉及到条件、排序、分页等操作。"],"code":[],"tips":[]},{"id":"pa3.3.2","label":"语法","text":["DQL查询语句，语法结构如下：","我们今天会将上面的完整语法拆分为以下几个部分学习：","基本查询（不带任何条件）"],"code":["SELECT\n字段列表\nFROM\n表名列表\nWHERE\n条件列表\nGROUP  BY\n分组字段列表\nHAVING\n分组后条件列表\nORDER BY\n排序字段列表\nLIMIT\n分页参数","create table emp(\nid int unsigned primary key auto_increment comment 'ID,主键',\nusername varchar(20) not null unique comment '用户名',\npassword varchar(32) not null comment '密码',\nname varchar(10) not null comment '姓名',\ngender tinyint unsigned not null comment '性别, 1:男, 2:女',\nphone char(11) not null unique comment '手机号',\njob tinyint unsigned comment '职位, 1:班主任,2:讲师,3:学工主管,4:教研主管,5:咨询师',\nsalary int unsigned comment '薪资',\nimage varchar(300) comment '头像',\nentry_date date comment '入职日期',\ncreate_time datetime comment '创建时间',\nupdate_time datetime comment '修改时间'\n) comment '员工表';\n-- 准备测试数据\nINSERT INTO emp(id, username, password, name, gender, phone, job, salary, image, entry_date, create_time, update_time)\nVALUES (1,'shinaian','123456','施耐庵',1,'13309090001',4,15000,'1.jpg','2000-01-01','2024-04-11 16:35:33','2024-04-11 16:35:35'),\n(2,'songjiang','123456','宋江',1,'13309090002',2,8600,'2.jpg','2015-01-01','2024-04-11 16:35:33','2024-04-11 16:35:37'),\n(3,'lujunyi','123456','卢俊义',1,'13309090003',2,8900,'3.jpg','2008-05-01','2024-04-11 16:35:33','2024-04-11 16:35:39'),\n(4,'wuyong','123456','吴用',1,'13309090004',2,9200,'4.jpg','2007-01-01','2024-04-11 16:35:33','2024-04-11 16:35:41'),\n(5,'gongsunsheng','123456','公孙胜',1,'13309090005',2,9500,'5.jpg','2012-12-05','2024-04-11 16:35:33','2024-04-11 16:35:43'),\n(6,'huosanniang','123456','扈三娘',2,'13309090006',3,6500,'6.jpg','2013-09-05','2024-04-11 16:35:33','2024-04-11 16:35:45'),\n(7,'chaijin','123456','柴进',1,'13309090007',1,4700,'7.jpg','2005-08-01','2024-04-11 16:35:33','2024-04-11 16:35:47'),\n(8,'likui','123456','李逵',1,'13309090008',1,4800,'8.jpg','2014-11-09','2024-04-11 16:35:33','2024-04-11 16:35:49'),\n(9,'wusong','123456','武松',1,'13309090009',1,4900,'9.jpg','2011-03-11','2024-04-11 16:35:33','2024-04-11 16:35:51'),\n(10,'lichong','123456','林冲',1,'13309090010',1,5000,'10.jpg','2013-09-05','2024-04-11 16:35:33','2024-04-11 16:35:53'),\n(11,'huyanzhuo','123456','呼延灼',1,'13309090011',2,9700,'11.jpg','2007-02-01','2024-04-11 16:35:33','2024-04-11 16:35:55'),\n(12,'xiaoliguang','123456','小李广',1,'13309090012',2,10000,'12.jpg','2008-08-18','2024-04-11 16:35:33','2024-04-11 16:35:57'),\n(13,'yangzhi','123456','杨志',1,'13309090013',1,5300,'13.jpg','2012-11-01','2024-04-11 16:35:33','2024-04-11 16:35:59'),\n(14,'shijin','123456','史进',1,'13309090014',2,10600,'14.jpg','2002-08-01','2024-04-11 16:35:33','2024-04-11 16:36:01'),\n(15,'sunerniang','123456','孙二娘',2,'13309090015',2,10900,'15.jpg','2011-05-01','2024-04-11 16:35:33','2024-04-11 16:36:03'),\n(16,'luzhishen','123456','鲁智深',1,'13309090016',2,9600,'16.jpg','2010-01-01','2024-04-11 16:35:33','2024-04-11 16:36:05'),\n(17,'liying','12345678','李应',1,'13309090017',1,5800,'17.jpg','2015-03-21','2024-04-11 16:35:33','2024-04-11 16:36:07'),\n(18,'shiqian','123456','时迁',1,'13309090018',2,10200,'18.jpg','2015-01-01','2024-04-11 16:35:33','2024-04-11 16:36:09'),\n(19,'gudasao','123456','顾大嫂',2,'13309090019',2,10500,'19.jpg','2008-01-01','2024-04-11 16:35:33','2024-04-11 16:36:11'),\n(20,'ruanxiaoer','123456','阮小二',1,'13309090020',2,10800,'20.jpg','2018-01-01','2024-04-11 16:35:33','2024-04-11 16:36:13'),\n(21,'ruanxiaowu','123456','阮小五',1,'13309090021',5,5200,'21.jpg','2015-01-01','2024-04-11 16:35:33','2024-04-11 16:36:15'),\n(22,'ruanxiaoqi','123456','阮小七',1,'13309090022',5,5500,'22.jpg','2016-01-01','2024-04-11 16:35:33','2024-04-11 16:36:17'),\n(23,'ruanji','123456','阮籍',1,'13309090023',5,5800,'23.jpg','2012-01-01','2024-04-11 16:35:33','2024-04-11 16:36:19'),\n(24,'tongwei','123456','童威',1,'13309090024',5,5000,'24.jpg','2006-01-01','2024-04-11 16:35:33','2024-04-11 16:36:21'),\n(25,'tongmeng','123456','童猛',1,'13309090025',5,4800,'25.jpg','2002-01-01','2024-04-11 16:35:33','2024-04-11 16:36:23'),\n(26,'yanshun','123456','燕顺',1,'13309090026',5,5400,'26.jpg','2011-01-01','2024-04-11 16:35:33','2024-04-11 16:36:25'),\n(27,'lijun','123456','李俊',1,'13309090027',5,6600,'27.jpg','2004-01-01','2024-04-11 16:35:33','2024-04-11 16:36:27'),\n(28,'lizhong','123456','李忠',1,'13309090028',5,5000,'28.jpg','2007-01-01','2024-04-11 16:35:33','2024-04-11 16:36:29'),\n(29,'songqing','123456','宋清',1,'13309090029',5,5100,'29.jpg','2020-01-01','2024-04-11 16:35:33','2024-04-11 16:36:31'),\n(30,'liyun','123456','李云',1,'13309090030',NULL,NULL,'30.jpg','2020-03-01','2024-04-11 16:35:33','2024-04-11 16:36:31');"],"tips":[]},{"id":"pa3.3.3","label":"基本查询","text":["在基本查询的DQL语句中，不带任何的查询条件。","查询所有字段（通配符）","案例1：查询指定字段 name，entry_date并返回"],"code":["select 字段1, 字段2, 字段3 from  表名;","select *  from  表名;","select 字段1 [ as 别名1 ] , 字段2 [ as 别名2 ]  from  表名;","select distinct 字段列表 from  表名;","select name,entry_date from emp;","select * from emp;","-- 方式1：\nselect name AS 姓名, entry_date AS 入职日期 from emp;\n-- 方式2： 别名中有特殊字符时，使用''或\"\"包含\nselect name AS '姓 名', entry_date AS '入职日期' from emp;\n-- 方式3：\nselect name AS \"姓名\", entry_date AS \"入职日期\" from emp;","select distinct job from emp;"],"tips":[]},{"id":"pa3.3.4","label":"条件查询","text":["学习条件查询就是学习条件的构建方式，而在SQL语句当中构造条件的运算符分为两类：","常用的比较运算符如下:","常用的逻辑运算符如下:"],"code":["select  字段列表  from   表名   where   条件列表 ; -- 条件列表：意味着可以有多个条件","select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere name = '杨逍'; -- 字符串使用''或\"\"包含","select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere salary <=5000;","select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere job is null ;","select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere job is not null ;","-- 方式1：\nselect id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere password <> '123456';","-- 方式2：\nselect id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere password != '123456';","-- 方式1：\nselect id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere entry_date >= '2000-01-01' and entry_date <= '2010-01-01';\n-- 方式2： between...and\nselect id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere entry_date between '2000-01-01' and '2010-01-01';","select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere entry_date between '2000-01-01' and '2010-01-01';\nand gender = 2;","-- 方式1：使用or连接多个条件\nselect id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere job=2 or job=3 or job=4;\n-- 方式2：in关键字\nselect id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere job in (2,3,4);","select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere name like '__';  # 通配符 \"_\" 代表任意1个字符","select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere name like '张%'; # 通配符 \"%\" 代表任意个字符（0个 ~ 多个）","select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere name like '%二%'; # 通配符 \"%\" 代表任意个字符（0个 ~ 多个）"],"tips":["注意：查询为NULL的数据时，不能使用 = null 或 ！=null 。得使用 is null 或 is not null。"]},{"id":"pa3.3.5","label":"聚合函数","text":["之前我们做的查询都是横向查询，就是根据条件一行一行的进行判断，而使用聚合函数查询就是纵向查询，它是对一列的值进行计算，然后返回一个结果值。（将一列数据作为一个整体，进行纵向计算）","count ：按照列去统计有多少行数据。","在根据指定的列统计的时候，如果这一列中有null的行，该行不会被统计在其中。"],"code":["-- count(字段)\nselect count(id) from emp;-- 结果：30\nselect count(job) from emp;-- 结果：29 （聚合函数对NULL值不做计算）\n-- count(常量)\nselect count(0) from emp;\nselect count('A') from emp;\n-- count(*)  推荐此写法（MySQL底层进行了优化）\nselect count(*) from emp;","select avg(salary) from  emp;","select min(salary) from emp;","select max(salary) from emp;","select sum(salary) from emp;"],"tips":["注意 : 聚合函数会忽略空值，对NULL值不作为统计。"]},{"id":"pa3.3.6","label":"分组查询","text":["分组： 按照某一列或者某几列，把相同的数据进行合并输出。","分组其实就是按列进行分类(指定列下相同的数据归为一类)，然后可以对分类完的数据进行合并计算。","分组查询通常会使用聚合函数进行计算。"],"code":["select  字段列表  from  表名  [where 条件]  group by 分组字段名  [having 分组后过滤条件];","select gender, count(*)\nfrom emp\ngroup by gender; -- 按照gender字段进行分组（gender字段下相同的数据归为一组）","select job, count(*)\nfrom emp\nwhere entry_date <= '2015-01-01'   -- 分组前条件\ngroup by job                      -- 按照job字段分组\nhaving count(*) >= 2;             -- 分组后条件"],"tips":["注意事项: / 分组之后，查询的字段一般为聚合函数和分组字段，查询其他字段无任何意义 / 执行顺序：where > 聚合函数 > having"]},{"id":"pa3.3.7","label":"排查查询","text":["排序在日常开发中是非常常见的一个操作，有升序排序，也有降序排序。","ASC ：升序（默认值）","案例1：根据入职时间, 对员工进行升序排序"],"code":["select  字段列表\nfrom   表名\n[where  条件列表]\n[group by  分组字段 ]\norder  by  字段1  排序方式1 , 字段2  排序方式2 … ;","select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\norder by entry_date ASC; -- 按照entrydate字段下的数据进行升序排序\nselect id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\norder by  entry_date; -- 默认就是ASC（升序）","select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\norder by entry_date DESC; -- 按照entrydate字段下的数据进行降序排序","select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\norder by entry_date ASC , update_time DESC;"],"tips":["注意事项：如果是升序, 可以不指定排序方式ASC","注意事项：如果是多字段排序，当第一个字段值相同时，才会根据第二个字段进行排序"]},{"id":"pa3.3.8","label":"分页查询","text":["分页操作在业务系统开发时，也是非常常见的一个功能，日常我们在网站中看到的各种各样的分页条，后台也都需要借助于数据库的分页操作。","案例1：从起始索引0开始查询员工数据, 每页展示5条记录","案例2：查询 第1页 员工数据, 每页展示5条记录"],"code":["select  字段列表  from  表名  limit  起始索引, 查询记录数 ;","select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nlimit 0 , 5; -- 从索引0开始，向后取5条记录","select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nlimit 5; -- 如果查询的是第1页数据，起始索引可以省略，直接简写为：limit 条数","select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nlimit 5 , 5; -- 从索引5开始，向后取5条记录","select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nlimit 10 , 5; -- 从索引10开始，向后取5条记录"],"tips":["注意事项: / 起始索引从0开始。           计算公式 ：起始索引 = （查询页码 - 1）* 每页显示记录数 / 分页查询是数据库的方言，不同的数据库有不同的实现，MySQL中是LIMIT / 如果查询的是第一页数据，起始索引可"]}]}]},{"id":"cb1","label":"JDBC","groups":[{"id":"gb2.2","label":"查询数据","points":[{"id":"pb2.2.1","label":"需求","text":["需求：基于JDBC实现用户登录功能。","本质：其本质呢，其实就是基于JDBC程序，执行如下select语句，并将查询的结果输出到控制台。SQL语句："],"code":["select * from user where username = 'linchong' and password = '123456';"],"tips":[]},{"id":"pb2.2.2","label":"准备工作","text":["1). 创建一个maven项目","2). 创建一个数据库 web，并在该数据库中创建user表"],"code":["create table user(\nid int unsigned primary key auto_increment comment 'ID,主键',\nusername varchar(20) comment '用户名',\npassword varchar(32) comment '密码',\nname varchar(10) comment '姓名',\nage tinyint unsigned comment '年龄'\n) comment '用户表';\ninsert into user(id, username, password, name, age) values (1, 'daqiao', '123456', '大乔', 22),\n(2, 'xiaoqiao', '123456', '小乔', 18),\n(3, 'diaochan', '123456', '貂蝉', 24),\n(4, 'lvbu', '123456', '吕布', 28),\n(5, 'zhaoyun', '12345678', '赵云', 27);"],"tips":[]},{"id":"pb2.2.3","label":"代码实现","text":["AI提示词（prompt）： / 你是一名java开发工程师，帮我基于JDBC程序来操作数据库，执行如下SQL语句： / select * from user where username = 'daqiao' and password = '123456'","1). 在 pom.xml 文件中引入依赖","XML / <dependencies> /     <!-- MySQL JDBC driver --> /     <dependency> /         <groupId>mysql</groupId> /         <artifactId>mysql-connector-java</artifact"],"code":[],"tips":[]},{"id":"pb2.2.4.1","label":"ResultSet","text":["ResultSet（结果集对象）：封装了DQL查询语句查询的结果。","next()：将光标从当前位置向前移动一行，并判断当前行是否为有效行，返回值为boolean。","true：有效行，当前行有数据"],"code":[],"tips":[]},{"id":"pb2.2.4.2","label":"预编译SQL","text":["其实我们在编写SQL语句的时候，有两种风格：","静态SQL（参数硬编码）","Java / conn.prepareStatement(\"SELECT * FROM user WHERE username = 'daqiao' AND password = '123456'\"); / ResultSet resultSet = pstmt.executeQuery();"],"code":[],"tips":["注意：在以后的项目开发中，我们使用的基本全部都是预编译SQL语句。"]}]},{"id":"gb2.3","label":"增删改数据","points":[{"id":"pb2.3.1","label":"需求","text":["需求：基于JDBC程序，执行如下update语句。","Java / update user set password = '123456', gender = 2 where id = 1;"],"code":[],"tips":[]},{"id":"pb2.3.2","label":"代码实现","text":["AI提示词（prompt）： / 你是一名java开发工程师，帮我基于JDBC程序来操作数据库，执行如下SQL语句： / update user set password = '123456', gender = 2 where id = 1;","Java / @ParameterizedTest / @CsvSource({\"1,123456,25\"}) / public void testUpdate(int userId, String newPassword, int newAge) throws Exception { /     // 建立数据库连接","JDBC程序执行DML语句：int rowsUpdated = pstmt.executeUpdate();  //返回值是影响的记录数 / JDBC程序执行DQL语句：ResultSet resultSet = pstmt.executeQuery(); //返回值是查询结果集"],"code":[],"tips":[]}]}]},{"id":"cb2","label":"Mybatis","groups":[{"id":"gb3.1","label":"介绍","points":[{"id":"pb3.1.1","label":"快速入门","text":["需求：使用Mybatis查询所有用户数据 。","1). 创建springboot工程，并导入 mybatis的起步依赖、mysql的驱动包、lombok。","项目工程创建完成后，自动在pom.xml文件中，导入Mybatis依赖和MySQL驱动依赖。如下所示："],"code":[],"tips":["注意：测试类所在包，需要与引导类所在包相同。"]},{"id":"pb3.1.2.1","label":"配置SQL提示","text":["默认我们在UserMapper接口上加的 @Select 注解中编写SQL语句是没有提示的。 如果想让idea给我们提示对应的SQL语句，我们需要在IDEA中配置与MySQL数据库的链接。","默认我们在UserMapper接口上的 @Select 注解中编写SQL语句是没有提示的。如果想让idea给出提示，可以做如下配置：","配置完成之后，发现SQL语句中的关键字有提示了，但还存在不识别表名(列名)的情况："],"code":[],"tips":["注意：该配置的目的，仅仅是为了在编写SQL语句时，有语法提示（写错了会报错），不会影响运行，即使不配置也是可以的。"]},{"id":"pb3.1.2.2","label":"配置Mybatis日志输出","text":["默认情况下，在Mybatis中，SQL语句执行时，我们并看不到SQL语句的执行日志。 在application.properties加入如下配置，即可查看日志：","Properties / #mybatis的配置 / mybatis.configuration.log-impl=org.apache.ibatis.logging.stdout.StdOutImpl","打开上述开关之后，再次运行单元测试，就可以看到控制台输出的SQL语句是什么样子的。"],"code":[],"tips":[]},{"id":"pb3.1.3","label":"JDBC VS  Mybatis","text":["JDBC程序的缺点：","url、username、password 等相关参数全部硬编码在java代码中。","查询结果的解析、封装比较繁琐。"],"code":[],"tips":[]},{"id":"pb3.1.4","label":"数据库连接池","text":["在前面我们所讲解的mybatis中，使用了数据库连接池技术，避免频繁的创建连接、销毁连接而带来的资源浪费。","下面我们就具体的了解下数据库连接池。"],"code":[],"tips":[]},{"id":"pb3.1.4.1","label":"介绍","text":["1). 没有数据库连接池的情况","客户端执行SQL语句：要先创建一个新的连接对象，然后执行SQL语句，SQL语句执行后又需要关闭连接对象从而释放资源，每次执行SQL时都需要创建连接、销毁链接，这种频繁的重复创建销毁的过程是比较耗费计算机的性能。","2). 有数据库连接池的情况"],"code":[],"tips":[]},{"id":"pb3.1.4.2","label":"产品","text":["要怎么样实现数据库连接池呢？","官方(sun)提供了数据库连接池标准（javax.sql.DataSource接口）","Java / public Connection getConnection() throws SQLException;"],"code":[],"tips":[]},{"id":"pb3.1.5.1","label":"删除","text":["需求：根据ID删除用户信息","SQL：delete from user where id = 5;","Mapper接口方法："],"code":[],"tips":[]},{"id":"pb3.1.5.2","label":"新增","text":["需求：添加一个用户","SQL：insert into user(username,password,name,age) values('zhouyu','123456','周瑜',20);","Mapper接口："],"code":[],"tips":[]},{"id":"pb3.1.5.3","label":"修改","text":["需求：根据ID更新用户信息","SQL：update user set username = 'zhouyu', password = '123456', name = '周瑜', age = 20 where id = 1；","Mapper接口方法："],"code":[],"tips":[]},{"id":"pb3.1.5.4","label":"查询","text":["需求：根据用户名和密码查询用户信息","SQL：select* fromuser whereusername = 'zhouyu' and password = '123456'","Mapper接口方法："],"code":[],"tips":["说明：基于官方骨架创建的springboot项目中，接口编译时会保留方法形参名，@Param注解可以省略 (#{形参名})。"]},{"id":"pb3.1.6","label":"XML映射配置","text":["Mybatis的开发有两种方式："],"code":[],"tips":[]},{"id":"pb3.1.6.1","label":"XML配置文件规范","text":["使用Mybatis的注解方式，主要是来完成一些简单的增删改查功能。如果需要实现复杂的SQL功能，建议使用XML来配置映射语句，也就是将SQL语句写在XML配置文件中。","在Mybatis中使用XML映射文件方式开发，需要符合一定的规范： / XML映射文件的名称与Mapper接口名称一致，并且将XML映射文件和Mapper接口放置在相同包下（同包同名） / XML映射文件的namespace属性为Mapper接口全限定名一致 / XML映射文件中sql语句的id与Mapper接口中的方","<select>标签：就是用于编写select查询语句的。 / resultType属性，指的是查询返回的单条记录所封装的类型。"],"code":[],"tips":[]},{"id":"pb3.1.6.2","label":"XML配置文件实现","text":["第1步： 创建XML映射文件","第2步：编写XML映射文件","xml映射文件中的dtd约束，直接从mybatis官网复制即可; 或者直接AI生成。"],"code":[],"tips":["注意：一个接口方法对应的SQL语句，要么使用注解配置，要么使用XML配置，切不可同时配置。"]},{"id":"pb3.1.6.3","label":"MybatisX的使用","text":["MybatisX是一款基于IDEA的快速开发Mybatis的插件，为效率而生。","MybatisX的安装：","可以通过MybatisX快速定位："],"code":[],"tips":["结论：使用Mybatis的注解，主要是来完成一些简单的增删改查功能。如果需要实现复杂的SQL功能，建议使用XML来配置映射语句。"]}]}]}]};
+const G = {"meta":{"built":"2026-10-23 14:20","layers":7,"concepts":92,"scenarios":4,"steps":94,"details":558,"edges":190,"themes":4,"shared":35},"layers":[{"id":"frontend","label":"前端","color":"#2563EB"},{"id":"protocol","label":"网络协议","color":"#0E7490"},{"id":"server","label":"容器部署","color":"#7C3AED"},{"id":"framework","label":"框架架构","color":"#047857"},{"id":"persistence","label":"持久层","color":"#C2410C"},{"id":"database","label":"数据库","color":"#BE123C"},{"id":"tooling","label":"工程工具","color":"#B45309"}],"concepts":[{"id":"c.html-form","label":"HTML 表单","aka":"form / input","layer":"frontend","gloss":"form 把一组输入框聚合成一次提交，input 采集单个字段","learned":"2026-10-11","ep":"第1~10集","scenarios":["s.register"],"themes":[],"weight":1},{"id":"c.vue.model","label":"v-model 双向绑定","aka":"v-model","layer":"frontend","gloss":"data 与输入框互相同步，是 :value + @input 的语法糖","learned":"2026-10-13","ep":"第19~26集","scenarios":["s.register"],"themes":[],"weight":1},{"id":"c.vue.event","label":"@click 事件绑定","aka":"v-on:click","layer":"frontend","gloss":"把 DOM 点击事件绑到 methods 里的方法上","learned":"2026-10-13","ep":"第19~26集","scenarios":["s.register"],"themes":[],"weight":1},{"id":"c.js.object","label":"JS 对象字面量","aka":"{}","layer":"frontend","gloss":"花括号直接构成对象，是前端这一层的通用货币","learned":"2026-10-12","ep":"第18集","scenarios":["s.register"],"themes":[],"weight":1},{"id":"c.js.async","label":"async/await 异步等待","aka":"async / await","layer":"frontend","gloss":"await 只挂起当前函数，页面不冻结","learned":"2026-10-14","ep":"第27~32集","scenarios":["s.register","s.ref"],"themes":[],"weight":2},{"id":"c.axios.post","label":"axios.post","aka":"axios","layer":"frontend","gloss":"自动 JSON.stringify + 自动设 Content-Type","learned":"2026-10-14","ep":"第27~32集","scenarios":["s.register"],"themes":[],"weight":1},{"id":"c.json","label":"JSON 格式","aka":"JSON","layer":"frontend","gloss":"前后端唯一都认的数据格式，键必须双引号","learned":"2026-10-12","ep":"第18集","scenarios":["s.register","s.dept","s.emp"],"themes":[],"weight":3},{"id":"c.validate.client","label":"前端校验","aka":"","layer":"frontend","gloss":"提升体验但挡不住绕过，后端必须再校验","learned":"2026-10-14","ep":"第30集","scenarios":["s.register"],"themes":[],"weight":1},{"id":"c.dom.render","label":"数据驱动渲染","aka":"v-for / v-html","layer":"frontend","gloss":"数据一变视图自动更新，不用手动操作 DOM","learned":"2026-10-13","ep":"第26集","scenarios":["s.register"],"themes":[],"weight":1},{"id":"c.frontend.xss","label":"innerHTML 与 XSS","aka":"","layer":"frontend","gloss":"把用户输入当 HTML 解析执行，本质是「把数据当代码」","learned":"2026-10-12","ep":"第18集","scenarios":[],"themes":["t.data-as-code"],"weight":0},{"id":"c.tcp","label":"TCP 连接","aka":"三次握手","layer":"protocol","gloss":"HTTP 建立在 TCP 之上，先建连再发报文","learned":"2026-10-16","ep":"第39~47集","scenarios":["s.register"],"themes":[],"weight":1},{"id":"c.http.request","label":"HTTP 请求报文","aka":"请求行/头/空行/体","layer":"protocol","gloss":"四部分：请求行 + 请求头 + 空行 + 请求体","learned":"2026-10-16","ep":"第40集","scenarios":["s.register","s.dept"],"themes":[],"weight":2},{"id":"c.http.response","label":"HTTP 响应报文","aka":"状态行/头/体","layer":"protocol","gloss":"三部分：状态行 + 响应头 + 响应体","learned":"2026-10-16","ep":"第41集","scenarios":["s.register"],"themes":[],"weight":1},{"id":"c.http.method","label":"HTTP 请求方法","aka":"GET / POST / PUT / DELETE","layer":"protocol","gloss":"GET 查、POST 增、PUT 改、DELETE 删","learned":"2026-10-16","ep":"第41集","scenarios":["s.register","s.dept"],"themes":[],"weight":2},{"id":"c.http.status","label":"HTTP 状态码","aka":"200 / 404 / 405 / 415 / 500","layer":"protocol","gloss":"4xx 是你的请求有问题，5xx 是服务器有问题","learned":"2026-10-16","ep":"第41集","scenarios":["s.register"],"themes":[],"weight":1},{"id":"c.http.content-type","label":"Content-Type","aka":"application/json","layer":"protocol","gloss":"决定后端用哪个 HttpMessageConverter 解析请求体","learned":"2026-10-16","ep":"第40集","scenarios":["s.register","s.dept","s.ref"],"themes":[],"weight":3},{"id":"c.url","label":"URL 结构","aka":"协议://主机:端口/路径?查询#锚点","layer":"protocol","gloss":"路径交给路由查表，查询串交给参数绑定","learned":"2026-10-16","ep":"第42集","scenarios":["s.register","s.dept","s.ref"],"themes":[],"weight":3},{"id":"c.cors","label":"跨域与预检","aka":"CORS / OPTIONS","layer":"protocol","gloss":"同源策略是浏览器限制，服务端要靠响应头放行","learned":"2026-10-16","ep":"第46集","scenarios":["s.register","s.dept"],"themes":[],"weight":2},{"id":"c.restful","label":"RESTful 风格","aka":"REST","layer":"protocol","gloss":"URL 定位资源，HTTP 动词描述操作；复数表资源","learned":"2026-10-20","ep":"第75集","scenarios":["s.dept"],"themes":[],"weight":1},{"id":"c.tomcat","label":"内嵌 Tomcat","aka":"","layer":"server","gloss":"SpringBoot 把容器打成依赖，一个 jar 就能跑","learned":"2026-10-16","ep":"第44集","scenarios":["s.register","s.dept","s.ref"],"themes":[],"weight":3},{"id":"c.servlet.request","label":"HttpServletRequest","aka":"","layer":"server","gloss":"Tomcat 把字节流解析成 Request/Response 对象","learned":"2026-10-16","ep":"第44集","scenarios":["s.register"],"themes":[],"weight":1},{"id":"c.nginx.proxy","label":"Nginx 反向代理","aka":"proxy_pass","layer":"server","gloss":"浏览器 → Nginx(:90) → Tomcat，多一层转发/安全/负载均衡","learned":"2026-10-21","ep":"第79集","scenarios":["s.dept"],"themes":[],"weight":1},{"id":"c.springboot.app","label":"SpringBoot 启动类","aka":"@SpringBootApplication","layer":"framework","gloss":"三个注解的合体：配置类 + 自动配置 + 组件扫描","learned":"2026-10-16","ep":"第44集","scenarios":["s.register","s.dept"],"themes":[],"weight":2},{"id":"c.springboot.scan","label":"组件扫描范围","aka":"@ComponentScan","layer":"framework","gloss":"启动类必须放在所有业务类的父包下，否则扫不到","learned":"2026-10-16","ep":"第44集","scenarios":["s.register"],"themes":[],"weight":1},{"id":"c.spring.ioc","label":"IoC 控制反转","aka":"","layer":"framework","gloss":"对象创建权从程序员手里交给容器","learned":"2026-10-17","ep":"第48集","scenarios":["s.register"],"themes":[],"weight":1},{"id":"c.spring.di","label":"DI 依赖注入","aka":"","layer":"framework","gloss":"要什么让容器给，注入的是接口而不是实现类","learned":"2026-10-17","ep":"第49集","scenarios":["s.register","s.ref"],"themes":[],"weight":2},{"id":"c.annotation.autowired","label":"@Autowired","aka":"","layer":"framework","gloss":"按类型注入；同类型多个要用 @Qualifier / @Primary","learned":"2026-10-17","ep":"第49集","scenarios":["s.register"],"themes":[],"weight":1},{"id":"c.annotation.component","label":"@Service / @Repository","aka":"@Component","layer":"framework","gloss":"标记为组件交给容器管理，默认单例","learned":"2026-10-17","ep":"第50集","scenarios":["s.register","s.emp"],"themes":[],"weight":2},{"id":"c.springmvc.dispatcher","label":"DispatcherServlet","aka":"","layer":"framework","gloss":"前端控制器：问 HandlerMapping 这个路径该谁处理","learned":"2026-10-16","ep":"第45集","scenarios":["s.register","s.ref"],"themes":[],"weight":2},{"id":"c.springmvc.mapping","label":"@RequestMapping 路由","aka":"@GetMapping …","layer":"framework","gloss":"路径 + 方法 → 处理函数；衍生注解把方法定死","learned":"2026-10-16","ep":"第45集","scenarios":["s.register","s.dept"],"themes":[],"weight":2},{"id":"c.springmvc.mapping-class","label":"类级路径抽取","aka":"@RequestMapping(\"/depts\")","layer":"framework","gloss":"完整路径 = 类上 + 方法上；消除重复前缀","learned":"2026-10-22","ep":"第83集","scenarios":["s.register","s.dept"],"themes":["t.convention"],"weight":2},{"id":"c.annotation.method-mapping","label":"请求方式映射","aka":"@GetMapping/@PostMapping/@PutMapping/@DeleteMapping","layer":"framework","gloss":"@RequestMapping 按 method 定死的衍生注解","learned":"2026-10-21","ep":"第77集","scenarios":["s.register","s.dept","s.emp","s.ref"],"themes":[],"weight":4},{"id":"c.annotation.restcontroller","label":"@RestController","aka":"= @Controller + @ResponseBody","layer":"framework","gloss":"返回值直接写进响应体，不当视图名解析","learned":"2026-10-16","ep":"第45集","scenarios":["s.register"],"themes":[],"weight":1},{"id":"c.annotation.requestbody","label":"@RequestBody","aka":"","layer":"framework","gloss":"读整个请求体，交给 Jackson 反序列化成对象","learned":"2026-10-16","ep":"第45集","scenarios":["s.register","s.dept","s.emp"],"themes":[],"weight":3},{"id":"c.annotation.requestparam","label":"@RequestParam","aka":"","layer":"framework","gloss":"取 query 参数或表单字段；名字对上可省略","learned":"2026-10-22","ep":"第80集","scenarios":["s.dept","s.emp"],"themes":[],"weight":2},{"id":"c.annotation.pathvariable","label":"@PathVariable","aka":"","layer":"framework","gloss":"取路径占位 /depts/{id} 里的参数","learned":"2026-10-22","ep":"第82集","scenarios":["s.dept"],"themes":[],"weight":1},{"id":"c.param.simple","label":"简单参数接收三方案","aka":"request.getParameter / @RequestParam / 同名形参","layer":"framework","gloss":"本质是「参数在 HTTP 的哪个位置」","learned":"2026-10-22","ep":"第80集","scenarios":["s.dept"],"themes":[],"weight":1},{"id":"c.arch.three-layer","label":"三层架构","aka":"Controller / Service / Mapper","layer":"framework","gloss":"每层只做自己的事，靠约定串起来","learned":"2026-10-16","ep":"第47集","scenarios":["s.register","s.dept","s.ref"],"themes":[],"weight":3},{"id":"c.arch.controller","label":"Controller 职责","aka":"","layer":"framework","gloss":"接参、调 Service、包返回；不写 SQL、不写事务","learned":"2026-10-16","ep":"第47集","scenarios":["s.register","s.dept"],"themes":[],"weight":2},{"id":"c.arch.service","label":"Service 职责","aka":"","layer":"framework","gloss":"业务规则、校验、事务边界、补全公共字段","learned":"2026-10-16","ep":"第47集","scenarios":["s.register","s.dept","s.emp"],"themes":[],"weight":3},{"id":"c.arch.mapper","label":"Mapper 职责","aka":"","layer":"framework","gloss":"只管 SQL，不关心业务","learned":"2026-10-16","ep":"第47集","scenarios":["s.register","s.dept"],"themes":[],"weight":2},{"id":"c.result.wrapper","label":"Result 统一响应","aka":"{code,msg,data}","layer":"framework","gloss":"前端只写一套解析逻辑；契约落在代码结构上","learned":"2026-10-21","ep":"第78集","scenarios":["s.register","s.dept"],"themes":["t.convention"],"weight":2},{"id":"c.jackson","label":"Jackson 序列化","aka":"","layer":"framework","gloss":"Java 对象 ⇄ JSON，@RestController 自动调用","learned":"2026-10-16","ep":"第45集","scenarios":["s.register"],"themes":[],"weight":1},{"id":"c.exception.handler","label":"全局异常处理","aka":"@RestControllerAdvice","layer":"framework","gloss":"别把 500 和堆栈直接甩给前端","learned":"2026-10-22","ep":"第84集","scenarios":["s.register"],"themes":[],"weight":1},{"id":"c.biz.validation","label":"业务校验","aka":"","layer":"framework","gloss":"后端才是安全边界，前端校验可被绕过","learned":"2026-10-21","ep":"第81集","scenarios":["s.register","s.dept"],"themes":[],"weight":2},{"id":"c.biz.transaction","label":"事务 @Transactional","aka":"","layer":"framework","gloss":"多表操作要么全成功要么全回滚","learned":"2026-10-21","ep":"第64集","scenarios":["s.register","s.emp"],"themes":[],"weight":2},{"id":"c.arch.separation","label":"前后端分离","aka":"","layer":"framework","gloss":"拆成两个工程，靠接口文档对齐","learned":"2026-10-20","ep":"第74集","scenarios":["s.dept"],"themes":[],"weight":1},{"id":"c.spec.api-doc","label":"接口文档","aka":"","layer":"framework","gloss":"前后端的合同：地址、参数、响应类型","learned":"2026-10-20","ep":"第74集","scenarios":["s.dept"],"themes":["t.convention"],"weight":1},{"id":"c.java.interface","label":"接口与实现类","aka":"","layer":"framework","gloss":"面向接口编程，换实现不改调用方","learned":"2026-10-05","ep":"Java day4","scenarios":["s.register"],"themes":["t.std-impl"],"weight":1},{"id":"c.mybatis.mapper","label":"@Mapper 接口","aka":"","layer":"persistence","gloss":"只有签名没有实现，启动时由 MyBatis 生成","learned":"2026-10-18","ep":"第60集","scenarios":["s.register","s.dept","s.emp","s.ref"],"themes":[],"weight":4},{"id":"c.mybatis.proxy","label":"动态代理","aka":"JDK Proxy","layer":"persistence","gloss":"接口名/方法名/namespace/id 必须严丝合缝对上","learned":"2026-10-18","ep":"第60集","scenarios":["s.register"],"themes":[],"weight":1},{"id":"c.mybatis.mapping","label":"注解 vs XML 写 SQL","aka":"@Select / <select>","layer":"persistence","gloss":"简单用注解，动态 SQL 用 XML","learned":"2026-10-19","ep":"第70集","scenarios":["s.register","s.emp","s.ref"],"themes":[],"weight":3},{"id":"c.mybatis.hash","label":"#{} 预编译占位符","aka":"？","layer":"persistence","gloss":"编译成 ? 走 PreparedStatement，值永远是值","learned":"2026-10-19","ep":"第70集","scenarios":["s.register","s.dept","s.ref"],"themes":["t.data-as-code","t.convention"],"weight":3},{"id":"c.mybatis.dollar","label":"${} 字符串拼接","aka":"","layer":"persistence","gloss":"直接拼进 SQL，有注入风险；只能用于表名/字段名","learned":"2026-10-19","ep":"第70集","scenarios":["s.register","s.ref"],"themes":["t.data-as-code"],"weight":2},{"id":"c.mybatis.resultmap","label":"结果映射","aka":"resultType / RowMapper","layer":"persistence","gloss":"数据库的行变成 Java 对象，靠列名匹配属性名","learned":"2026-10-18","ep":"第62集","scenarios":["s.register","s.dept","s.emp"],"themes":[],"weight":3},{"id":"c.mybatis.camel-case","label":"驼峰映射开关","aka":"map-underscore-to-camel-case","layer":"persistence","gloss":"create_time → createTime；不开就静悄悄留 null","learned":"2026-10-21","ep":"第78集","scenarios":["s.register","s.dept","s.emp","s.ref"],"themes":["t.convention","t.config-out"],"weight":4},{"id":"c.mybatis.generated-keys","label":"主键回填","aka":"@Options(useGeneratedKeys,keyProperty)","layer":"persistence","gloss":"插入后自增 id 回填到对象上","learned":"2026-10-18","ep":"第63集","scenarios":["s.emp"],"themes":[],"weight":1},{"id":"c.jdbc","label":"JDBC","aka":"","layer":"persistence","gloss":"一套访问数据库的标准接口，六步模板代码","learned":"2026-10-18","ep":"第56集","scenarios":["s.ref"],"themes":["t.std-impl"],"weight":1},{"id":"c.jdbc.driver","label":"JDBC 驱动","aka":"mysql-connector-j","layer":"persistence","gloss":"标准接口的具体实现，换数据库只换驱动","learned":"2026-10-18","ep":"第56集","scenarios":[],"themes":["t.std-impl"],"weight":0},{"id":"c.pool.hikari","label":"HikariCP 连接池","aka":"","layer":"persistence","gloss":"借还代替建销，把连接成本摊到启动时","learned":"2026-10-19","ep":"第68集","scenarios":["s.register","s.ref"],"themes":[],"weight":2},{"id":"c.sql","label":"SQL 语言","aka":"","layer":"database","gloss":"标准；MySQL/Oracle 是各自的实现","learned":"2026-10-17","ep":"第48集","scenarios":["s.register","s.dept","s.emp","s.ref"],"themes":["t.std-impl"],"weight":4},{"id":"c.sql.dml","label":"DML 增删改","aka":"insert/update/delete","layer":"database","gloss":"影响的是数据行，返回受影响行数","learned":"2026-10-18","ep":"第57集","scenarios":["s.register","s.dept"],"themes":[],"weight":2},{"id":"c.sql.ddl","label":"建库建表","aka":"create table","layer":"database","gloss":"dept 表：id/name/create_time/update_time","learned":"2026-10-21","ep":"第76集","scenarios":["s.dept"],"themes":[],"weight":1},{"id":"c.mysql","label":"MySQL","aka":"","layer":"database","gloss":"只懂 SQL，不关心是谁在问","learned":"2026-10-17","ep":"第52集","scenarios":["s.dept","s.ref"],"themes":["t.std-impl"],"weight":2},{"id":"c.tool.maven","label":"Maven","aka":"pom.xml","layer":"tooling","gloss":"依赖管理与标准构建，版本要锁死","learned":"2026-10-14","ep":"第31~32集","scenarios":["s.dept"],"themes":[],"weight":1},{"id":"c.tool.apifox","label":"Apifox","aka":"","layer":"tooling","gloss":"接口文档 + 调试 + Mock；浏览器只能发 GET 所以要它","learned":"2026-10-20","ep":"第75集","scenarios":["s.dept"],"themes":[],"weight":1},{"id":"c.config.yml","label":"application.yml","aka":"","layer":"tooling","gloss":"缩进即层级，不能 Tab；把变化挪出代码","learned":"2026-10-20","ep":"第73集","scenarios":["s.dept","s.emp"],"themes":["t.config-out"],"weight":2},{"id":"c.log.slf4j","label":"Slf4j 日志门面","aka":"","layer":"tooling","gloss":"一套标准接口，底下可以换任意日志实现","learned":"2026-10-22","ep":"第84集","scenarios":["s.dept"],"themes":["t.std-impl"],"weight":1},{"id":"c.log.logback","label":"Logback","aka":"logback.xml","layer":"tooling","gloss":"Slf4j 的实现，按配置输出到控制台/文件","learned":"2026-10-22","ep":"第84集","scenarios":["s.dept"],"themes":["t.std-impl","t.config-out"],"weight":1},{"id":"c.log.println","label":"System.out.println","aka":"","layer":"tooling","gloss":"硬编码、只到控制台、不分级 —— 日志要替代它","learned":"2026-10-22","ep":"第84集","scenarios":["s.dept"],"themes":[],"weight":1},{"id":"c.log.level","label":"日志级别","aka":"ALL/DEBUG/INFO/WARN/ERROR","layer":"tooling","gloss":"优先级由低到高，配置文件里控制输出到哪一级","learned":"2026-10-22","ep":"第85集","scenarios":["s.dept"],"themes":["t.config-out"],"weight":1},{"id":"c.arch.package","label":"包结构约定","aka":"controller/service/mapper/pojo","layer":"tooling","gloss":"约定优于配置，扫包靠它","learned":"2026-10-21","ep":"第76集","scenarios":["s.dept"],"themes":["t.convention"],"weight":1},{"id":"c.db.fk","label":"外键约束","aka":"foreign key","layer":"database","gloss":"为多的一方加外键指向一的一方主键，保证数据一致与完整","learned":null,"ep":null,"scenarios":["s.emp"],"themes":[],"weight":1},{"id":"c.db.fk-physical","label":"物理外键 vs 逻辑外键","aka":"","layer":"database","gloss":"物理外键影响增删改效率、只适合单节点；项目里多用逻辑外键","learned":null,"ep":null,"scenarios":["s.emp"],"themes":[],"weight":1},{"id":"c.db.relation","label":"多表关系","aka":"一对一/一对多/多对多","layer":"database","gloss":"一对多靠外键，多对多靠中间表，一对一多用于单表拆分","learned":null,"ep":null,"scenarios":["s.emp"],"themes":[],"weight":1},{"id":"c.sql.cartesian","label":"笛卡尔积","aka":"","layer":"database","gloss":"两表直接相连得到所有组合（30×6=180），必须用连接条件消除","learned":null,"ep":null,"scenarios":["s.emp"],"themes":[],"weight":1},{"id":"c.sql.join","label":"多表连接查询","aka":"inner / left / right join","layer":"database","gloss":"内连接取交集，外连接保留一侧全部；员工列表用左外连接","learned":null,"ep":null,"scenarios":["s.emp"],"themes":[],"weight":1},{"id":"c.sql.subquery","label":"子查询四类","aka":"标量/列/行/表","layer":"database","gloss":"SQL 里嵌 select，按结果形状分标量、列、行、表四种","learned":null,"ep":null,"scenarios":["s.emp"],"themes":[],"weight":1},{"id":"c.sql.aggregate","label":"聚合与分组","aka":"count / avg / group by","layer":"database","gloss":"按维度聚合统计；「低于本部门平均工资」是相关子查询的经典题","learned":null,"ep":null,"scenarios":["s.emp"],"themes":[],"weight":1},{"id":"c.page.limit","label":"LIMIT 分页","aka":"limit 开始索引, 条数","layer":"persistence","gloss":"开始索引 = (页码-1) × 每页条数；接口还要返回总记录数","learned":null,"ep":null,"scenarios":["s.emp"],"themes":[],"weight":1},{"id":"c.query.param-object","label":"查询参数对象封装","aka":"EmpQueryParam","layer":"framework","gloss":"6 个散参改成 1 个对象，前端参数名与属性名对齐即可自动绑定","learned":null,"ep":null,"scenarios":["s.emp"],"themes":[],"weight":1},{"id":"c.mybatis.dynamic-sql","label":"动态 SQL","aka":"<where> / <if>","layer":"persistence","gloss":"SQL 随条件变化；<where> 自动处理多余 and，无条���时不输出 where","learned":null,"ep":null,"scenarios":["s.emp"],"themes":[],"weight":1},{"id":"c.mybatis.batch","label":"批量保存","aka":"<foreach>","layer":"persistence","gloss":"工作经历多条一次写入；需要员工自增 id 先回填","learned":null,"ep":null,"scenarios":["s.emp"],"themes":[],"weight":1},{"id":"c.tx.atomic","label":"要么全成功要么全失败","aka":"","layer":"framework","gloss":"多条写操作必须作为一个整体，否则出现「部分成功」的数据不一致","learned":null,"ep":null,"scenarios":["s.emp"],"themes":[],"weight":1},{"id":"c.tx.rollbackfor","label":"rollbackFor 回滚属性","aka":"rollbackFor","layer":"framework","gloss":"@Transactional 默认只回滚 RuntimeException，受检异常要显式指定","learned":null,"ep":null,"scenarios":["s.emp"],"themes":[],"weight":1},{"id":"c.tx.propagation","label":"事务传播行为","aka":"propagation","layer":"framework","gloss":"解决事务方法与事务方法互相调用时的边界问题（REQUIRED / REQUIRES_NEW）","learned":null,"ep":null,"scenarios":["s.emp"],"themes":[],"weight":1},{"id":"c.tx.acid","label":"事务四大特性","aka":"ACID","layer":"framework","gloss":"原子性、一致性、隔离性、持久性；分别靠 undo log、约束、锁、redo log","learned":null,"ep":null,"scenarios":["s.emp"],"themes":[],"weight":1},{"id":"c.file.multipart","label":"MultipartFile","aka":"MultipartFile","layer":"framework","gloss":"Spring 接收上传文件的类型，能拿文件名、大小、字节流","learned":null,"ep":null,"scenarios":["s.emp"],"themes":[],"weight":1},{"id":"c.file.local","label":"本地磁盘存储","aka":"","layer":"server","gloss":"写到服务器目录再返回 URL；扩容或迁移后文件就丢了","learned":null,"ep":null,"scenarios":["s.emp"],"themes":[],"weight":1},{"id":"c.file.oss","label":"阿里云 OSS","aka":"OSS / Bucket","layer":"tooling","gloss":"对象存储：开通建 Bucket → 拿 AccessKey → SDK 上传，只存 URL 到库","learned":null,"ep":null,"scenarios":["s.emp"],"themes":[],"weight":1},{"id":"c.file.config","label":"上传大小限制","aka":"max-file-size","layer":"tooling","gloss":"默认单文件 1MB、单请求 10MB，要在配置里统一放开","learned":null,"ep":null,"scenarios":["s.emp"],"themes":[],"weight":1},{"id":"c.springboot.props","label":"配置绑定 @ConfigurationProperties","aka":"","layer":"tooling","gloss":"把 OSS 的 endpoint/bucket 等写进 yml 再绑定到实体，不写死在代码里","learned":null,"ep":null,"scenarios":["s.emp"],"themes":[],"weight":1}],"scenarios":[{"id":"s.register","label":"用户注册全链路","sub":"前端点击 → 落库 → 响应","color":"#2563EB","source":"source.md / 原思维导图","phases":[{"label":"阶段一：前端数据采集与发送（HTML + Vue + Axios）","color":"#2563EB"},{"label":"阶段二：网络传输（HTTP 协议）","color":"#0E7490"},{"label":"阶段三：后端接客与参数解析（SpringBoot + SpringMVC + Controller）","color":"#7C3AED"},{"label":"阶段四：业务处理与依赖注入（Service + IOC/DI）","color":"#047857"},{"label":"阶段五：数据持久化（MyBatis + HikariCP + MySQL）","color":"#C2410C"},{"label":"阶段六：响应返回与前端渲染（HTTP Response + Axios）","color":"#BE123C"}],"steps":[{"id":"st.register.1.0","label":"1.1 HTML 表单：先把「容器」搭好","phase":0,"color":"#2563EB","concepts":["c.html-form"],"details":["知识点：HTML 表单元素——form 标签负责把一组输入框聚合成一次「提交」；input 负责采集单个字段","详细过程：页面里先写好结构：一个用户名输入框、一个密码输入框、一个注册按钮","关键细节：type=\"text\" 是明文；type=\"password\" 输入时显示圆点但值仍是明文，加密必须靠后端","关键细节：input 必须绑定一个「归宿」——在 Vue 里就是 data 中的字段，否则输入的值抓不到","常见坑：input 忘了写 v-model，用户输入了但 form.username 一直是空字符串"],"path":"r-1-0"},{"id":"st.register.1.1","label":"1.2 Vue 的 v-model：把输入框和 data 焊在一起","phase":0,"color":"#2563EB","concepts":["c.vue.model"],"details":["知识点：v-model 双向绑定——它是语法糖，等价于 :value + @input 的合体","拆开看本质：一是「数据 → 视图」：data 变了，输入框的值跟着变","拆开看本质：二是「视图 → 数据」：用户敲键盘触发 input 事件，Vue 自动把新值写回 data","详细过程：写 v-model=\"form.username\"，用户每敲一个字符，form.username 立刻同步更新，不需要手动读 DOM","为什么不用 document.getElementById：手动取 DOM 要自己监听事件、自己赋值、还得处理中文输入法组合态；v-model 全部替你做了","常见坑：v-model 绑定到一个未在 data 里声明的字段，Vue3 下会不响应（要先声明）"],"path":"r-1-1"},{"id":"st.register.1.2","label":"1.3 前端校验：能在这里拦住的就不要发网络请求","phase":0,"color":"#2563EB","concepts":["c.validate.client"],"details":["知识点：表单校验——校验越靠前越省钱——前端拦住一次，就省一次网络往返 + 一次后端处理 + 一次数据库查询","详细过程：点注册前先判断：用户名非空、长度 3~20、密码长度不少于 6 位；不通过就直接提示，不发请求","关键细节：前端校验只提升体验，不能当安全防线——用户可以绕过前端直接调接口，所以后端必须再校验一遍","对应到本项目：知识库后端的 Service 层就写了「标题不能为空 / 分类不能为空 / 正文不能为空」的校验，和前端校验是两道关卡"],"path":"r-1-2"},{"id":"st.register.1.3","label":"1.4 @click 事件：真正的触发点","phase":0,"color":"#2563EB","concepts":["c.vue.event"],"details":["知识点：Vue 事件绑定 @click——v-on:click 的简写，把「点击」这个 DOM 事件绑到 methods 里的一个方法上","详细过程：给注册按钮写 @click=\"register\"，点击时调用 register() 方法","为什么触发的是方法而不是直接发请求：把「事件」和「请求」拆开，好处是方法里可以先校验、可以置 loading、可以防重复提交","关键细节：若用 form 原生提交，要写 @submit.prevent，否则浏览器会刷新整页，Ajax 白写","常见坑：按钮写在 form 里但没写 type=\"button\"，点一下触发表单默认提交，页面闪一下刷新","常见坑：防重复提交：点完没禁用按钮，用户连点三次就注册了三条记录"],"path":"r-1-3"},{"id":"st.register.1.4","label":"1.5 组装参数：JS 对象是这一层的通用货币","phase":0,"color":"#2563EB","concepts":["c.js.object"],"details":["知识点：JS 对象 / 字面量——前端发出去的不是「两个变量」，而是一个结构化的对象","详细过程：方法里组装 const data = { username: form.username, password: form.password }","关键细节：字段名必须和后端 Java 实体类的属性名一致——这是前后端唯一的「口头约定」，对不上后端收到 null","关键细节：不要直接把 form 整个发过去，可能夹带无关字段（比如确认密码），后端要么忽略要么报错"],"path":"r-1-4"},{"id":"st.register.1.5","label":"1.6 Axios 的 POST 请求：把对象变成网络报文","phase":0,"color":"#2563EB","concepts":["c.axios.post","c.http.content-type","c.json"],"details":["知识点：axios.post——axios.post(url, data) 发一个 POST 请求","详细过程：调用 axios.post('/api/users/register', data)，url 里的 /api 是后端统一前缀","关键细节：Axios 自动做了两件事——一是把 JS 对象序列化成 JSON 字符串","关键细节：Axios 自动做了两件事——二是自动设置请求头 Content-Type: application/json","如果手写原生 fetch 会怎样：要自己 JSON.stringify、自己设 header，Axios 把这些默认行为都封好了","常见坑：发给后端却报 415 Unsupported Media Type，多半是 Content-Type 没设成 application/json","常见坑：路径写成相对路径时，基准是当前页面地址；页面地址变了就会 404，建议统一从配置里读 baseURL"],"path":"r-1-5"},{"id":"st.register.1.6","label":"1.7 async/await：等待但不卡死","phase":0,"color":"#2563EB","concepts":["c.js.async"],"details":["知识点：async/await 异步等待——await 让异步代码读起来像同步，但底层仍然是「先挂起、结果回来再继续」","详细过程：register() 声明成 async，里面 const res = await axios.post(...)；执行到 await 时函数暂停，把控制权交回浏览器，页面仍可滚动、仍可点别的","关键细节：await 挂起的是「当前 async 函数」，不是整个页面——所以不会像同步请求那样把界面冻住","等价写法：不写 async/await 就用 axios.post(...).then(res => {...}).catch(err => {...})，本质上一样","关键细节：必须用 try/catch 包住 await，否则网络错误会变成未捕获异常，提示框弹不出来","常见坑：忘了写 await，拿到的是 Promise 对象而不是响应数据，后面 res.data 全是 undefined"],"path":"r-1-6"},{"id":"st.register.1.7","label":"1.8 JSON：前端与后端唯一都认的数据格式","phase":0,"color":"#2563EB","concepts":["c.json"],"details":["知识点：JSON 格式——一种纯文本的数据交换格式，键值对 + 数组，语言无关","为什么不用 JS 对象直接发：网络只能传字节流；JSON 是文本，能安全穿过 HTTP 请求体","JSON 与 JS 对象的区别：JSON 的键必须用双引号；不能有注释；不能有 undefined；不能有函数","详细过程：浏览器里 { username: \"wuji\", password: \"123\" } 是 JS 对象","详细过程：发出后变成文本 {\"username\":\"wuji\",\"password\":\"123\"} 这才是 JSON","常见坑：后端返回的字段名和前端.js 里写的对不上（比如 note_date 与 noteDate），页面一片空白"],"path":"r-1-7"},{"id":"st.register.2.0","label":"2.1 建立连接：先握手再说话","phase":1,"color":"#0E7490","concepts":["c.tcp"],"details":["知识点：TCP 三次握手——HTTP 建立在 TCP 之上；发请求前先建立可靠连接","详细过程：客户端发 SYN → 服务端回 SYN+ACK → 客户端回 ACK，连接建立后才会发 HTTP 报文","关键细节：本机访问 127.0.0.1 走 loopback，不经过网卡，所以几乎无延迟","关键细节：HTTP/1.1 默认 keep-alive，连接可复用，不是每个请求都重新握手"],"path":"r-2-0"},{"id":"st.register.2.1","label":"2.2 HTTP 请求报文：三个部分一个空行","phase":1,"color":"#0E7490","concepts":["c.http.request","c.http.content-type"],"details":["知识点：请求行——格式是「方法 + 路径 + 协议版本」","详细过程：请求行实例——POST /api/users/register HTTP/1.1","知识点：请求头——一组「键: 值」，告诉服务器这次请求的元信息","详细过程：请求头关键项——Host：目标主机和端口","详细过程：请求头关键项——Content-Type: application/json：请求体是 JSON，这是后端能否用 @RequestBody 解析的关键","详细过程：请求头关键项——Content-Length：请求体的字节长度","详细过程：请求头关键项——Accept: application/json：希望返回 JSON","详细过程：请求头关键项——User-Agent：浏览器身份","详细过程：请求头关键项——Cookie：若已登录，会话信息在这里","知识点：空行——请求头和请求体之间的分界线，一个空行，告诉服务器「头结束了」","知识点：请求体——真正要传的业务数据，只在 POST/PUT 里有","详细过程：请求体实例——{\"username\":\"wuji\",\"password\":\"123\"}","关键细节：请求头里能看出「是什么格式」，请求体里才是「内容」，两者配合才能正确解析"],"path":"r-2-1"},{"id":"st.register.2.2","label":"2.3 POST 与 GET 的区别：为什么注册必须用 POST","phase":1,"color":"#0E7490","concepts":["c.http.method"],"details":["知识点：参数位置不同——GET 把参数拼在 URL 的问号后面（query string）；POST 把参数放在请求体里","知识点：语义不同——GET 用于「取」，应该是只读、可重复的；POST 用于「提交」，会改变服务器状态","知识点：安全性不同——GET 参数暴露在 URL 里，会被浏览器历史、日志、代理服务器记录；POST 放在 body 里相对隐蔽","关键细节：注意「相对隐蔽」不等于「安全」——POST 照样可以被抓包，真正安全要靠 HTTPS","知识点：长度限制不同——GET 受 URL 长度限制（不同浏览器几千字符）；POST 理论上没有硬限制","知识点：缓存与幂等不同——GET 可被缓存、可重复执行结果不变（幂等）；POST 一般不被缓存、重复执行会产生多条数据（非幂等）","详细过程：对照表——注册用 POST：/api/users/register + body 里放 username/password","详细过程：对照表——查询用户用 GET：/api/users?page=1&size=10","常见坑：用 GET 传密码，密码直接出现在 URL 和访问日志里，属于低级安全事故"],"path":"r-2-2"},{"id":"st.register.2.3","label":"2.4 URL 的拆解：请求到底发到哪","phase":1,"color":"#0E7490","concepts":["c.url"],"details":["知识点：URL 结构——协议://主机:端口/路径?查询参数#锚点","详细过程：http://127.0.0.1:8080/api/users/register","逐段拆解：http：协议","逐段拆解：127.0.0.1：主机（本机回环地址）","逐段拆解：8080：端口，对应 SpringBoot 内嵌 Tomcat 的监听端口","逐段拆解：/api/users/register：路径，SpringMVC 就是靠它查路由表的","关键细节：端口不对会直接连接被拒（ERR_CONNECTION_REFUSED），根本不是 404——两者要分清"],"path":"r-2-3"},{"id":"st.register.2.4","label":"2.5 跨域与预检：本地开发的高频坑","phase":1,"color":"#0E7490","concepts":["c.cors"],"details":["知识点：同源策略——浏览器的安全策略：协议 + 域名 + 端口三者完全相同才算同源，否则 Ajax 被拦","知识点：CORS——服务端通过响应头 Access-Control-Allow-Origin 等声明「允许哪些来源访问」","详细过程：若前端跑在 5173、后端在 8080，就是跨域；浏览器会先发一个 OPTIONS 预检请求，服务端允许后才发真正的 POST","关键细节：这是浏览器的限制，不是服务器的限制——用 Postman 直接调接口不会跨域，因为 Postman 不是浏览器","常见坑：file:// 协议下打开页面，Ajax 一律失败：这是本地文件跨域限制，必须用本地服务器打开"],"path":"r-2-4"},{"id":"st.register.3.0","label":"3.1 SpringBoot 启动类：一切的起点","phase":2,"color":"#7C3AED","concepts":["c.springboot.app","c.springboot.scan"],"details":["知识点：@SpringBootApplication——它是三个注解的合体：@SpringBootConfiguration + @EnableAutoConfiguration + @ComponentScan","逐个解释：@SpringBootConfiguration：声明这是配置类","逐个解释：@EnableAutoConfiguration：自动配置，按依赖推断要装配什么（比如引了 web 依赖就自动配 Tomcat）","逐个解释：@ComponentScan：从启动类所在包向下扫描所有 @Component/@Service/@Repository/@RestController","详细过程：main 方法里调 SpringApplication.run(XxxApplication.class, args)，容器启动、Bean 创建、Tomcat 拉起","关键细节：包的位置很关键——启动类必须放在所有业务类的「父包」下，否则扫不到——这就是为什么 Controller 注入 Service 会变成 null 的常见原因"],"path":"r-3-0"},{"id":"st.register.3.1","label":"3.2 内嵌 Tomcat：不用单独装服务器","phase":2,"color":"#7C3AED","concepts":["c.tomcat"],"details":["知识点：内嵌 Tomcat——SpringBoot 把 Tomcat 打进了 jar 里，启动应用就等于启动服务器","详细过程：启动日志里会出现 Tomcat started on port 8080 和 Started XxxApplication in x.xx seconds","为什么可以内嵌：传统做法是把 war 丢进外部 Tomcat；SpringBoot 反过来把容器作为依赖引入，做到「一个 jar 就能跑」","关键细节：端口可在 application.yml 里改 server.port；被占用时启动会直接失败，报 Port 8080 was already in use","关键细节：Tomcat 内部用线程池处理请求，每个请求占一个线程，所以 Service 里不要写死循环或长阻塞"],"path":"r-3-1"},{"id":"st.register.3.2","label":"3.3 请求进入 Tomcat：从字节流到 Request 对象","phase":2,"color":"#7C3AED","concepts":["c.servlet.request"],"details":["知识点：Connector 与线程池——Tomcat 的 Connector 组件监听端口，收到 TCP 数据后交给工作线程处理","详细过程：Tomcat 解析 HTTP 报文，把请求行、请求头、请求体封装成 HttpServletRequest 对象，响应封装成 HttpServletResponse","关键细节：到这里 Tomcat 并不知道「用户注册」是什么业务，它只管把报文解析成对象"],"path":"r-3-2"},{"id":"st.register.3.3","label":"3.4 SpringMVC 路由分发：DispatcherServlet 是总调度","phase":2,"color":"#7C3AED","concepts":["c.springmvc.dispatcher","c.springmvc.mapping"],"details":["知识点：DispatcherServlet——SpringMVC 的前端控制器（Front Controller），所有请求的入口，负责统筹而不是自己干活","详细过程：请求先到 DispatcherServlet → 它问 HandlerMapping「这个路径该谁处理」→ HandlerMapping 查路由表 → 返回对应的 Controller 方法","关键细节：路由表是启动时扫出来的：扫描所有 @RequestMapping/@GetMapping/@PostMapping，建立「路径 + 方法 → 处理函数」的映射","常见坑：路径对得上但请求方法不对（代码写 @PostMapping、你发的是 GET），会返回 405 Method Not Allowed——这是接口层面最容易被误判成 404 的错误"],"path":"r-3-3"},{"id":"st.register.3.4","label":"3.5 路由映射的两种写法","phase":2,"color":"#7C3AED","concepts":["c.springmvc.mapping","c.springmvc.mapping-class"],"details":["知识点：类级 + 方法级组合——类上写 @RequestMapping(\"/api/users\") 作为前缀，方法上写 @PostMapping(\"/register\")","详细过程：最终路径——两者拼接得到 /api/users/register，这才和前端 axios 里的 url 对上","另一种写法：方法上直接写完整路径 @PostMapping(\"/api/users/register\")，效果一样但不利于统一管理","关键细节：路径前有没有斜杠、末尾有没有斜杠，都可能影响匹配，团队要统一约定"],"path":"r-3-4"},{"id":"st.register.3.5","label":"3.6 @RestController：告诉 Spring「我是接口」","phase":2,"color":"#7C3AED","concepts":["c.annotation.restcontroller","c.jackson"],"details":["知识点：@RestController——等于 @Controller + @ResponseBody 的组合注解","拆开看：@Controller：声明这是一个控制器，要被 Spring 管理","拆开看：@ResponseBody：方法返回值不再当「视图名」解析，而是直接写进响应体","详细过程：返回一个 User 对象，Spring 用 Jackson 自动把它序列化成 JSON 字符串放进响应体","关键细节：如果用 @Controller 而忘了 @ResponseBody，Spring 会把返回值当模板名去找页面，结果报 404 或视图解析错误——这是新手最常见的坑之一"],"path":"r-3-5"},{"id":"st.register.3.6","label":"3.7 @PostMapping：只接 POST","phase":2,"color":"#7C3AED","concepts":["c.annotation.method-mapping","c.springmvc.mapping"],"details":["知识点：@PostMapping——限定只有 POST 请求才进这个方法，是 @RequestMapping(method = RequestMethod.POST) 的简写","详细过程：@PostMapping(\"/register\") 贴在方法上，表示「/register 且是 POST」才匹配","家族成员：@GetMapping / @PostMapping / @PutMapping / @DeleteMapping 分别对应查/增/改/删，和 RESTful 风格一一对应","常见坑：前端用了 axios.get 而后端写的是 @PostMapping，报 405；反过来也一样"],"path":"r-3-6"},{"id":"st.register.3.7","label":"3.8 @RequestBody：把 JSON 变成 Java 对象","phase":2,"color":"#7C3AED","concepts":["c.annotation.requestbody","c.jackson","c.http.content-type"],"details":["知识点：@RequestBody——告诉 Spring「把请求体整个读出来，转成这个参数类型的对象」","详细过程：方法签名写 public Result register(@RequestBody User user)，Spring 会：","详细过程：第一步——读取请求体里的 JSON 字符串","详细过程：第二步——根据 Content-Type 选择 HttpMessageConverter（JSON 对应 Jackson 的 MappingJackson2HttpMessageConverter）","详细过程：第三步——Jackson 把 JSON 的键和 User 的属性名逐一匹配、反序列化成 new User(...)","关键细节：这就是为什么前端字段名和后端实体属性名必须一致——不一致就映射不上，拿到 null","关键细节：Content-Type 必须是 application/json，否则会报 415 Unsupported Media Type","与 @RequestParam 的区别：@RequestParam 取的是 URL 上的参数或表单字段（key=value）；@RequestBody 取的是请求体的整体内容","与 @PathVariable 的区别：@PathVariable 取的是路径里的占位（/users/{id}）；@RequestBody 取的是 body","常见坑：一个方法里既想接 body 又想接 query 参数是可以的，但不能写两个 @RequestBody"],"path":"r-3-7"},{"id":"st.register.3.8","label":"3.9 Controller 的职责边界：接客不干活","phase":2,"color":"#7C3AED","concepts":["c.arch.controller","c.arch.three-layer"],"details":["知识点：Controller 层是「前台」——只做三件事：接收参数、调用 Service、包装返回结果","详细过程：Controller 里不应该出现 SQL、不应该出现复杂判断、不应该出现事务 —— 那些都属于 Service","关键细节：Controller 保持薄，一旦业务变复杂，改 Service 就够了，接口层不用动"],"path":"r-3-8"},{"id":"st.register.4.0","label":"4.1 IOC：对象创建权交给容器","phase":3,"color":"#047857","concepts":["c.spring.ioc"],"details":["知识点：IOC（控制反转）——传统写法是「我要用什么，我自己 new」；IOC 是「我要用什么，容器给我」","反转了什么：反转的是「对象的创建权与生命周期管理权」——从程序员手里转到了 Spring 容器","详细过程：Spring 启动时扫描到 @Service、@RestController、@Repository、@Component、@Mapper，把它们实例化成对象放进容器，这些对象统称 Bean","为什么要这么做：一是解耦（换个实现类不用改调用方）；二是统一管理（生命周期、作用域、AOP 增强都集中处理）"],"path":"r-4-0"},{"id":"st.register.4.1","label":"4.2 @Service：把类注册成 Bean","phase":3,"color":"#047857","concepts":["c.annotation.component"],"details":["知识点：@Service——语义上标记「这是一个业务层组件」，本质上和 @Component 一样，都是让容器扫描并实例化","详细过程：在 UserServiceImpl 类上加 @Service，Spring 启动时就会创建它的实例放进容器","关键细节：默认单例——一个 @Service 类在容器里只有一个实例，被所有请求共享；所以不要在 Service 里用成员变量存「这个请求的数据」，会串数据","家族成员：@Controller/@RestController 用于接口层，@Service 用于业务层，@Repository 用于持久层，@Component 是通用兜底"],"path":"r-4-1"},{"id":"st.register.4.2","label":"4.3 @Autowired：依赖注入，替代手动 new","phase":3,"color":"#047857","concepts":["c.spring.di","c.annotation.autowired"],"details":["知识点：@Autowired（DI 依赖注入）——声明「这个字段需要的对象，请容器帮我注入进来」","详细过程：对比两种写法——老写法：private UserService userService = new UserServiceImpl();","详细过程：对比两种写法——新写法：@Autowired private UserService userService;","关键细节：注意注入的是「接口类型」而不是实现类——这就是利用多态解耦：以后把 UserServiceImpl 换成 UserServiceImplV2，Controller 一行都不用改","注入方式：字段注入——直接标在字段上，写法最简，但不利于单元测试","注入方式：构造器注入——把依赖作为构造参数，Spring 自动传入；官方推荐，因为依赖不可变（final）、便于测试、能早暴露循环依赖","关键细节：@Autowired 默认按「类型」找 Bean；同类型有多个时要用 @Qualifier 指定名字，或 @Primary 标记首选","常见坑：注入到的是 null，通常三个原因：类没加 @Service/@Repository；类不在启动类扫描范围内；Bean 还没创建就用了"],"path":"r-4-2"},{"id":"st.register.4.3","label":"4.4 Controller 调用 Service：进入业务层","phase":3,"color":"#047857","concepts":["c.arch.service","c.arch.three-layer"],"details":["详细过程：Controller 里 userService.register(user) 一行调用，控制权交给 Service","关键细节：这一行「看起来很简单」，但背后是：Spring 已经提前把 UserService 的实例准备好并注入到 Controller 里了"],"path":"r-4-3"},{"id":"st.register.4.4","label":"4.5 Service 里的业务逻辑：真正「有脑子」的一层","phase":3,"color":"#047857","concepts":["c.biz.validation","c.biz.transaction"],"details":["知识点：业务校验——即便前端校验过，后端仍然要再校验一遍：用户名非空、长度合规、密码强度","为什么后端还要校验：前端可以绕过（Postman 直接调接口），所以后端才是真正的安全边界","知识点：唯一性检查——先查库里是否已存在同名用户，存在就抛业务异常（用户名已存在）","关键细节：严格来说「先查再插」在高并发下有竞态问题，真正可靠的做法是数据库唯一索引兜底","知识点：密码加密——绝不能明文存库；常见做法是 BCrypt（自带盐、可调强度）或 MD5+随机盐","关键细节：加密后存的是密文，登录时是把「用户输入的密码」用同样规则算出密文再比对，不是解密","知识点：事务——如果注册涉及多张表（用户表 + 用户角色表），要加 @Transactional，保证要么全成功要么全回滚","知识点：业务异常——校验不通过时抛自定义异常（如 ApiException），交给全局异常处理器统一转成错误响应"],"path":"r-4-4"},{"id":"st.register.4.5","label":"4.6 Service 调用 Mapper：业务层不写 SQL","phase":3,"color":"#047857","concepts":["c.arch.mapper"],"details":["详细过程：Service 里调用 userMapper.insert(user)，把「持久化」这件事委托出去","关键细节：Service 只关心「要保存这个用户」，不关心「SQL 怎么写、连接从哪来」——这就是分层带来的好处"],"path":"r-4-5"},{"id":"st.register.5.0","label":"5.1 @Mapper 接口：只有签名，没有实现","phase":4,"color":"#C2410C","concepts":["c.mybatis.mapper"],"details":["知识点：@Mapper——标记这是一个 MyBatis 的持久层接口，告诉 MyBatis「启动时请为它生成实现」","详细过程：写 public interface UserMapper { int insert(User user); } —— 只有方法签名，没有方法体","关键细节：@Mapper 可以逐接口标注，也可以在启动类上用 @MapperScan 批量扫描包"],"path":"r-5-0"},{"id":"st.register.5.1","label":"5.2 动态代理：实现类是运行时生成的","phase":4,"color":"#C2410C","concepts":["c.mybatis.proxy","c.java.interface"],"details":["知识点：MyBatis 动态代理——MyBatis 用 JDK 动态代理（java.lang.reflect.Proxy）在运行时生成接口的实现类对象","详细过程：调用 userMapper.insert(user) 时，实际进入的是代理对象的 invoke 方法，代理再根据「接口名 + 方法名」找到对应的 SQL 并执行","关键细节：所以 Mapper 接口不需要你写实现类；但这也意味着「接口名 / 方法名 / namespace / id」必须严丝合缝对上，否则报 Invalid bound statement (not found)","关键细节：代理对象同样被注册进 Spring 容器，所以 Service 里可以用 @Autowired 注入它"],"path":"r-5-1"},{"id":"st.register.5.2","label":"5.3 SQL 映射：注解写还是 XML 写","phase":4,"color":"#C2410C","concepts":["c.mybatis.mapping"],"details":["知识点：注解方式——在方法上直接写 @Insert(\"insert into user(username, password) values(#{username}, #{password})\")","知识点：XML 方式——在 resources/mapper/UserMapper.xml 里写 mapper + insert，namespace 指向接口全限定名、id 等于方法名","怎么选：简单 SQL 用注解；复杂/动态 SQL（if、where、foreach）用 XML，可读性更好","关键细节：XML 必须放在 mybatis.mapper-locations 配置的路径下（如 classpath:mapper/*.xml），否则打包后找不到"],"path":"r-5-2"},{"id":"st.register.5.3","label":"5.4 #{} 占位符：防 SQL 注入的关键","phase":4,"color":"#C2410C","concepts":["c.mybatis.hash","c.mybatis.dollar"],"details":["知识点：#{} 预编译占位符——MyBatis 把 #{username} 编译成 JDBC 的 ?，交给 PreparedStatement 设参","详细过程：最终执行的 SQL 是 INSERT INTO user(username, password) VALUES(?, ?)","为什么能防注入：因为 SQL 的「结构」在预编译阶段就固定了，用户输入只作为「值」被传入，不会被当成 SQL 语法的一部分","对比 ${} 字符串拼接：${} 是直接文本替换，如果用户输入 ' or '1'='1，整条语句语义就被改掉","详细过程：注入攻击示例——假设 SQL 是 select * from user where username = '${username}'，输入 ' or '1'='1 后变成 where username = '' or '1'='1'，条件永远成立","关键细节：结论：99% 的场景用 #{}；只有表名、字段名这类「不能用 ? 替代」的地方才考虑 ${}，而且必须自己做白名单校验","这个坑你踩过两次：前端用 innerHTML 拼用户输入会 XSS；SQL 用字符串拼接会注入 —— 本质都是「把数据当代码执行」"],"path":"r-5-3"},{"id":"st.register.5.4","label":"5.5 HikariCP 连接池：借连接而不是造连接","phase":4,"color":"#C2410C","concepts":["c.pool.hikari"],"details":["知识点：为什么需要连接池——建立一次数据库连接要做网络握手、身份认证、分配资源，成本很高；每个请求都新建连接，高并发下会把数据库拖死","知识点：连接池机制——应用启动时预先建好一批连接放进池子；用时「借出」，用完「归还」，而不是关闭","详细过程：MyBatis 执行 SQL 前向 HikariCP 借一个 Connection → 执行 → 归还","关键细节：SpringBoot 引入 JDBC/MyBatis 依赖后默认就用 HikariCP，不需要额外配置；application.yml 里可调最大连接数、超时等","关键细节：连接池的参数本质是「并发上限」：池子满了，后来的请求只能排队等"],"path":"r-5-4"},{"id":"st.register.5.5","label":"5.6 执行 INSERT：DML 与事务","phase":4,"color":"#C2410C","concepts":["c.sql.dml","c.sql","c.biz.transaction"],"details":["知识点：DML 语句——INSERT 属于 DML（数据操作语言），影响的是「数据行」而不是「表结构」","详细过程：PreparedStatement 设好两个参数 → executeUpdate() 执行 → MySQL 写入数据页并更新索引","关键细节：数据库默认 autocommit=true，一条 DML 执行完立即提交；如果加了 @Transactional，则要在方法结束时统一提交","知识点：主键回填——如果是自增主键，需要配置 useGeneratedKeys=true + keyProperty=\"id\"，插入后新 id 会回填到传入的 User 对象上","关键细节：不配回填，插入完你就拿不到新记录的 id，后续想用 id 做跳转或关联就没法做"],"path":"r-5-5"},{"id":"st.register.5.6","label":"5.7 结果映射：数据库的行变成 Java 的对象","phase":4,"color":"#C2410C","concepts":["c.mybatis.resultmap","c.mybatis.camel-case"],"details":["知识点：结果映射——查询时 MySQL 返回 ResultSet（结果集），MyBatis 负责把「一行」映射成「一个 Java 对象」","详细过程：INSERT 的返回——插入方法通常声明返回 int，值等于「受影响的行数」；返回 0 说明一条都没插进去","详细过程：查询的返回——select 方法声明返回 User 或 List<User>，MyBatis 按列名匹配属性名自动填充","关键细节：列名 user_name 与属性名 userName 默认映射不上，需要在 SQL 里 as 起别名，或开启 map-underscore-to-camel-case","常见坑：同一条 SQL 在数据库工具里查得到数据，程序里对象却全是 null —— 多半就是命名没对上"],"path":"r-5-6"},{"id":"st.register.6.0","label":"6.1 Service 返回结果给 Controller","phase":5,"color":"#BE123C","concepts":["c.arch.service"],"details":["详细过程：userService.register(user) 执行完返回（void 或 int 或其他），Controller 拿到这个结果","关键细节：如果 Service 里抛了异常，流程不会走到这里，而是直接进入全局异常处理分支"],"path":"r-6-0"},{"id":"st.register.6.1","label":"6.2 统一响应封装：Result 是前后端的「契约」","phase":5,"color":"#BE123C","concepts":["c.result.wrapper"],"details":["知识点：统一响应结果类——把所有接口的返回都统一成 { code, msg, data } 三段式","为什么需要统一：前端只需要写一套解析逻辑：先看 code，再决定取 data 还是弹 msg；不用为每个接口写不同的判断","详细过程：Controller 返回 Result.success(\"注册成功\")，或 Result.error(\"用户名已存在\")","关键细节：code 的约定要固定下来：0 或 200 表示成功，非 0 表示失败；失败时要带上可读的 msg","对照你的项目：知识库后端的接口就返回统一结构，出错时由 @RestControllerAdvice 统一转成错误 JSON，前端不用逐个接口写 try"],"path":"r-6-1"},{"id":"st.register.6.2","label":"6.3 @RestController 序列化：Result 对象变 JSON","phase":5,"color":"#BE123C","concepts":["c.jackson","c.annotation.restcontroller"],"details":["知识点：Jackson 序列化——Spring 内置 Jackson，把 Java 对象转成 JSON 字符串","详细过程：Result 对象的 code/msg/data 三个属性 → {\"code\":0,\"msg\":\"注册成功\",\"data\":null}","关键细节：serialization 时对象里的 null 字段默认会被写成 null；日期默认是时间戳或 ISO 格式，必要时用 @JsonFormat 指定格式"],"path":"r-6-2"},{"id":"st.register.6.3","label":"6.4 HTTP 响应报文：状态行 + 响应头 + 响应体","phase":5,"color":"#BE123C","concepts":["c.http.response","c.http.content-type"],"details":["知识点：状态行——格式是「协议版本 + 状态码 + 状态描述」","详细过程：状态行实例——HTTP/1.1 200 OK","知识点：响应头——Content-Type: application/json;charset=UTF-8（告诉浏览器这是 JSON，别乱解析）","详细过程：响应头关键项——Content-Length：响应体字节长度","详细过程：响应头关键项——Date：服务器时间","详细过程：响应头关键项——Set-Cookie：需要建立会话时在这里下发 Cookie","知识点：响应体——真正的业务数据，就是那段 JSON","详细过程：响应体实例——{\"code\":0,\"msg\":\"注册成功\",\"data\":null}"],"path":"r-6-3"},{"id":"st.register.6.4","label":"6.5 状态码：HTTP 层的「一句话结论」","phase":5,"color":"#BE123C","concepts":["c.http.status"],"details":["知识点：200 OK——请求成功，业务是否成功还要看响应体里的 code","知识点：201 Created——资源创建成功（新增接口更规范的做法）；很多项目统一用 200，但要和前端约定好","知识点：400 Bad Request——请求参数有问题，比如 JSON 格式错、必填字段缺失","知识点：401 / 403——未认证 / 已认证但无权限","知识点：404 Not Found——路径找不到——注意区分「路径错」与「端口错」，端口错是连接被拒","知识点：405 Method Not Allowed——路径对了但请求方法不对（该 POST 发了 GET）","知识点：415 Unsupported Media Type——Content-Type 不对，@RequestBody 解析不了","知识点：500 Internal Server Error——服务端代码抛了未被捕获的异常，比如空指针、SQL 语法错、连接池耗尽","关键细节：一句话区分：4xx 是「你的请求有问题」，5xx 是「我的服务器有问题」"],"path":"r-6-4"},{"id":"st.register.6.5","label":"6.6 全局异常处理：别让 500 直接甩给用户","phase":5,"color":"#BE123C","concepts":["c.exception.handler"],"details":["知识点：@RestControllerAdvice + @ExceptionHandler——统一捕获 Controller 层抛出的异常，转成规范的 JSON 响应","详细过程：自定义异常（如用户名已存在）→ 被 @ExceptionHandler 捕获 → 返回 400 + {code:xxx, msg:\"用户名已存在\"}","关键细节：没有全局处理时，未捕获异常会导致 500 并可能把堆栈信息暴露给前端，既不友好也不安全"],"path":"r-6-5"},{"id":"st.register.6.6","label":"6.7 Tomcat 发回响应","phase":5,"color":"#BE123C","concepts":["c.tomcat"],"details":["详细过程：Tomcat 把响应对象序列化成 HTTP 响应报文字节流，通过 TCP 连接写回浏览器","关键细节：如果前面是跨域请求，Tomcat 返回时还要带上 CORS 相关响应头，否则浏览器仍然会拦"],"path":"r-6-6"},{"id":"st.register.6.7","label":"6.8 前端接收：await 恢复执行","phase":5,"color":"#BE123C","concepts":["c.js.async","c.axios.post"],"details":["知识点：Promise 的 resolve——网络响应回来后，之前挂起的 await 恢复执行，axios 把响应包装成 response 对象","详细过程：const res = await axios.post(...)；res 里有 status（HTTP 状态码）、data（响应体 JSON 解析后的对象）","关键细节：axios 已经帮你做了 JSON.parse；如果响应不是 JSON（比如返回 HTML 错误页），会解析失败","关键细节：HTTP 状态码非 2xx 时，axios 默认会走 catch 而不是 then，需要用 try/catch 或在拦截器里统一处理"],"path":"r-6-7"},{"id":"st.register.6.8","label":"6.9 判断与渲染：把结果变成用户能看懂的东西","phase":5,"color":"#BE123C","concepts":["c.dom.render","c.http.status"],"details":["详细过程：判断 res.data.code 是否为成功值","成功分支：弹出「注册成功」提示 → 清空表单 → 延迟跳转到登录页（路由跳转而不是 window.location，避免整页刷新）","失败分支：把 res.data.msg 显示在页面上（比如「用户名已存在」），让用户知道下一步该改什么","关键细节：loading 状态要在这时关闭（无论成功失败），否则按钮会一直转圈","关键细节：提示信息要具体，「操作失败」这种话对用户毫无帮助"],"path":"r-6-8"}],"extras":[{"id":"ex.register.0","label":"阶段〇：全景速览（先建立全局认知）","color":"#475569","items":[{"t":"0.1 一句话主线：用户在前端点「注册」→ 浏览器把数据打成 HTTP 请求发出去 → 内嵌 Tomcat 收到 → SpringMVC 按路由找到 Controller → Controller 调 Service 做业务 → Service 调 Mapper → MyBatis 生成 SQL 交给连接池执行 → MySQL 落库 → 结果原路返回 → 前端拿到 JSON 渲染提示","details":[]},{"t":"0.2 六段式时间轴（严格按此顺序）","details":["阶段一：前端采集与发送——前端：HTML 表单 → v-model 双向绑定 → 校验 → @click 触发 → 组装 JS 对象 → axios.post → await 挂起等待","阶段二：网络传输——网络：TCP 建连 → HTTP 请求报文（请求行 + 请求头 + 空行 + 请求体）→ 到达服务器端口","阶段三：后端接收与参数解析——后端：内嵌 Tomcat 监听 → DispatcherServlet 拦截 → HandlerMapping 查路由 → @PostMapping 命中 → @RequestBody 反序列化","阶段四：业务处理与依赖注入——业务：@Autowired 拿到 Service Bean → @Service 里的业务校验 → 调 Mapper","阶段五：数据持久化——持久层：@Mapper 动态代理 → #{} 预编译 → HikariCP 借连接 → INSERT → 返回受影响行数 → 归还连接","阶段六：响应返回——响应：封装 Result → Jackson 转 JSON → 200 状态码 → Tomcat 发回 → 前端 await 恢复 → 判断 code → 提示/跳转"]},{"t":"0.3 四个角色与各自的语言","details":["浏览器（前端）：只懂 JS 对象、JSON、HTTP；不关心数据库长什么样","Tomcat（容器）：只懂 TCP 连接、HTTP 报文；不关心业务","Spring（框架）：负责路由、参数转换、对象创建、依赖注入；把杂乱的基础工作收走","MySQL（数据库）：只懂 SQL；不关心是谁在问、为什么要问"]},{"t":"0.4 一次注册请求的耗时分层（体感）","details":["前端处理：输入、校验、序列化：约 1ms 以内，肉眼无感","网络往返：本机 loopback 约 1~3ms；公网 20~200ms","后端处理：路由 + 业务 + SQL 解析：约 5~30ms","数据库写入：INSERT + 索引更新 + 事务提交：约 1~10ms","渲染反馈：弹提示、跳转：约 1ms"]}]},{"id":"ex.register.7","label":"附录 A：全链路文字时序图","color":"#0F766E","items":[{"t":"A.1 正常流程（逐步）","details":["步骤 1：用户输入 → v-model 同步到 form.username / form.password","步骤 2：点击按钮 → @click 触发 register()","步骤 3：前端校验通过 → 组装 data 对象","步骤 4：axios.post('/api/users/register', data) → 序列化成 JSON","步骤 5：浏览器发出 HTTP 请求：请求行 + 请求头（Content-Type: application/json）+ 空行 + 请求体","步骤 6：TCP 连接建立 → 请求到达 127.0.0.1:8080","步骤 7：Tomcat 解析报文 → 封装成 HttpServletRequest","步骤 8：DispatcherServlet → HandlerMapping 查到 UserController.register 方法","步骤 9：@RequestBody 用 Jackson 把 JSON 反序列化成 User 对象","步骤 10：@Autowired 注入的 UserService 被调用 → 执行业务校验与加密","步骤 11：Service 调用 @Autowired 注入的 UserMapper（动态代理对象）","步骤 12：MyBatis 找到对应 SQL，#{} 编译成 ?，从 HikariCP 借连接","步骤 13：执行 INSERT → MySQL 写入磁盘 → 返回受影响行数","步骤 14：连接归还池中 → int 结果一路上传：Mapper → Service → Controller","步骤 15：Controller 封装 Result.success(\"注册成功\")","步骤 16：Jackson 序列化成 JSON → 写入 HTTP 响应体 → 状态码 200","步骤 17：Tomcat 发回浏览器 → await 恢复 → 判断 code → 提示并跳转"]}]},{"id":"ex.register.8","label":"附录 B：常见错误对照表","color":"#9333EA","items":[{"t":"B.1 前端侧","details":["页面不刷新 / 数据不变：v-model 绑定的字段未在 data 中声明，或字段名写错","请求根本没发出：按钮在 form 内且未 preventDefault，触发了页面刷新；或 @click 方法名写错","请求 404：axios 的 url 与后端 @RequestMapping 拼出来的路径不一致","请求 405：请求方法与后端注解不匹配（GET 打了 @PostMapping）","请求 415：Content-Type 不是 application/json，或没传 body","拿到 undefined：await 漏写，res 还是个 Promise","报跨域错误：前后端不同源且后端没配 CORS；或页面是 file:// 打开的"]},{"t":"B.2 后端侧","details":["启动失败 Port already in use：8080 被占用，改 server.port 或杀掉占用进程","注入的 Service 为 null：类没加 @Service，或不在启动类扫描的包范围内","收到的参数全是 null：前端字段名与实体属性名不一致；或漏了 @RequestBody","Invalid bound statement (not found)：XML 的 namespace 不是接口全限定名、select 的 id 与方法名不一致，或 XML 不在 mapper-locations 路径","查得到数据但对象全 null：数据库下划线命名与 Java 驼峰命名没做映射","500 空指针：Service 里没判空就调用了方法，或注入失败","中文乱码：数据库/表不是 utf8mb4，或连接串没指定字符集","时间差 8 小时：连接串没配 serverTimezone=Asia/Shanghai"]}]},{"id":"ex.register.9","label":"附录 C：面试高频追问","color":"#B45309","items":[{"t":"C.1 为什么 Controller 不直接操作数据库","details":["答案要点：职责分离：Controller 负责协议层（接参、返参），Service 负责业务规则与事务边界，Mapper 负责 SQL；分层让「改业务」和「改 SQL」互不影响，也让单元测试更可行"]},{"t":"C.2 @Autowired 注入的是接口，能调用吗","details":["答案要点：能。Spring 注入的是接口的「实现类实例」，通过多态调用；这也是面向接口编程的价值——换实现不用改调用方"]},{"t":"C.3 #{} 和 ${} 到底差在哪","details":["答案要点：#{} 编译成 JDBC 的 ? 走预编译，值永远是值；${} 是文本替换，值可能变成语法的一部分。前者安全，后者只在表名/字段名这类无法用 ? 的场景使用，且必须白名单校验"]},{"t":"C.4 为什么有了 JDBC 还要 MyBatis","details":["答案要点：JDBC 一个查询要写连接、PreparedStatement、设参、遍历 ResultSet、关资源，模板代码占了大头；MyBatis 把模板收走，只留「接口方法 + SQL」，本质是「把重复收进壳里」"]},{"t":"C.5 连接池解决了什么问题","details":["答案要点：建连接成本高（握手、认证、分配资源），连接池把连接复用起来，用「借/还」代替「建/销」，把开销从「每请求一次」降到「启动时一批」"]},{"t":"C.6 一次请求经过了多少层","details":["答案要点：浏览器 → TCP → Tomcat → DispatcherServlet → HandlerMapping → Controller → Service → Mapper 代理 → MyBatis → 连接池 → MySQL → 原路返回。每层只做自己的事，靠「约定」（路径、字段名、返回结构）串起来"]}]},{"id":"ex.register.10","label":"附录 D：这张图怎么用","color":"#4B5563","items":[{"t":"D.1 顺向背一遍：从阶段一读到阶段六，每个阶段问自己：「这一层的输入是什么、输出是什么、出了什么错」","details":[]},{"t":"D.2 逆向查一遍：从报错倒推：看到 404 想「路径匹配」，看到 405 想「请求方法」，看到 500 想「服务端异常」，看到 null 想「字段映射」","details":[]},{"t":"D.3 画一遍再讲一遍：合上这张图，自己在纸上画出六段式，然后对着空气讲给「一个不懂的人」听——能讲通，才算真会","details":[]}]}],"flow":["JSON 字符串","HTTP 请求报文","User 对象","insert(user)","受影响行数 int"],"returnNote":"响应 JSON + 200 回到前端，渲染提示"},{"id":"s.dept","label":"部门管理 CRUD","sub":"接口定义 → 三层实现 → 联调 → 日志","color":"#0E7490","source":"课件 07-后端Web实战(部门管理) + tlias 源码","phases":[{"label":"准备工作","color":"#334155"},{"label":"查询","color":"#2563EB"},{"label":"删除","color":"#C2410C"},{"label":"新增","color":"#047857"},{"label":"修改","color":"#7C3AED"},{"label":"日志","color":"#B45309"}],"steps":[{"id":"st.dept.0","label":"1.1 前后端分离与接口文档","phase":0,"color":"#334155","concepts":["c.arch.separation","c.spec.api-doc"],"details":["企业开发有两种模式：前后台混合开发、前后台分离开发。","混合开发把前台后台代码写在同一个工程里，缺点有四条。","缺点一·沟通成本高：后台发现前端有问题，要找前端改，改完再交回来。","缺点二·分工不明确：后台也要写部分前端代码，很难培养专业人才。","缺点三·不便管理：所有代码都在一个工程里。","缺点四·难以维护：前端只改一点，整个工程（含后台）都要重新打包部署。","分离开发把工程拆成前端工程 + 后端工程，各由专业人员开发，前端发异步请求取数据。","分离之后冒出真问题：前端怎么知道后端返回什么格式？后端怎么知道前端要什么？","答案是前后端统一制定一套规范——接口文档，两边都按它开发。","接口文档有离线版和在线版；内容由后端开发者根据产品经理的产品原型 + 需求文档撰写。","后端开发一个功能的完整流程：需求分析 → 接口定义 → 前后台并行开发 → 测试 → 前后端联调测试。","需求分析：读需求文档，分析、理解需求。","接口定义：查接口文档里该需求的接口定义，包括地址、参数、响应数据类型。","前后台并行开发：各自按接口文档开发、各自按接口文档测试。","前后端联调测试：前端工程请求后端工程，验证功能。"]},{"id":"st.dept.1","label":"1.2 RESTful 风格","phase":0,"color":"#334155","concepts":["c.restful","c.http.method","c.url"],"details":["REST = Representational State Transfer，表述性状态转换，是一种软件架构风格。","传统 URL 的例子：/user/getById?id=1（GET 查询）、/user/saveUser（POST 新增）。","传统 URL 三个毛病：定义复杂；把资源的访问行为暴露在 URL 里；每人命名习惯不同。","命名不一致的后果：getById / selectById / queryById / loadById 到处都是，几十上百人的项目没法维护。","REST 风格写法：/users/1 GET 查询、/users POST 新增、/users PUT 修改、/users/1 DELETE 删除。","一句话总结：通过 URL 定位要操作的资源，通过 HTTP 动词（请求方式）描述具体操作。","四种请求方式对应增删改查：GET 查询、POST 新增、PUT 修改、DELETE 删除。","REST 让 URL 更简洁、更规范、更优雅。","注意事项一：REST 是风格、是约定，约定不是规定，可以打破。","注意事项二：描述模块功能通常用复数（users / emps / books），表示这类资源而不是单个。","后端开发人员必须严格遵守接口文档开发，才能保证前端对得上。"]},{"id":"st.dept.2","label":"1.3 Apifox 与接口测试","phase":0,"color":"#334155","concepts":["c.tool.apifox","c.http.method"],"details":["本案例要测四种请求方式：POST、DELETE、PUT、GET。","关键限制：浏览器地址栏发起的请求全是 GET。","由此引出两个问题：后端开发完接口怎么测？前端开发时怎么拿数据测页面？","工具方案：Postman、Apipost、Apifox，用法基本类似。","课程选 Apifox，因为功能更强大、更完善。","Apifox = 集成了 API 文档、API 调试、API Mock、API 测试的一体化协作平台。","三个作用：接口文档管理、接口请求测试、Mock 服务。","一个工具品类的诞生，往往只是某个环境缺了一个很基础的能力。"]},{"id":"st.dept.3","label":"1.4 工程搭建：四步","phase":0,"color":"#334155","concepts":["c.tool.maven","c.springboot.app","c.sql.ddl","c.sql","c.mysql","c.config.yml","c.arch.package","c.result.wrapper","c.mybatis.camel-case"],"details":["第一步：创建 SpringBoot 工程，引入 web 起步依赖 + mybatis + mysql 驱动 + lombok。","第二步：创建 tlias 数据库与 dept 部门表。","建表语句要点：id int unsigned 主键自增、name varchar(10) 非空唯一、create_time、update_time 两个 datetime。","第三步：application.yml 配数据源——driver-class-name、url（jdbc:mysql://localhost:3306/tlias）、username、password。","第四步：准备基础包结构 controller / service（+ impl）/ mapper / pojo。","实体类 Dept：id / name / createTime / updateTime，用 lombok 的 @Data + 全参/无参构造。","统一响应 Result：code（1 成功 / 0 失败）+ msg + data。","Result 提供三个静态工厂：success()、success(Object)、error(String)。","Result 的意义：让「怎么造一个合法响应」只有一种写法，避免每人手搓出花样。","四个空壳类同时建好：DeptMapper、DeptService、DeptServiceImpl、DeptController。","包结构本身就是约定：扫描靠它，不靠额外配置。"]},{"id":"st.dept.4","label":"2.1 列表查询：三层各写一行","phase":1,"color":"#2563EB","concepts":["c.arch.three-layer","c.arch.controller","c.arch.service","c.arch.mapper","c.mybatis.mapper","c.mybatis.resultmap"],"details":["需求：查询所有部门数据，展示在部门管理页面。","接口：参照接口文档「部门管理 → 部门列表查询」。","思路先分三层职责，再动手写代码。","Controller 层：接收前端请求，调 Service 查询数据，再响应结果。","Service 层：调 Mapper 接口方法，查询所有部门数据。","Mapper 层：执行「查询所有部门」的 SQL。","Mapper 写法：@Mapper 接口 + @Select(\"select * from dept\") 返回 List<Dept>。","Service 接口声明 List<Dept> findAll()；实现类加 @Service，@Autowired 注入 DeptMapper。","Controller 加 @RestController，@Autowired 注入 DeptService，方法里 return Result.success(list)。","自下往上读更好懂：SQL 是根，Service 是透传，Controller 只做协议层。","写完之后启动项目，用 Apifox 测，返回 json 且与接口文档一致。"]},{"id":"st.dept.5","label":"2.2 限定请求方式：@GetMapping","phase":1,"color":"#2563EB","concepts":["c.annotation.method-mapping","c.springmvc.mapping"],"details":["测试中的意外：用 POST、PUT、DELETE 去请求，居然也能查到数据。","但接口文档明确要求这个接口是 GET，所以是问题。","方式一：在 @RequestMapping 里用 method 属性限定 RequestMethod.GET。","方式二（推荐）：直接用衍生注解 @GetMapping，简洁优雅。","四个衍生注解：@GetMapping 查、@PostMapping 增、@PutMapping 改、@DeleteMapping 删。","记忆法：记不住就记「祖宗」——@RequestMapping 管通用能力，衍生注解把请求方式定死。"]},{"id":"st.dept.6","label":"2.3 数据封装：createTime 为什么是 null","phase":1,"color":"#2563EB","concepts":["c.mybatis.camel-case","c.mybatis.resultmap"],"details":["现象：id、name 有值，createTime、updateTime 却是 null，而数据库里明明有值。","原因：实体类属性名与查询返回的字段名一致时 MyBatis 才自动封装，不一致就不封装。","表里叫 create_time，类里叫 createTime —— 名字对不上，静悄悄留 null。","最阴的地方是「部分成功」：不报错、不提示，不逐字段核对就发现不了。","方案一·手动结果映射：@Results({@Result(column=\"create_time\", property=\"createTime\")})。","方案二·起别名：SQL 里写 select create_time createTime, update_time updateTime from dept。","方案三·开启驼峰命名（推荐）：yml 里配 map-underscore-to-camel-case: true。","驼峰规则：abc_xyz → abcXyz。","前提：实体类属性与表字段名必须严格遵守驼峰命名。","三种解法的层次不同：前两个在每个 SQL 上打补丁，第三个在整个项目上定一条规则。","能在一个地方定规则，就别在十个地方打补丁。"]},{"id":"st.dept.7","label":"2.4 前后端联调：Nginx 反向代理","phase":1,"color":"#2563EB","concepts":["c.nginx.proxy","c.http.request","c.cors","c.url","c.tomcat"],"details":["联调步骤一：把「前端环境」压缩包拷到没有中文、不带空格的目录。","步骤二：解压到当前目录。","步骤三：双击 nginx.exe 启动，一闪而过就是启动成功；任务管理器里能看到两个进程。","步骤四：浏览器访问 http://localhost:90。","关键问题：前端请求 http://localhost:90/api/depts，怎么就跑到后端 Tomcat 上了？","答案：靠 Nginx 的反向代理。","链路：浏览器请求 localhost:90，请求的其实是 Nginx；Nginx 不处理，转发给后端 Tomcat。","为什么不直接请求 Tomcat——理由一·安全：后端一般是集群，全暴露给前端很危险。","理由二·灵活：后端增减服务器，前端无感知，只改 Nginx 配置。","理由三·负载均衡：基于反向代理可以很方便地做 Tomcat 负载均衡。","配置三个指令：location（定义匹配规则）、rewrite（重写 URI）、proxy_pass（代理转发）。","^~ /api/ 表示精确匹配以 /api/ 开头的路径。","架构认知：Controller 上面不是浏览器，中间还隔着一层服务器；这一层与业务无关，配错就接不上。"]},{"id":"st.dept.8","label":"3.1 删除：需求与三层职责","phase":2,"color":"#C2410C","concepts":["c.arch.three-layer","c.annotation.method-mapping"],"details":["需求：点击「删除」按钮，根据 ID 删除部门数据。","接口：参照接口文档「部门管理 → 删除部门」。","Controller 层：接收请求参数并调用 Service 的删除方法，最后响应结果。","Service 层：调 Mapper 完成删除。","Mapper 层：执行 delete 语句。","这里第一次遇到「Controller 要接前端传的参数」，于是引出参数接收的话题。"]},{"id":"st.dept.9","label":"3.2 简单参数接收：三种方案","phase":2,"color":"#C2410C","concepts":["c.param.simple","c.annotation.requestparam"],"details":["方案一：用原生 HttpServletRequest 的 request.getParameter(\"id\")。","方案一的缺点：实现繁琐，还要手动类型转换（Integer.parseInt），项目开发很少用。","方案二：@RequestParam(\"id\") Integer deptId，把请求参数绑定给方法形参。","方案二的约束：@RequestParam 的 value 必须与前端传的参数名保持一致。","@RequestParam 的 required 默认 true，不传会报错；参数可选时设为 false。","方案三：请求参数名与形参变量名相同时，直接定义方法形参即可，省略 @RequestParam。","讲义推荐方案三。","演进逻辑：能推导出来的，就不该让人再写一遍。","三种方案的差别不在写法，而在「谁来保证名字对得上」。"]},{"id":"st.dept.10","label":"3.3 删除实现与 DML 返回值","phase":2,"color":"#C2410C","concepts":["c.sql.dml","c.mybatis.hash","c.biz.validation"],"details":["Controller：@DeleteMapping(\"/depts\") + delete(Integer id)，调 Service 后 return Result.success()。","Service 接口声明 void deleteById(Integer id)；实现类里直接 deptMapper.deleteById(id)。","Mapper：@Delete(\"delete from dept where id = #{id}\") void deleteById(Integer id)。","细节一：Mapper 方法只有一个普通类型参数时，#{…} 里的属性名可以随便写（#{id}、#{value} 都行）。","细节二：DML 语句也有返回值，代表影响的记录数，所以返回值可以设成 Integer。","但一般开发不需要这个返回值，写成 void 即可。","写完后启动服务，用 Apifox 测 delete 接口。"]},{"id":"st.dept.11","label":"4.1 新增：JSON 参数接收","phase":3,"color":"#047857","concepts":["c.annotation.requestbody","c.json","c.http.content-type"],"details":["需求：点「新增部门」弹表单，填部门名称，点确定保存。","接口：参照接口文档「部门管理 → 新增部门」。","关键点：前端传的是 json 格式的请求参数。","规则：JSON 格式的参数通常用一个实体对象来接收。","进一步规则：JSON 的键名与形参对象的属性名相同，并且必须用 @RequestBody 标识。","前端传 {\"name\":\"研发部\"}，就用一个有 name 属性的对象接。","为什么必须 @RequestBody：告诉 Spring 把请求体整个读出来并反序列化成这个类型。","参数在 HTTP 的哪个位置，决定了用哪个注解——body 里就用 @RequestBody。","补充：一个方法里既想接 body 又想接 query 是可以的，但不能写两个 @RequestBody。"]},{"id":"st.dept.12","label":"4.2 新增实现与公共字段补全","phase":3,"color":"#047857","concepts":["c.biz.validation","c.arch.service","c.sql.dml","c.mybatis.hash"],"details":["Controller：@PostMapping(\"/depts\") + save(@RequestBody Dept dept)。","Service 实现里要「补全基础属性」：setCreateTime(LocalDateTime.now())、setUpdateTime(...)。","为什么在 Service 补：这些公共字段不该让前端传，Service 就是干业务规则的地方。","Mapper：@Insert(\"insert into dept(name,create_time,update_time) values(#{name},#{createTime},#{updateTime})\")。","Mapper 需要传多个参数时，把多个参数封装到一个对象里再传。","#{} 里写的是对象的属性名（createTime），不是表的字段名（create_time）。","这一步印证了分层：Controller 只管协议，Service 管规则，Mapper 管 SQL。"]},{"id":"st.dept.13","label":"5.1 查询回显：路径参数 @PathVariable","phase":4,"color":"#7C3AED","concepts":["c.annotation.pathvariable","c.url","c.springmvc.mapping"],"details":["讲义第一条结论：任何业务的「修改」功能一般分两步——查询回显、修改数据。","需求：点「编辑」时按 ID 查部门数据，用于页面回显。","接口：参照接口文档「部门管理 → 根据ID查询」。","/depts/1、/depts/2 这种在 URL 里直接传递的参数叫路径参数。","标识方式：在映射路径里用 {…} 占位，如 @GetMapping(\"/depts/{id}\")。","接收方式：用 @PathVariable 获取路径参数。","路径参数名与形参名一致时，@PathVariable 的 value 可以省略。","至此三种来源三种注解齐了：query → @RequestParam，路径 → @PathVariable，body → @RequestBody。","看到接口文档就能反应出该用哪个注解，是这个模块最大的收获。"]},{"id":"st.dept.14","label":"5.2 修改数据：@PutMapping","phase":4,"color":"#7C3AED","concepts":["c.annotation.requestbody","c.annotation.method-mapping","c.sql.dml","c.biz.validation"],"details":["需求：回显回来后改部门信息，点确定提交修改。","前端传的也是 json，所以 Controller 用 @PutMapping(\"/depts\") + @RequestBody Dept dept。","Service 每次修改都要更新 updateTime：setUpdateTime(LocalDateTime.now())。","Mapper：@Update(\"update dept set name = #{name},update_time = #{updateTime} where id = #{id}\")。","改动要检查返回值：受影响 0 行说明这个 id 不存在。","修改与新增的差别：新增补 createTime + updateTime，修改只补 updateTime。","三步套路固定：需求 → 接口文档 → 三层职责，然后填空。"]},{"id":"st.dept.15","label":"5.3 @RequestMapping 抽取到类上","phase":4,"color":"#7C3AED","concepts":["c.springmvc.mapping-class","c.springmvc.mapping"],"details":["增删改查写完会发现：所有方法的请求路径都以 /depts 开头，前缀重复了 5 遍。","做法：把公共路径抽到类上——类上加 @RequestMapping(\"/depts\")。","各方法上就不用再写 /depts，只写 @GetMapping / @PostMapping / @GetMapping(\"/{id}\") 等。","一条规则记住就不会晕：完整请求路径 = 类上 @RequestMapping 的 value + 方法上的 value。","消除重复不是「少打字」，是少一个改错的地方。","到这里部门管理的基础增删改查就全部实现了。"]},{"id":"st.dept.16","label":"6.1 日志概述与框架选型","phase":5,"color":"#B45309","concepts":["c.log.println","c.log.slf4j","c.log.logback"],"details":["日志记录应用程序的运行信息、状态信息、错误信息。","四个作用：追踪数据和执行过程、便于性能优化、出问题好排查、监控系统运行状态。","为什么不用 System.out.println——理由一：硬编码，想不输出只能回去删代码。","理由二：只能输出到控制台，不能输出到文件、不能分级。","理由三：不便于扩展和维护，没有格式、没有级别、没有滚动。","四个日志框架：JUL（官方，配置简单但不够灵活、性能较差）。","Log4j：流行的日志框架，配置灵活，支持多种输出目标。","Logback：基于 Log4j 升级而来，功能更多、性能优于 Log4j。","Slf4j：简单日志门面，一套标准接口，允许应用使用不同的底层日志框架。","第四次遇到「标准 vs 实现」：SQL↔MySQL、JDBC↔驱动、Java 接口↔实现类、Slf4j↔Logback。","同一个思想出现在四个层次上：想换掉底层实现，上层就得靠一套标准接口撑着。"]},{"id":"st.dept.17","label":"6.2 Logback 入门三步","phase":5,"color":"#B45309","concepts":["c.log.logback","c.log.slf4j"],"details":["第一步·引依赖：SpringBoot 中无需自己引入，已经传递了 logback-classic。","第二步·引配置：把 logback.xml 放到 src/main/resources 目录下。","第三步·写日志：定义 Logger 对象，再调用 log.debug / log.info。","写法：private static final Logger log = LoggerFactory.getLogger(LogTest.class)。","日志输出里除了消息，还有输出时间、线程名、是哪个类输出的。","这正是 System.out.println 做不到的——没有这些信息，日志就没法用来排查问题。","实操：先写一个测试方法打两条 debug、一条 info，观察输出格式。"]},{"id":"st.dept.18","label":"6.3 logback.xml 与日志级别","phase":5,"color":"#B45309","concepts":["c.log.level","c.log.logback","c.config.yml"],"details":["logback.xml 是对 Logback 输出进行控制的配置文件。","它能配置：输出格式、输出位置、日志开关。","日志级别是日志信息的类型，常见级别优先级由低到高：ALL、DEBUG、INFO、WARN、ERROR。","配置里写 level 决定输出到哪一级以上。","输出到文件要配 RollingFileAppender 的滚动策略（按大小或时间切分）。","和 application.yml 是同一个思路：把变化的东西挪出代码。","想关掉某条日志，改配置而不是改代码——这就是「配置 vs 写死」的区别。"]}],"flow":["建好表与工程环境","列表接口跑通","简单参数打通","JSON 参数打通","增删改查完成"],"returnNote":"每个接口都统一返回 Result{code, msg, data}"},{"id":"s.emp","label":"员工管理 CRUD","sub":"多表查询 → 分页 → 事务 → 文件上传","color":"#9333EA","source":"课件 08-后端Web实战(员工管理) + 09","phases":[{"label":"多表基础","color":"#BE123C"},{"label":"列表查询","color":"#2563EB"},{"label":"新增员工","color":"#047857"},{"label":"事务管理","color":"#C2410C"},{"label":"文件上传","color":"#7C3AED"}],"flow":["表关系与连接查询","分页列表跑通","嵌套 JSON 落库","事务兜住一致性","文件存到 OSS"],"returnNote":"前半段是「一次查多张表」，后半段是「一次写多张表」","steps":[{"id":"st.emp.0","label":"1.1 多表关系与外键约束","phase":0,"color":"#BE123C","concepts":["c.db.relation","c.db.fk","c.db.fk-physical"],"details":["员工表和部门表是一对多：一个部门下关联多个员工。","问题现象：删掉 3 号部门后，仍有 7 个员工归属该部门，数据不完整、不一致。","原因：两张表在数据库层面没有建立关联，无法保证一致性与完整性。","解决方案：用外键约束，把员工表的 dept_id 关联到部门表主键。","加外键的前提：当前数据必须完整，所以得先把删掉的部门补回来。","一对多的落地：在多的一方（员工表）加外键，指向一的一方（部门表）主键。","一对一：多用于单表拆分，任意一方加外键并加唯一约束。","多对多：必须引入第三张中间表，维护两张表主键的对应关系。","物理外键缺点一：影响增删改效率，每次都要检查外键关系。","缺点二：仅适用于单节点数据库，不适用于分布式、集群场景。","缺点三：容易引发死锁，消耗性能。","逻辑外键：数据库不建约束，由业务代码保证一致性——项目里更常用这个。"]},{"id":"st.emp.1","label":"1.2 多表查询与笛卡尔积","phase":0,"color":"#BE123C","concepts":["c.sql.join","c.sql.cartesian"],"details":["多表查询：一次查询从多张表获取所需数据。","直接查员工表和部门表，返回 30 × 6 = 180 条记录。","这就是笛卡尔积：两个集合的所有组合情况，其中大部分是无效数据。","多表查询必须消除无效笛卡尔积，只保留表关联部分的数据。","消除办法：给多表查询加上连接查询条件。","内连接：相当于查询 A、B 交集部分数据。","左外连接：查询左表所有数据（包含两表交集部分）。","右外连接：查询右表所有数据（包含两表交集部分）。","员工列表必须用左外连接：即使员工没有部门（id 29、30 无 dept_id）也要查出来。","内连接可以写成隐式（逗号 + where）或显式（join … on），显式可读性更好。"]},{"id":"st.emp.2","label":"1.3 子查询四类","phase":0,"color":"#BE123C","concepts":["c.sql.subquery","c.sql.aggregate"],"details":["子查询：在 SQL 语句中嵌套 select 语句，又称嵌套查询。","外部语句可以是 insert / update / delete / select，最常见的是 select。","按结果形状分四类：标量子查询（一行一列）、列子查询（一列多行）、行子查询（一行多列）、表子查询（多行多列）。","标量子查询常用操作符：= <> > >= < <=；案例：查询最早入职的员工信息。","标量子查询案例：查询在「阮小五」入职之后入职的员工信息。","列子查询常用操作符：in / not in / any / some / all；案例：查询「教研部」和「咨询部」的所有员工。","行子查询常用操作符：= <> in not in；案例：查与「李忠」薪资和职位都相同的员工。","表子查询结果是一张临时表；案例：获取每个部门中薪资最高的员工信息。","最难的题：查询工资低于本部门平均工资的员工——要用到相关子查询。","子查询写多了会发现：能一次 join 出来的，就别嵌套三层。"]},{"id":"st.emp.3","label":"2.1 员工列表：左外连接 + 别名","phase":1,"color":"#2563EB","concepts":["c.sql.join","c.mybatis.mapper","c.mybatis.camel-case","c.mybatis.resultmap"],"details":["准备工作：员工管理相关表结构、Emp 与 EmpExpr 实体类、Controller/Service/Mapper 基础结构。","SQL 用左外连接，保证「没有部门的员工」也能被查出来。","部门名称要起别名 deptName，因为接口文档要求返回字段就叫 deptName。","Emp 实体里必须有 deptName 属性，查询返回的字段名与属性名一一对应才能封装。","这是「字段名 ↔ 属性名」规则在多表场景的延伸：单表靠驼峰，多表还要管别名。","接口文档是约束方：字段名不是你觉得好听就行，是文档说什么就得叫什么。"]},{"id":"st.emp.4","label":"2.2 分页查询：LIMIT","phase":1,"color":"#2563EB","concepts":["c.page.limit","c.sql"],"details":["问题：数据有几千几万条时，全部查出来展示不现实。","方案：分页，每次只展示一页（比如 10 条），点页码切换。","数据库层用 LIMIT 关键字，格式：limit 开始索引, 每页显示的条数。","第 1 页：limit 0, 10；第 2 页：limit 10, 10；第 3 页：limit 20, 10。","规律：开始索引 = (页码 - 1) × 每页条数。","接口还要返回总记录数，前端才能算出总页数。","分页参数名（page / pageSize）同样由接口文档规定。"]},{"id":"st.emp.5","label":"2.3 条件分页：三条件与参数对象","phase":1,"color":"#2563EB","concepts":["c.query.param-object","c.annotation.requestparam","c.annotation.method-mapping"],"details":["需求：在分页基础上加搜索条件。","三个条件：姓名（模糊匹配）、性别（精确匹配）、入职日期（范围匹配）。","接口：GET /emps?name=张&gender=1&begin=2007-09-01&end=2022-09-01&page=1&pageSize=10","初级写法：Controller 方法直接声明 6 个形参，功能能实现但不方便维护。","优化一：定义 EmpQueryParam 实体类封装这几个参数。","约束：前端传递的请求参数名必须与实体类属性名一致，Spring 才会自动绑定。","参数一多就该收成对象——这和「公共字段不该让前端传」是同一个思路。"]},{"id":"st.emp.6","label":"2.4 动态 SQL：条件不能写死","phase":1,"color":"#2563EB","concepts":["c.mybatis.dynamic-sql","c.mybatis.mapping"],"details":["现状：Mapper 映射文件里的查询条件是写死的。","但条件是可选的：只输入姓名、只输入性别、两个都输入，SQL 都不一样。","所谓动态 SQL，就是随用户输入或外部条件变化而变化的 SQL 语句。","MyBatis 用 <where> + <if> 实现：<if> 判断条件是否为空。","<where> 很聪明：自动去掉第一个多余的 and，并且没有任何条件时不输出 where 关键字。","这就是之前手写 StringBuilder 拼 where 1=1 的正式解法。","动态 SQL 写在 XML 里比注解清晰——注解里几百字符的 SQL 根本没法读。","注解 vs XML 的选择规则在这里再次成立：简单的用注解，动态的用 XML。"]},{"id":"st.emp.7","label":"3.1 新增员工：需求与嵌套 JSON","phase":2,"color":"#047857","concepts":["c.annotation.requestbody","c.json"],"details":["需求：点「新增员工」填表单（含多条工作经历），保存。","请求体是嵌套 JSON：员工基本信息 + 工作经历列表。","Emp 实体类里增加 exprList 属性用来接收工作经历数据。","需要 EmpExprMapper 接口与 EmpExprMapper.xml 映射配置文件。","嵌套 JSON 用对象接收时，属性名与 JSON 键名仍然要一一对应。"]},{"id":"st.emp.8","label":"3.2 保存基本信息与批量保存工作经历","phase":2,"color":"#047857","concepts":["c.mybatis.batch","c.mybatis.generated-keys","c.arch.service"],"details":["Controller：save(@RequestBody Emp emp)，只做转发。","Service：先 empMapper.insert(emp) 保存员工基本信息。","关键前提：insert 必须配 useGeneratedKeys + keyProperty，新员工 id 才会回填到 emp 对象上。","拿到 id 之后，遍历 exprList 逐条（或批量）写入工作经历表。","两条写操作分属两张表，但它们是一件事——这就引出了下面的问题。"]},{"id":"st.emp.9","label":"4.1 事务问题：部分成功","phase":3,"color":"#C2410C","concepts":["c.tx.atomic","c.biz.transaction"],"details":["现象：员工信息保存成功，工作经历保存失败，数据不完整不一致。","复现：保存完员工基本信息后执行 1/0 抛异常。","原因：异常之前的 insert 已经提交，之后的代码不会执行。","本质：两条写操作各自独立，属于「部分成功」。","目标：让涉及两个业务操作新增要么全部成功，要么全部失败。","这就是事务要解决的问题：保证操作前后数据的一致性。"]},{"id":"st.emp.10","label":"4.2 @Transactional 与它的位置","phase":3,"color":"#C2410C","concepts":["c.biz.transaction","c.annotation.component"],"details":["@Transactional 作用：方法执行前开启事务，正常执行完提交，过程中出异常就回滚。","位置一·方法上：只有当前方法交给 Spring 管理事务。","位置二·类上：当前类中所有方法都交给 Spring 管理事务。","位置三·接口上：该接口下所有实现类的所有方法都纳入事务。","实践：在业务方法 save 上加 @Transactional 即可。","注意：只对 public 方法生效，且同类内部调用不走代理（事务会失效）。"]},{"id":"st.emp.11","label":"4.3 事务进阶：rollbackFor 与传播行为","phase":3,"color":"#C2410C","concepts":["c.tx.rollbackfor","c.tx.propagation","c.tx.acid"],"details":["@Transactional 两个常用属性：rollbackFor（回滚）与 propagation（传播行为）。","rollbackFor：默认只回滚 RuntimeException，受检异常必须显式写 rollbackFor = Exception.class。","propagation：一个事务方法调用另一个事务方法时的边界规则。","常用两种：REQUIRED（有事务就加入，没有就新建）、REQUIRES_NEW（总是新建、挂起外层）。","事务四大特性（ACID）：原子性、一致性、隔离性、持久性。","原子性靠 undo log 回滚，持久性靠 redo log 保证，隔离性靠锁与 MVCC。"]},{"id":"st.emp.12","label":"5.1 文件上传：MultipartFile 与本地存储","phase":4,"color":"#7C3AED","concepts":["c.file.multipart","c.file.local","c.file.config"],"details":["文件上传：把本地文件传送到服务器保存。","Spring 用 MultipartFile 类型接收上传的文件。","本地存储做法：把文件写到服务器磁盘目录，再返回可访问的 URL。","必须在配置里放开上传大小限制：默认单文件 1MB、单请求 10MB。","本地存储的致命问题：服务器扩容、迁移后文件就丢了，多台服务器之间也不共享。","所以真实项目要用对象存储。"]},{"id":"st.emp.13","label":"5.2 阿里云 OSS 入门","phase":4,"color":"#7C3AED","concepts":["c.file.oss"],"details":["OSS 是对象存储服务，专门用来存文件，按量计费。","三步：开通服务并创建 Bucket → 拿 AccessKey → 参照官方 SDK 示例写入门程序。","引入阿里云 OSS 的 SDK 依赖。","入门程序里要改成自己的四个参数：endpoint、bucketName、objectName、file。","运行后文件就传到 OSS 上了，返回一个 URL。","数据库只存这个 URL，不存文件本身——这是对象存储的核心用法。"]},{"id":"st.emp.14","label":"5.3 上传功能优化：配置化","phase":4,"color":"#7C3AED","concepts":["c.springboot.props","c.file.config","c.config.yml"],"details":["问题：endpoint、AccessKey、bucket 写死在代码里，换环境就要改代码。","优化一：把这些参数写进 application.yml。","优化二：用 @ConfigurationProperties 把配置绑定到一个实体类上，注入即用。","优化三：文件名用 UUID 保证唯一，避免同名覆盖。","优化四：上传大小限制在配置里统一调整，不写在代码里。","又一次回到那条原则：把变化的东西挪出代码。"]}]},{"id":"s.ref","label":"参考与附录","sub":"阶段〇 / 附录 A~D","color":"#475569","source":"原导图的阶段〇与附录","phases":[{"label":"阶段〇：全景速览（先建立全局认知）","color":"#475569"},{"label":"附录 A：全链路文字时序图","color":"#0F766E"},{"label":"附录 B：常见错误对照表","color":"#9333EA"},{"label":"附录 C：面试高频追问","color":"#B45309"},{"label":"附录 D：这张图怎么用","color":"#4B5563"}],"steps":[{"id":"st.ref.0.0","label":"0.1 一句话主线：用户在前端点「注册」→ 浏览器把数据打成 HTTP 请求发出去 → 内嵌 Tomcat 收到 → SpringMVC 按路由找到 Controller → Controller 调 Service 做业务 → Service 调 Mapper → MyBatis 生成 SQL 交给连接池执行 → MySQL 落库 → 结果原路返回 → 前端拿到 JSON 渲染提示","phase":0,"color":"#475569","path":"r-0-0","concepts":[],"details":[]},{"id":"st.ref.0.1","label":"0.2 六段式时间轴（严格按此顺序）","phase":0,"color":"#475569","path":"r-0-1","concepts":[],"details":["阶段一：前端采集与发送——前端：HTML 表单 → v-model 双向绑定 → 校验 → @click 触发 → 组装 JS 对象 → axios.post → await 挂起等待","阶段二：网络传输——网络：TCP 建连 → HTTP 请求报文（请求行 + 请求头 + 空行 + 请求体）→ 到达服务器端口","阶段三：后端接收与参数解析——后端：内嵌 Tomcat 监听 → DispatcherServlet 拦截 → HandlerMapping 查路由 → @PostMapping 命中 → @RequestBody 反序列化","阶段四：业务处理与依赖注入——业务：@Autowired 拿到 Service Bean → @Service 里的业务校验 → 调 Mapper","阶段五：数据持久化——持久层：@Mapper 动态代理 → #{} 预编译 → HikariCP 借连接 → INSERT → 返回受影响行数 → 归还连接","阶段六：响应返回——响应：封装 Result → Jackson 转 JSON → 200 状态码 → Tomcat 发回 → 前端 await 恢复 → 判断 code → 提示/跳转"]},{"id":"st.ref.0.2","label":"0.3 四个角色与各自的语言","phase":0,"color":"#475569","path":"r-0-2","concepts":["c.tomcat","c.mysql","c.springmvc.dispatcher","c.arch.three-layer"],"details":["浏览器（前端）：只懂 JS 对象、JSON、HTTP；不关心数据库长什么样","Tomcat（容器）：只懂 TCP 连接、HTTP 报文；不关心业务","Spring（框架）：负责路由、参数转换、对象创建、依赖注入；把杂乱的基础工作收走","MySQL（数据库）：只懂 SQL；不关心是谁在问、为什么要问"]},{"id":"st.ref.0.3","label":"0.4 一次注册请求的耗时分层（体感）","phase":0,"color":"#475569","path":"r-0-3","concepts":[],"details":["前端处理：输入、校验、序列化：约 1ms 以内，肉眼无感","网络往返：本机 loopback 约 1~3ms；公网 20~200ms","后端处理：路由 + 业务 + SQL 解析：约 5~30ms","数据库写入：INSERT + 索引更新 + 事务提交：约 1~10ms","渲染反馈：弹提示、跳转：约 1ms"]},{"id":"st.ref.7.0","label":"A.1 正常流程（逐步）","phase":1,"color":"#0F766E","path":"r-7-0","concepts":[],"details":["步骤 1：用户输入 → v-model 同步到 form.username / form.password","步骤 2：点击按钮 → @click 触发 register()","步骤 3：前端校验通过 → 组装 data 对象","步骤 4：axios.post('/api/users/register', data) → 序列化成 JSON","步骤 5：浏览器发出 HTTP 请求：请求行 + 请求头（Content-Type: application/json）+ 空行 + 请求体","步骤 6：TCP 连接建立 → 请求到达 127.0.0.1:8080","步骤 7：Tomcat 解析报文 → 封装成 HttpServletRequest","步骤 8：DispatcherServlet → HandlerMapping 查到 UserController.register 方法","步骤 9：@RequestBody 用 Jackson 把 JSON 反序列化成 User 对象","步骤 10：@Autowired 注入的 UserService 被调用 → 执行业务校验与加密","步骤 11：Service 调用 @Autowired 注入的 UserMapper（动态代理对象）","步骤 12：MyBatis 找到对应 SQL，#{} 编译成 ?，从 HikariCP 借连接","步骤 13：执行 INSERT → MySQL 写入磁盘 → 返回受影响行数","步骤 14：连接归还池中 → int 结果一路上传：Mapper → Service → Controller","步骤 15：Controller 封装 Result.success(\"注册成功\")","步骤 16：Jackson 序列化成 JSON → 写入 HTTP 响应体 → 状态码 200","步骤 17：Tomcat 发回浏览器 → await 恢复 → 判断 code → 提示并跳转"]},{"id":"st.ref.8.0","label":"B.1 前端侧","phase":2,"color":"#9333EA","path":"r-8-0","concepts":["c.url","c.annotation.method-mapping","c.http.content-type","c.js.async"],"details":["页面不刷新 / 数据不变：v-model 绑定的字段未在 data 中声明，或字段名写错","请求根本没发出：按钮在 form 内且未 preventDefault，触发了页面刷新；或 @click 方法名写错","请求 404：axios 的 url 与后端 @RequestMapping 拼出来的路径不一致","请求 405：请求方法与后端注解不匹配（GET 打了 @PostMapping）","请求 415：Content-Type 不是 application/json，或没传 body","拿到 undefined：await 漏写，res 还是个 Promise","报跨域错误：前后端不同源且后端没配 CORS；或页面是 file:// 打开的"]},{"id":"st.ref.8.1","label":"B.2 后端侧","phase":2,"color":"#9333EA","path":"r-8-1","concepts":["c.mybatis.mapping","c.mybatis.camel-case","c.spring.di","c.sql"],"details":["启动失败 Port already in use：8080 被占用，改 server.port 或杀掉占用进程","注入的 Service 为 null：类没加 @Service，或不在启动类扫描的包范围内","收到的参数全是 null：前端字段名与实体属性名不一致；或漏了 @RequestBody","Invalid bound statement (not found)：XML 的 namespace 不是接口全限定名、select 的 id 与方法名不一致，或 XML 不在 mapper-locations 路径","查得到数据但对象全 null：数据库下划线命名与 Java 驼峰命名没做映射","500 空指针：Service 里没判空就调用了方法，或注入失败","中文乱码：数据库/表不是 utf8mb4，或连接串没指定字符集","时间差 8 小时：连接串没配 serverTimezone=Asia/Shanghai"]},{"id":"st.ref.9.0","label":"C.1 为什么 Controller 不直接操作数据库","phase":3,"color":"#B45309","path":"r-9-0","concepts":["c.arch.three-layer"],"details":["答案要点：职责分离：Controller 负责协议层（接参、返参），Service 负责业务规则与事务边界，Mapper 负责 SQL；分层让「改业务」和「改 SQL」互不影响，也让单元测试更可行"]},{"id":"st.ref.9.1","label":"C.2 @Autowired 注入的是接口，能调用吗","phase":3,"color":"#B45309","path":"r-9-1","concepts":["c.spring.di"],"details":["答案要点：能。Spring 注入的是接口的「实现类实例」，通过多态调用；这也是面向接口编程的价值——换实现不用改调用方"]},{"id":"st.ref.9.2","label":"C.3 #{} 和 ${} 到底差在哪","phase":3,"color":"#B45309","path":"r-9-2","concepts":["c.mybatis.hash","c.mybatis.dollar"],"details":["答案要点：#{} 编译成 JDBC 的 ? 走预编译，值永远是值；${} 是文本替换，值可能变成语法的一部分。前者安全，后者只在表名/字段名这类无法用 ? 的场景使用，且必须白名单校验"]},{"id":"st.ref.9.3","label":"C.4 为什么有了 JDBC 还要 MyBatis","phase":3,"color":"#B45309","path":"r-9-3","concepts":["c.jdbc","c.mybatis.mapper"],"details":["答案要点：JDBC 一个查询要写连接、PreparedStatement、设参、遍历 ResultSet、关资源，模板代码占了大头；MyBatis 把模板收走，只留「接口方法 + SQL」，本质是「把重复收进壳里」"]},{"id":"st.ref.9.4","label":"C.5 连接池解决了什么问题","phase":3,"color":"#B45309","path":"r-9-4","concepts":["c.pool.hikari"],"details":["答案要点：建连接成本高（握手、认证、分配资源），连接池把连接复用起来，用「借/还」代替「建/销」，把开销从「每请求一次」降到「启动时一批」"]},{"id":"st.ref.9.5","label":"C.6 一次请求经过了多少层","phase":3,"color":"#B45309","path":"r-9-5","concepts":["c.tomcat","c.springmvc.dispatcher","c.arch.three-layer"],"details":["答案要点：浏览器 → TCP → Tomcat → DispatcherServlet → HandlerMapping → Controller → Service → Mapper 代理 → MyBatis → 连接池 → MySQL → 原路返回。每层只做自己的事，靠「约定」（路径、字段名、返回结构）串起来"]},{"id":"st.ref.10.0","label":"D.1 顺向背一遍：从阶段一读到阶段六，每个阶段问自己：「这一层的输入是什么、输出是什么、出了什么错」","phase":4,"color":"#4B5563","path":"r-10-0","concepts":[],"details":[]},{"id":"st.ref.10.1","label":"D.2 逆向查一遍：从报错倒推：看到 404 想「路径匹配」，看到 405 想「请求方法」，看到 500 想「服务端异常」，看到 null 想「字段映射」","phase":4,"color":"#4B5563","path":"r-10-1","concepts":[],"details":[]},{"id":"st.ref.10.2","label":"D.3 画一遍再讲一遍：合上这张图，自己在纸上画出六段式，然后对着空气讲给「一个不懂的人」听——能讲通，才算真会","phase":4,"color":"#4B5563","path":"r-10-2","concepts":[],"details":[]}],"flow":["总览","时序图","错误对照","面试追问","使用方法"],"returnNote":"这些不是业务链路，是查漏补缺用的索引页"}],"edges":[{"s":"c.vue.model","t":"c.js.object","type":"depends"},{"s":"c.axios.post","t":"c.json","type":"depends"},{"s":"c.js.async","t":"c.axios.post","type":"depends"},{"s":"c.json","t":"c.http.request","type":"depends"},{"s":"c.http.request","t":"c.tcp","type":"depends"},{"s":"c.http.response","t":"c.http.status","type":"depends"},{"s":"c.http.request","t":"c.http.content-type","type":"depends"},{"s":"c.annotation.requestbody","t":"c.http.content-type","type":"depends"},{"s":"c.annotation.requestbody","t":"c.jackson","type":"depends"},{"s":"c.annotation.requestbody","t":"c.json","type":"depends"},{"s":"c.tomcat","t":"c.servlet.request","type":"depends"},{"s":"c.nginx.proxy","t":"c.tomcat","type":"depends"},{"s":"c.springmvc.dispatcher","t":"c.springmvc.mapping","type":"depends"},{"s":"c.springmvc.mapping","t":"c.annotation.method-mapping","type":"depends"},{"s":"c.annotation.restcontroller","t":"c.jackson","type":"depends"},{"s":"c.spring.di","t":"c.spring.ioc","type":"depends"},{"s":"c.annotation.autowired","t":"c.spring.di","type":"depends"},{"s":"c.annotation.component","t":"c.spring.ioc","type":"depends"},{"s":"c.arch.controller","t":"c.arch.three-layer","type":"depends"},{"s":"c.arch.service","t":"c.arch.mapper","type":"depends"},{"s":"c.arch.service","t":"c.biz.validation","type":"depends"},{"s":"c.arch.service","t":"c.biz.transaction","type":"depends"},{"s":"c.result.wrapper","t":"c.jackson","type":"depends"},{"s":"c.exception.handler","t":"c.result.wrapper","type":"depends"},{"s":"c.mybatis.mapper","t":"c.mybatis.proxy","type":"depends"},{"s":"c.mybatis.mapper","t":"c.mybatis.mapping","type":"depends"},{"s":"c.mybatis.mapping","t":"c.mybatis.hash","type":"depends"},{"s":"c.mybatis.hash","t":"c.mybatis.dollar","type":"contrast"},{"s":"c.mybatis.resultmap","t":"c.mybatis.camel-case","type":"depends"},{"s":"c.pool.hikari","t":"c.jdbc","type":"depends"},{"s":"c.jdbc","t":"c.sql","type":"depends"},{"s":"c.jdbc","t":"c.jdbc.driver","type":"depends"},{"s":"c.sql.dml","t":"c.sql","type":"depends"},{"s":"c.sql.ddl","t":"c.mysql","type":"depends"},{"s":"c.log.logback","t":"c.log.slf4j","type":"depends"},{"s":"c.log.level","t":"c.log.logback","type":"depends"},{"s":"c.log.logback","t":"c.log.println","type":"replaces"},{"s":"c.restful","t":"c.spec.api-doc","type":"depends"},{"s":"c.restful","t":"c.http.method","type":"depends"},{"s":"c.tool.apifox","t":"c.spec.api-doc","type":"depends"},{"s":"c.springboot.app","t":"c.springboot.scan","type":"depends"},{"s":"c.springboot.app","t":"c.tomcat","type":"depends"},{"s":"c.springmvc.mapping-class","t":"c.springmvc.mapping","type":"depends"},{"s":"c.param.simple","t":"c.annotation.requestparam","type":"depends"},{"s":"c.annotation.pathvariable","t":"c.url","type":"depends"},{"s":"c.config.yml","t":"c.springboot.app","type":"depends"},{"s":"c.frontend.xss","t":"c.mybatis.dollar","type":"contrast"}],"uses":[{"s":"s.register","t":"c.html-form","type":"uses"},{"s":"s.register","t":"c.vue.model","type":"uses"},{"s":"s.register","t":"c.validate.client","type":"uses"},{"s":"s.register","t":"c.vue.event","type":"uses"},{"s":"s.register","t":"c.js.object","type":"uses"},{"s":"s.register","t":"c.axios.post","type":"uses"},{"s":"s.register","t":"c.http.content-type","type":"uses"},{"s":"s.register","t":"c.json","type":"uses"},{"s":"s.register","t":"c.js.async","type":"uses"},{"s":"s.register","t":"c.tcp","type":"uses"},{"s":"s.register","t":"c.http.request","type":"uses"},{"s":"s.register","t":"c.http.method","type":"uses"},{"s":"s.register","t":"c.url","type":"uses"},{"s":"s.register","t":"c.cors","type":"uses"},{"s":"s.register","t":"c.springboot.app","type":"uses"},{"s":"s.register","t":"c.springboot.scan","type":"uses"},{"s":"s.register","t":"c.tomcat","type":"uses"},{"s":"s.register","t":"c.servlet.request","type":"uses"},{"s":"s.register","t":"c.springmvc.dispatcher","type":"uses"},{"s":"s.register","t":"c.springmvc.mapping","type":"uses"},{"s":"s.register","t":"c.springmvc.mapping-class","type":"uses"},{"s":"s.register","t":"c.annotation.restcontroller","type":"uses"},{"s":"s.register","t":"c.jackson","type":"uses"},{"s":"s.register","t":"c.annotation.method-mapping","type":"uses"},{"s":"s.register","t":"c.annotation.requestbody","type":"uses"},{"s":"s.register","t":"c.arch.controller","type":"uses"},{"s":"s.register","t":"c.arch.three-layer","type":"uses"},{"s":"s.register","t":"c.spring.ioc","type":"uses"},{"s":"s.register","t":"c.annotation.component","type":"uses"},{"s":"s.register","t":"c.spring.di","type":"uses"},{"s":"s.register","t":"c.annotation.autowired","type":"uses"},{"s":"s.register","t":"c.arch.service","type":"uses"},{"s":"s.register","t":"c.biz.validation","type":"uses"},{"s":"s.register","t":"c.biz.transaction","type":"uses"},{"s":"s.register","t":"c.arch.mapper","type":"uses"},{"s":"s.register","t":"c.mybatis.mapper","type":"uses"},{"s":"s.register","t":"c.mybatis.proxy","type":"uses"},{"s":"s.register","t":"c.java.interface","type":"uses"},{"s":"s.register","t":"c.mybatis.mapping","type":"uses"},{"s":"s.register","t":"c.mybatis.hash","type":"uses"},{"s":"s.register","t":"c.mybatis.dollar","type":"uses"},{"s":"s.register","t":"c.pool.hikari","type":"uses"},{"s":"s.register","t":"c.sql.dml","type":"uses"},{"s":"s.register","t":"c.sql","type":"uses"},{"s":"s.register","t":"c.mybatis.resultmap","type":"uses"},{"s":"s.register","t":"c.mybatis.camel-case","type":"uses"},{"s":"s.register","t":"c.result.wrapper","type":"uses"},{"s":"s.register","t":"c.http.response","type":"uses"},{"s":"s.register","t":"c.http.status","type":"uses"},{"s":"s.register","t":"c.exception.handler","type":"uses"},{"s":"s.register","t":"c.dom.render","type":"uses"},{"s":"s.dept","t":"c.arch.separation","type":"uses"},{"s":"s.dept","t":"c.spec.api-doc","type":"uses"},{"s":"s.dept","t":"c.restful","type":"uses"},{"s":"s.dept","t":"c.http.method","type":"uses"},{"s":"s.dept","t":"c.url","type":"uses"},{"s":"s.dept","t":"c.tool.apifox","type":"uses"},{"s":"s.dept","t":"c.tool.maven","type":"uses"},{"s":"s.dept","t":"c.springboot.app","type":"uses"},{"s":"s.dept","t":"c.sql.ddl","type":"uses"},{"s":"s.dept","t":"c.sql","type":"uses"},{"s":"s.dept","t":"c.mysql","type":"uses"},{"s":"s.dept","t":"c.config.yml","type":"uses"},{"s":"s.dept","t":"c.arch.package","type":"uses"},{"s":"s.dept","t":"c.result.wrapper","type":"uses"},{"s":"s.dept","t":"c.mybatis.camel-case","type":"uses"},{"s":"s.dept","t":"c.arch.three-layer","type":"uses"},{"s":"s.dept","t":"c.arch.controller","type":"uses"},{"s":"s.dept","t":"c.arch.service","type":"uses"},{"s":"s.dept","t":"c.arch.mapper","type":"uses"},{"s":"s.dept","t":"c.mybatis.mapper","type":"uses"},{"s":"s.dept","t":"c.mybatis.resultmap","type":"uses"},{"s":"s.dept","t":"c.annotation.method-mapping","type":"uses"},{"s":"s.dept","t":"c.springmvc.mapping","type":"uses"},{"s":"s.dept","t":"c.nginx.proxy","type":"uses"},{"s":"s.dept","t":"c.http.request","type":"uses"},{"s":"s.dept","t":"c.cors","type":"uses"},{"s":"s.dept","t":"c.tomcat","type":"uses"},{"s":"s.dept","t":"c.param.simple","type":"uses"},{"s":"s.dept","t":"c.annotation.requestparam","type":"uses"},{"s":"s.dept","t":"c.sql.dml","type":"uses"},{"s":"s.dept","t":"c.mybatis.hash","type":"uses"},{"s":"s.dept","t":"c.biz.validation","type":"uses"},{"s":"s.dept","t":"c.annotation.requestbody","type":"uses"},{"s":"s.dept","t":"c.json","type":"uses"},{"s":"s.dept","t":"c.http.content-type","type":"uses"},{"s":"s.dept","t":"c.annotation.pathvariable","type":"uses"},{"s":"s.dept","t":"c.springmvc.mapping-class","type":"uses"},{"s":"s.dept","t":"c.log.println","type":"uses"},{"s":"s.dept","t":"c.log.slf4j","type":"uses"},{"s":"s.dept","t":"c.log.logback","type":"uses"},{"s":"s.dept","t":"c.log.level","type":"uses"},{"s":"s.emp","t":"c.db.relation","type":"uses"},{"s":"s.emp","t":"c.db.fk","type":"uses"},{"s":"s.emp","t":"c.db.fk-physical","type":"uses"},{"s":"s.emp","t":"c.sql.join","type":"uses"},{"s":"s.emp","t":"c.sql.cartesian","type":"uses"},{"s":"s.emp","t":"c.sql.subquery","type":"uses"},{"s":"s.emp","t":"c.sql.aggregate","type":"uses"},{"s":"s.emp","t":"c.mybatis.mapper","type":"uses"},{"s":"s.emp","t":"c.mybatis.camel-case","type":"uses"},{"s":"s.emp","t":"c.mybatis.resultmap","type":"uses"},{"s":"s.emp","t":"c.page.limit","type":"uses"},{"s":"s.emp","t":"c.sql","type":"uses"},{"s":"s.emp","t":"c.query.param-object","type":"uses"},{"s":"s.emp","t":"c.annotation.requestparam","type":"uses"},{"s":"s.emp","t":"c.annotation.method-mapping","type":"uses"},{"s":"s.emp","t":"c.mybatis.dynamic-sql","type":"uses"},{"s":"s.emp","t":"c.mybatis.mapping","type":"uses"},{"s":"s.emp","t":"c.annotation.requestbody","type":"uses"},{"s":"s.emp","t":"c.json","type":"uses"},{"s":"s.emp","t":"c.mybatis.batch","type":"uses"},{"s":"s.emp","t":"c.mybatis.generated-keys","type":"uses"},{"s":"s.emp","t":"c.arch.service","type":"uses"},{"s":"s.emp","t":"c.tx.atomic","type":"uses"},{"s":"s.emp","t":"c.biz.transaction","type":"uses"},{"s":"s.emp","t":"c.annotation.component","type":"uses"},{"s":"s.emp","t":"c.tx.rollbackfor","type":"uses"},{"s":"s.emp","t":"c.tx.propagation","type":"uses"},{"s":"s.emp","t":"c.tx.acid","type":"uses"},{"s":"s.emp","t":"c.file.multipart","type":"uses"},{"s":"s.emp","t":"c.file.local","type":"uses"},{"s":"s.emp","t":"c.file.config","type":"uses"},{"s":"s.emp","t":"c.file.oss","type":"uses"},{"s":"s.emp","t":"c.springboot.props","type":"uses"},{"s":"s.emp","t":"c.config.yml","type":"uses"},{"s":"s.ref","t":"c.tomcat","type":"uses"},{"s":"s.ref","t":"c.mysql","type":"uses"},{"s":"s.ref","t":"c.springmvc.dispatcher","type":"uses"},{"s":"s.ref","t":"c.arch.three-layer","type":"uses"},{"s":"s.ref","t":"c.url","type":"uses"},{"s":"s.ref","t":"c.annotation.method-mapping","type":"uses"},{"s":"s.ref","t":"c.http.content-type","type":"uses"},{"s":"s.ref","t":"c.js.async","type":"uses"},{"s":"s.ref","t":"c.mybatis.mapping","type":"uses"},{"s":"s.ref","t":"c.mybatis.camel-case","type":"uses"},{"s":"s.ref","t":"c.spring.di","type":"uses"},{"s":"s.ref","t":"c.sql","type":"uses"},{"s":"s.ref","t":"c.mybatis.hash","type":"uses"},{"s":"s.ref","t":"c.mybatis.dollar","type":"uses"},{"s":"s.ref","t":"c.jdbc","type":"uses"},{"s":"s.ref","t":"c.mybatis.mapper","type":"uses"},{"s":"s.ref","t":"c.pool.hikari","type":"uses"}],"themes":[{"id":"t.std-impl","label":"标准 vs 实现","color":"#111827","note":"上层只依赖标准接口，底层可换实现；你笔记里记了四次。","members":["c.sql","c.mysql","c.jdbc","c.jdbc.driver","c.java.interface","c.log.slf4j","c.log.logback"]},{"id":"t.data-as-code","label":"把数据当代码执行","color":"#DC2626","note":"XSS 与 SQL 注入是同一个病；解法都是让数据和代码分开。","members":["c.frontend.xss","c.mybatis.dollar","c.mybatis.hash"]},{"id":"t.convention","label":"约定优于手写","color":"#047857","note":"能推导出来的，就不该让人再写一遍。","members":["c.mybatis.camel-case","c.mybatis.hash","c.result.wrapper","c.spec.api-doc","c.arch.package","c.springmvc.mapping-class"]},{"id":"t.config-out","label":"把变化挪出代码","color":"#B45309","note":"yml、logback.xml、开关，都是同一件事。","members":["c.config.yml","c.log.logback","c.log.level","c.mybatis.camel-case"]}]};
+
+/* 顶栏实际高度：链视图 fit() 要用 */
+function topPadPx(extra){
+  const b = document.querySelector(".topbar");
+  const h = (b && b.offsetHeight) ? b.offsetHeight : 58;
+  return h + extra;
+}
+
+/* ================= 共享文字引擎（Canvas 实测 + 按词折行） ================= */
+function isCJK(ch){ return /[\u3000-\u303f\u4e00-\u9fff\uff00-\uffef]/.test(ch); }
+const _mc = document.createElement("canvas").getContext("2d");
+let _fontFam = null;
+const _wCache = new Map();
+function textW(s, fs, weight){
+  const w = weight || 400;
+  const key = w + "|" + fs + "|" + s;
+  const hit = _wCache.get(key);
+  if (hit !== undefined) return hit;
+  if (_fontFam === null) _fontFam = getComputedStyle(document.body).fontFamily;
+  _mc.font = w + " " + fs + "px " + _fontFam;
+  const v = _mc.measureText(s).width;
+  _wCache.set(key, v);
+  return v;
+}
+function tokenize(s){
+  const out = []; let buf = "";
+  for (const ch of s){
+    if (isCJK(ch)){ if (buf){ out.push(buf); buf = ""; } out.push(ch); }
+    else if (ch === " "){ buf += ch; out.push(buf); buf = ""; }
+    else buf += ch;
+  }
+  if (buf) out.push(buf);
+  const merged = [];
+  for (const tk of out){
+    if (merged.length && /^[）】」』，。、；：？！\)\]%]+$/.test(tk)) merged[merged.length-1] += tk;
+    else merged.push(tk);
+  }
+  return merged;
+}
+function splitLong(tk, fs, budget, weight){
+  if (textW(tk, fs, weight) <= budget) return [tk];
+  const out = []; let rest = tk;
+  while (rest){
+    let n = 1;
+    while (n < rest.length && textW(rest.slice(0, n+1), fs, weight) <= budget) n++;
+    out.push(rest.slice(0, n)); rest = rest.slice(n);
+  }
+  return out;
+}
+function wrap2(s, fs, budget, maxL, weight){
+  const toks = [];
+  tokenize(s).forEach(tk => splitLong(tk, fs, budget, weight).forEach(x => toks.push(x)));
+  const lines = []; let cur = "";
+  for (const tk of toks){
+    const test = cur + tk;
+    if (cur && textW(test, fs, weight) > budget){
+      lines.push(cur); cur = tk;
+      if (lines.length >= maxL){ cur = ""; break; }
+    } else cur = test;
+  }
+  if (cur && lines.length < maxL) lines.push(cur);
+  const full = toks.join("").replace(/\s/g, "");
+  const used = lines.join("").replace(/\s/g, "");
+  if (used.length < full.length && lines.length){
+    let last = lines[lines.length-1];
+    while (last.length > 1 && textW(last+"…", fs, weight) > budget) last = last.slice(0,-1);
+    lines[lines.length-1] = last + "…";
+  }
+  return lines;
+}
+
+/* ================= 标记 ================= */
+const MARK_COLORS = ["#9ca3af", "#DC2626", "#F59E0B", "#16A34A"];
+const MARK_TINTS  = ["#ffffff", "#FEF2F2", "#FFFBEB", "#F0FDF4"];
+const MARK_NAMES  = ["未标记", "不会", "仅了解", "理解"];
+const LS_KEY = "mm-graph-marks-v1";
+const LS_OLD = "mm-marks-v1";
+let marks = {};
+try { marks = JSON.parse(localStorage.getItem(LS_KEY) || "{}") || {}; } catch(e){ marks = {}; }
+function saveMarks(){ try { localStorage.setItem(LS_KEY, JSON.stringify(marks)); } catch(e){} }
+function markGet(p){ return marks[p] || 0; }
+function markCyclePath(p){
+  const next = (markGet(p) + 1) % 4;
+  if (next === 0) delete marks[p]; else marks[p] = next;
+  saveMarks(); redraw(true); updateStats();
+}
+/* 旧标记迁移：老的 r-阶段-环节-细节 路径 → 新的语义 id */
+function migrateOldMarks(){
+  let old = null;
+  try { old = JSON.parse(localStorage.getItem(LS_OLD) || "null"); } catch(e){}
+  if (!old || typeof old !== "object") return 0;
+  const byPath = {};
+  G.scenarios.forEach(sc => sc.steps.forEach(st => { if (st.path) byPath[st.path] = st; }));
+  let n = 0;
+  Object.keys(old).forEach(k => {
+    const v = old[k];
+    if (!(v >= 1 && v <= 3)) return;
+    let m = k.match(/^r-(\d+)-(\d+)-(\d+)$/);
+    if (m){
+      const st = byPath["r-" + m[1] + "-" + m[2]];
+      if (st){ marks[st.id + "." + m[3]] = v; n++; }
+      return;
+    }
+    m = k.match(/^r-(\d+)-(\d+)$/);
+    if (m){
+      const st = byPath["r-" + m[1] + "-" + m[2]];
+      if (st){ marks[st.id] = v; n++; }
+    }
+  });
+  if (n) saveMarks();
+  return n;
+}
+
+/* ================= 统计 ================= */
+function updateStats(){
+  const c = [0,0,0,0];
+  let total = 0;
+  G.scenarios.forEach(sc => sc.steps.forEach(st => {
+    if (st.details.length) st.details.forEach((_, k) => { c[markGet(st.id + "." + k)]++; total++; });
+    else { c[markGet(st.id)]++; total++; }
+  }));
+  const box = $("stats"); if (!box) return;
+  box.innerHTML =
+      `<span><i class="dot" style="background:${MARK_COLORS[1]}"></i>不会 <b>${c[1]}</b></span>`
+    + `<span><i class="dot" style="background:${MARK_COLORS[2]}"></i>仅了解 <b>${c[2]}</b></span>`
+    + `<span><i class="dot" style="background:${MARK_COLORS[3]}"></i>理解 <b>${c[3]}</b></span>`
+    + `<span style="opacity:.65">未标记 <b>${c[0]}</b></span>`;
+}
+
+/* ================= 链条数据（给 ChainView） ================= */
+function chainData(sc){
+  return {
+    main: sc.phases.map((ph, i) => ({
+      idx: i + 1,
+      title: ph.label,
+      color: ph.color,
+      items: sc.steps.filter(st => st.phase === i).map(st => ({
+        t: st.label,
+        p: st.id,
+        details: st.details.map((d, k) => ({ t: d, p: st.id + "." + k })),
+      })),
+    })).filter(col => col.items.length),
+    flow: sc.flow || [],
+    returnNote: sc.returnNote || "",
+  };
+}
+
+const ChainView = (function(){
+let DATA = { main: [], flow: [], returnNote: "" };
+function setData(x){ DATA = { main: x.main || x, flow: x.flow || [], returnNote: x.returnNote || "" }; }
+
+function markOf(p){ return markGet(p); }
+function cycleMark(p){ markCyclePath(p); }
+
+const FLOW = [
+  "JSON 字符串",
+  "HTTP 请求报文",
+  "User 对象",
+  "insert(user)",
+  "受影响行数 int"
+];
+const FS_STAGE = 13.5, FS_ITEM = 12, FS_DETAIL = 10.5;
+const CARD_W = 280, CARD_H = 88;
+const COL_GAP = 98;
+const ITEM_W = 252, ITEM_GAP = 7;
+const DETAIL_W = 330, DETAIL_GAP = 5;
+const HEAD_GAP = 26;
+
+const CONTENT = { w:0, h:0, y0:0 };
+const state = { scale:1, tx:0, ty:0, collapsedStage:new Set(), collapsedItem:new Set() };
+
+function markBtn(parent, px, py, path, r){
+  const mk = markOf(path);
+  const g = el("g", { class:"mk" });
+  g.appendChild(el("circle", {
+    cx:px, cy:py, r:r || 7,
+    fill: mk ? MARK_COLORS[mk] : "#ffffff",
+    stroke: mk ? MARK_COLORS[mk] : "#c3c9d2",
+    "stroke-width": mk ? 1 : 1.2,
+    "stroke-dasharray": mk ? "0" : "2 2"
+  }));
+  if (mk){
+    const t = el("text", { x:px, y:py+0.4, "text-anchor":"middle",
+      "font-size":8.5, "font-weight":800, fill:"#ffffff" });
+    t.textContent = mk === 3 ? "✓" : (mk === 2 ? "~" : "✕");
+    g.appendChild(t);
+  }
+  const ttl = el("title", {});
+  ttl.textContent = `【${MARK_NAMES[mk]}】点击切换：不会 → 仅了解 → 理解 → 取消`;
+  g.appendChild(ttl);
+  g.addEventListener("click", ev => { ev.stopPropagation(); cycleMark(path); });
+  parent.appendChild(g);
+}
+
+function txt(x, y, s, size, fill, weight, anchor){
+  const t = el("text", { x, y, "font-size":size, fill, "font-weight":weight||400 });
+  if (anchor) t.setAttribute("text-anchor", anchor);
+  t.textContent = s; return t;
+}
+
+function render(keepView){
+  const keep = keepView ? { s:state.scale, x:state.tx, y:state.ty } : null;
+  scene.innerHTML = "";
+  const main = DATA.main;
+
+  // ---------- 计算每列高度 ----------
+  const cols = main.map((st, i) => {
+    const stageCollapsed = state.collapsedStage.has(i);
+    let y = CARD_H + HEAD_GAP;
+    const items = [];
+    if (!stageCollapsed){
+      st.items.forEach((it, j) => {
+        const key = i + "-" + j;
+        const itemOpen = !state.collapsedItem.has(key) && it.details.length > 0;
+        const itemLines = wrap2(it.t, FS_ITEM, ITEM_W - 36, 99, 600);   // 不再截断
+        const itemH = itemLines.length * (FS_ITEM*1.32) + 13;
+        const itemY = y;
+        y += itemH + ITEM_GAP;
+        const dets = [];
+        if (itemOpen){
+          it.details.forEach((d, k) => {
+            const dl = wrap2(d.t, FS_DETAIL, DETAIL_W - 42, 99, 400);       // 不再截断
+            const dh = dl.length * (FS_DETAIL*1.3) + 9;
+            dets.push({ y, lines:dl, h:dh, p:d.p });
+            y += dh + DETAIL_GAP;
+          });
+        }
+        items.push({ it, j, key, y:itemY, h:itemH, lines:itemLines, open:itemOpen, dets });
+      });
+    }
+    return { st, i, items, height: Math.max(y, CARD_H + HEAD_GAP) };
+  });
+
+  const maxH = Math.max(...cols.map(c => c.height));
+  const topPad = 42;
+  const chainY = topPad;
+  const colX = (i) => i * (CARD_W + COL_GAP);
+
+  // ---------- 阶段之间的箭头（先画，压在卡片下面）----------
+  const gE = el("g", {});
+  for (let i = 0; i < main.length - 1; i++){
+    const x1 = colX(i) + CARD_W + 6;
+    const x2 = colX(i+1) - 6;
+    const y = chainY + CARD_H/2;
+    gE.appendChild(el("line", {
+      x1, y1:y, x2, y2:y, stroke:"#94a3b8", "stroke-width":1.8,
+      "marker-end":"url(#arw)"
+    }));
+    gE.appendChild(txt((x1+x2)/2, topPad - 15, (DATA.flow[i] || ""), 10.5, "#7c8798", 700, "middle"));
+  }
+  // 回流箭头：阶段六 -> 前端（下方虚线）
+  const retY = topPad + maxH + 34;
+  const rx1 = colX(main.length-1) + CARD_W/2;
+  const rx2 = colX(0) + CARD_W/2;
+  gE.appendChild(el("path", {
+    d:`M ${rx1} ${topPad+maxH+6} L ${rx1} ${retY} L ${rx2} ${retY} L ${rx2} ${topPad+maxH+18}`,
+    fill:"none", stroke:"#cbb8a6", "stroke-width":1.6, "stroke-dasharray":"5 4",
+    "marker-end":"url(#arwR)"
+  }));
+  gE.appendChild(txt((rx1+rx2)/2, retY - 10, (DATA.returnNote || ""), 10.5, "#a08b76", 600, "middle"));
+  scene.appendChild(gE);
+
+  // ---------- 每列 ----------
+  const gN = el("g", {});
+  cols.forEach((col, i) => {
+    const x = colX(i);
+    const st = col.st;
+    const stageCollapsed = state.collapsedStage.has(i);
+
+    // 阶段卡
+    const g = el("g", { });
+    g.appendChild(el("rect", {
+      x, y:chainY, width:CARD_W, height:CARD_H, rx:12,
+      fill:CAPTION_BG(i, st.color), stroke:st.color, "stroke-width":0
+    }));
+    // 序号徽章
+    g.appendChild(el("circle", { cx:x+22, cy:chainY+CARD_H/2, r:11, fill:"rgba(255,255,255,.22)" }));
+    g.appendChild(txt(x+22, chainY+CARD_H/2+0.5, String(i+1), 11.5, "#fff", 800, "middle"));
+    // 标题（最多 2 行）
+    const lines = wrap2(st.title.replace(/^阶段[一二三四五六七八九十]+：/, ""), FS_STAGE, CARD_W-80, 3, 700);
+    const lh = FS_STAGE*1.26;
+    const sy = chainY + CARD_H/2 - (lines.length-1)*lh/2;
+    lines.forEach((ln, k) => {
+      g.appendChild(txt(x+42, sy + k*lh, ln, FS_STAGE, "#fff", 700));
+    });
+    // 折叠指示
+    g.appendChild(el("circle", { cx:x+CARD_W-14, cy:chainY+14, r:7, fill:"rgba(255,255,255,.9)", stroke:"none" }));
+    g.appendChild(txt(x+CARD_W-14, chainY+14.5, stageCollapsed ? String(st.items.length) : "−", 9, st.color, 800, "middle"));
+    g.style.cursor = "pointer";
+    g.addEventListener("click", ev => {
+      ev.stopPropagation();
+      if (state.collapsedStage.has(i)) state.collapsedStage.delete(i);
+      else state.collapsedStage.add(i);
+      render(true);   // 保持当前缩放/平移，不重置视图
+    });
+    gN.appendChild(g);
+
+    // 竖线：阶段卡 -> 环节
+    if (!stageCollapsed && col.items.length){
+      const firstY = col.items[0].y;
+      gN.appendChild(el("line", {
+        x1:x+34, y1:chainY+CARD_H+2, x2:x+34, y2:firstY,
+        stroke:st.color, "stroke-width":1.4, opacity:.35
+      }));
+    }
+
+    // 环节
+    col.items.forEach(row => {
+      const cx = x + 8;
+      const gI = el("g", {});
+      gI.appendChild(el("rect", {
+        x:cx, y:row.y, width:ITEM_W, height:row.h, rx:7,
+        fill:"#fff", stroke:st.color, "stroke-width":1, "stroke-opacity":.45
+      }));
+      gI.appendChild(el("rect", { x:cx, y:row.y+5, width:3, height:row.h-10, rx:1.5, fill:st.color }));
+      const ilh = FS_ITEM*1.32;
+      const isy = row.y + row.h/2 - (row.lines.length-1)*ilh/2;
+      row.lines.forEach((ln,k) => {
+        gI.appendChild(txt(cx+12, isy + k*ilh, ln, FS_ITEM, "#1f2937", 600));
+      });
+      if (row.it.details.length){
+        gI.appendChild(el("circle", { cx:cx+ITEM_W-13, cy:row.y+row.h/2, r:6, fill:"#fff", stroke:st.color, "stroke-width":1, "stroke-opacity":.7 }));
+        gI.appendChild(txt(cx+ITEM_W-13, row.y+row.h/2+0.5, row.open ? "−" : String(row.it.details.length), 8, st.color, 700, "middle"));
+      } else {
+        /* 无细节的环节 = 叶子，加学习状态按钮 */
+        markBtn(gI, cx+ITEM_W-13, row.y+row.h/2, row.it.p, 6.5);
+      }
+      gI.style.cursor = "pointer";
+      gI.addEventListener("click", ev => {
+        ev.stopPropagation();
+        if (!row.it.details.length) return;
+        if (state.collapsedItem.has(row.key)) state.collapsedItem.delete(row.key);
+        else state.collapsedItem.add(row.key);
+        render(true);   // 保持当前缩放/平移，不重置视图
+      });
+      gN.appendChild(gI);
+
+      // 细节
+      row.dets.forEach(dd => {
+        const dmk = markOf(dd.p);
+        gN.appendChild(el("rect", {
+          x:cx+14, y:dd.y, width:DETAIL_W, height:dd.h, rx:5,
+          fill: dmk ? MARK_TINTS[dmk] : "#f6f4ef",
+          stroke: dmk ? MARK_COLORS[dmk] : st.color,
+          "stroke-width": dmk ? 1.4 : .8,
+          "stroke-opacity": dmk ? .9 : .28
+        }));
+        const dlh = FS_DETAIL*1.3;
+        const dsy = dd.y + dd.h/2 - (dd.lines.length-1)*dlh/2;
+        dd.lines.forEach((ln,kk) => {
+          gN.appendChild(txt(cx+22, dsy + kk*dlh, ln, FS_DETAIL, dmk === 1 ? "#b91c1c" : "#5b6472", 400));
+        });
+        markBtn(gN, cx+14+DETAIL_W-13, dd.y+dd.h/2, dd.p, 6.5);
+      });
+    });
+  });
+  scene.appendChild(gN);
+
+  if (keep){ state.scale = keep.s; state.tx = keep.x; state.ty = keep.y; apply(); }
+  else { CONTENT.w = 0; }
+
+  // 记录精确内容框，供 fit() 使用（getBBox 在这种大量分组下不准）
+  CONTENT.w = (main.length-1)*(CARD_W+COL_GAP) + CARD_W;
+  CONTENT.y0 = 0;
+  CONTENT.h = topPad + maxH + 46;
+  if (keep){ state.scale = keep.s; state.tx = keep.x; state.ty = keep.y; apply(); }
+  else fit();
+  updateStats();
+}
+
+function CAPTION_BG(i, c){
+  // 直接用阶段色，稍作区分
+  return c;
+}
+
+function apply(){
+  scene.setAttribute("transform", `translate(${state.tx},${state.ty}) scale(${state.scale})`);
+  document.getElementById("zoomval").textContent = Math.round(state.scale*100)+"%";
+}
+
+function fit(){
+  const W = svg.clientWidth, H = svg.clientHeight;
+  const clean = (new URLSearchParams(location.search)).get("clean") === "1";
+  const padX = clean ? 40 : 54, padTop = clean ? 34 : topPadPx(20), padBottom = 46;
+  if (!CONTENT.w) return;
+  const s = Math.min((W-padX*2)/CONTENT.w, (H-padTop-padBottom)/CONTENT.h, 3);
+  state.scale = Math.max(s, 0.12);
+  const cw = CONTENT.w*state.scale, ch = CONTENT.h*state.scale;
+  state.tx = Math.round((W - cw)/2);
+  state.ty = Math.round(padTop + (H - padTop - padBottom - ch)/2 - CONTENT.y0*state.scale);
+  apply();
+  window.__MM_GEOM = {scale:state.scale,tx:state.tx,ty:state.ty,cw:CONTENT.w,ch:CONTENT.h,vw:svg.clientWidth,vh:svg.clientHeight};
+}
+
+
+
+return { render: render, fit: fit, apply: apply, state: state, setData: setData };
+})();
+
+/* ================= 网状布局 ================= */
+const NW = 208, NH = 34, NGX = 58, NGY = 9;
+const LAYER_X0 = 250, LAYER_DX = NW + NGX;
+const SC_X = 42, SC_W = 186;
+let netNodes = [];   // {id,kind,x,y,w,h,...}
+let netSel = null;   // 当前聚焦场景 id
+let themeSel = null; // 当前聚焦母题 id
+let netRefs = {};    // 概念 id -> {g, rect, text}，变形动画用
+let netEdges = null; // 网图的边层，淡出用
+let curScenario = null;
+let MODE = "net";
+
+const conceptById = {};
+G.concepts.forEach(c => conceptById[c.id] = c);
+const scById = {};
+G.scenarios.forEach(s => scById[s.id] = s);
+const themeById = {};
+G.themes.forEach(t => themeById[t.id] = t);
+
+function layoutNet(){
+  const nodes = [];
+  const byLayer = {};
+  G.layers.forEach(l => byLayer[l.id] = []);
+  G.concepts.forEach(c => (byLayer[c.layer] || (byLayer[c.layer] = [])).push(c));
+  // 层内排序：先按学习日期，再按标签 —— 纵向顺序≈时间顺序，未来时间轴可直接复用
+  Object.keys(byLayer).forEach(k => byLayer[k].sort((a, b) =>
+    (a.learned || "9999").localeCompare(b.learned || "9999") || a.label.localeCompare(b.label)));
+
+  const ROWS = 13;                    // 每子列最多放 13 个，超过就并排多列
+  const SUBGAP = 14;
+  const HEAD = 34;                    // 层标题高度
+  const TOP0 = 74;
+
+  // 先算每层几列、总宽
+  let cursor = LAYER_X0;
+  const metas = G.layers.map(lay => {
+    const list = byLayer[lay.id] || [];
+    const cols = Math.max(1, Math.ceil(list.length / ROWS));
+    const w = cols * NW + (cols - 1) * SUBGAP;
+    const m = { lay, list, cols, x: cursor, w, list2: list };
+    cursor += w + NGX;
+    return m;
+  });
+  const maxH = Math.min(ROWS, Math.max(1, Math.max.apply(null, metas.map(m => m.list.length)))) * (NH + NGY);
+
+  metas.forEach(m => {
+    nodes.push({ kind: "layer", x: m.x, y: TOP0 - HEAD, w: m.w, h: HEAD - 8,
+                 label: m.lay.label, color: m.lay.color, count: m.list.length });
+    m.list.forEach((c, j) => {
+      const col = Math.floor(j / ROWS), row = j % ROWS;
+      const rowsInThisCol = (col === m.cols - 1) ? (m.list.length - col * ROWS) : ROWS;
+      const colH = rowsInThisCol * (NH + NGY) - NGY;
+      const y0 = TOP0 + (maxH - colH) / 2;
+      nodes.push({
+        kind: "concept", id: c.id, x: m.x + col * (NW + SUBGAP), y: y0 + row * (NH + NGY),
+        w: NW, h: NH, label: c.label, layer: m.lay.id, color: m.lay.color, weight: c.weight,
+      });
+    });
+  });
+  // 场景锚点：左侧一列，垂直居中
+  const scH = G.scenarios.length * (56 + 14);
+  const sy0 = TOP0 + (maxH - scH) / 2;
+  G.scenarios.forEach((sc, i) => {
+    nodes.push({
+      kind: "scenario", id: sc.id, x: SC_X, y: sy0 + i * (56 + 14), w: SC_W, h: 56,
+      label: sc.label, sub: sc.sub, color: sc.color,
+    });
+  });
+  return { nodes, totalW: cursor - NGX + 20, totalH: TOP0 + maxH + 30 };
+}
+
+function netFocusSet(sid){
+  const set = new Set();
+  if (!sid) return set;
+  const sc = scById[sid];
+  sc.steps.forEach(st => st.concepts.forEach(c => set.add(c)));
+  return set;
+}
+
+function renderNet(keep){
+  const keepView = keep ? { s: state.scale, x: state.tx, y: state.ty } : null;
+  scene.innerHTML = "";
+  const { nodes, totalW, totalH } = layoutNet();
+  netNodes = nodes;
+  const focus = netFocusSet(netSel);
+  const themeFocus = themeSel ? new Set(themeById[themeSel].members) : null;
+
+  const gE = el("g", {});
+  const pos = {};
+  nodes.forEach(n => { pos[n.id || ("layer" + n.x)] = n; });
+  const nodePos = {};
+  nodes.forEach(n => { if (n.kind === "concept") nodePos[n.id] = n; });
+  const scPos = {};
+  nodes.forEach(n => { if (n.kind === "scenario") scPos[n.id] = n; });
+
+  function curve(x1, y1, x2, y2, color, op, width, dash, tag){
+    const mx = (x1 + x2) / 2;
+    const p = el("path", {
+      d: `M ${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}`,
+      fill: "none", stroke: color, "stroke-width": width,
+      "stroke-opacity": op, "stroke-linecap": "round",
+    });
+    if (dash) p.setAttribute("stroke-dasharray", dash);
+    if (tag){
+      if (tag.theme) p.setAttribute("data-t", "1");
+      else {
+        p.setAttribute("data-a", tag.a || ""); p.setAttribute("data-b", tag.b || "");
+        p.setAttribute("data-k", tag.k || "");
+      }
+      p.setAttribute("data-op", String(op));
+      p.setAttribute("data-w", String(width));
+    }
+    gE.appendChild(p);
+  }
+  const dimEdges = netSel ? 0.9 : 1;
+
+  // 概念↔概念
+  G.edges.forEach(e => {
+    const a = nodePos[e.s], b = nodePos[e.t];
+    if (!a || !b) return;
+    let related = !netSel || (focus.has(e.s) && focus.has(e.t));
+    if (themeFocus) related = themeFocus.has(e.s) && themeFocus.has(e.t);
+    curve(a.x + a.w, a.y + a.h/2, b.x, b.y + b.h/2,
+      e.type === "contrast" ? "#DC2626" : "#94a3b8",
+      related ? 0.34 : 0.05, 1,
+      e.type === "contrast" ? "4 3" : null, { a: e.s, b: e.t, k: "cc" });
+  });
+  // 场景 → 知识点
+  G.uses.forEach(e => {
+    const a = scPos[e.s], b = nodePos[e.t];
+    if (!a || !b) return;
+    const related = !netSel || netSel === e.s;
+    const col = scById[e.s].color;
+    curve(a.x + a.w, a.y + a.h/2, b.x, b.y + b.h/2,
+      col, themeFocus ? 0.03 : (related ? (netSel ? 0.5 : 0.10) : 0.03),
+      related ? 1.4 : 1, null, { a: e.s, b: e.t, k: "uses" });
+  });
+  // 母题：横贯虚线（选中时加粗实线、序号标注）
+  G.themes.forEach(t => {
+    const ms = t.members.map(id => nodePos[id]).filter(Boolean);
+    const on = themeSel === t.id;
+    const off = themeSel && !on;
+    for (let i = 0; i < ms.length - 1; i++){
+      const a = ms[i], b = ms[i + 1];
+      curve(a.x + a.w, a.y + a.h/2, b.x, b.y + b.h/2, t.color,
+        off ? 0.04 : (on ? 0.95 : 0.22), on ? 2.6 : 1.1, on ? null : "5 4", { theme: true });
+    }
+    if (on){
+      // 在成员节点上标序号，读成一条「同一思想在不同层重复出现」的路径
+      ms.forEach((n, i) => {
+        const c = el("circle", { cx: n.x - 9, cy: n.y + n.h/2, r: 8.5, fill: t.color });
+        gE.appendChild(c);
+        const tx = el("text", { x: n.x - 9, y: n.y + n.h/2 + 0.5, "font-size": 9, "font-weight": 800,
+          fill: "#fff", "text-anchor": "middle" });
+        tx.textContent = String(i + 1);
+        gE.appendChild(tx);
+      });
+    }
+  });
+  netEdges = gE;
+  scene.appendChild(gE);
+
+  const gN = el("g", {});
+  netRefs = {};
+  nodes.forEach(n => {
+    if (n.kind === "layer"){
+      const gl = el("g", {}); gl.setAttribute("data-deco", "1");
+      const t = el("text", { x: n.x, y: n.y + 13, "font-size": 11, "font-weight": 800,
+        fill: n.color, "letter-spacing": ".6" });
+      t.textContent = n.label.toUpperCase();
+      gl.appendChild(t);
+      const t2 = el("text", { x: n.x, y: n.y + 13, "font-size": 10, fill: "#9ca3af",
+        "text-anchor": "end" });
+      t2.setAttribute("x", n.x + n.w);
+      t2.textContent = n.count + " 个";
+      gl.appendChild(t2);
+      gN.appendChild(gl);
+      return;
+    }
+    if (n.kind === "scenario"){
+      const dim = netSel && netSel !== n.id;
+      const g = el("g", {}); g.setAttribute("data-deco", "1"); g.setAttribute("data-sc", n.id);
+      const r = el("rect", { x: n.x, y: n.y, width: n.w, height: n.h, rx: n.h / 2,
+        fill: "#fff", stroke: n.color, "stroke-width": 1.6, opacity: dim ? 0.25 : 1 });
+      r.setAttribute("data-sel", "0");
+      g.appendChild(r);
+      const dot = el("circle", { cx: n.x + 20, cy: n.y + n.h / 2, r: 6, fill: n.color });
+      g.appendChild(dot);
+      const t1 = el("text", { x: n.x + 36, y: n.y + n.h / 2 - 4, "font-size": 14, "font-weight": 800, fill: "#111827" });
+      t1.textContent = n.label;
+      g.appendChild(t1);
+      const t2 = el("text", { x: n.x + 36, y: n.y + n.h / 2 + 13, "font-size": 10, fill: "#6b7280" });
+      t2.textContent = n.sub || "";
+      g.appendChild(t2);
+      g.style.cursor = "pointer";
+      g.addEventListener("click", ev => {
+        ev.stopPropagation();
+        if (armedScenario === n.id) focusScenario(n.id); else armScenario(n.id);
+      });
+      gN.appendChild(g);
+      return;
+    }
+    // 概念
+    const mk = markGet(n.id);
+    const dim = (netSel && !focus.has(n.id)) || (themeFocus && !themeFocus.has(n.id));
+    const isShared = n.weight >= 2;
+    const unlearned = !conceptById[n.id].learned;
+    const g = el("g", {});
+    const rect = el("rect", { x: n.x, y: n.y, width: n.w, height: n.h, rx: 7,
+      fill: mk ? MARK_TINTS[mk] : "#fff",
+      stroke: mk ? MARK_COLORS[mk] : (unlearned ? "#cbd5e1" : "#e2ded6"),
+      "stroke-width": mk ? 1.5 : 1,
+      opacity: dim ? 0.18 : 1 });
+    if (unlearned && !mk) rect.setAttribute("stroke-dasharray", "3 2.4");
+    g.appendChild(rect);
+    g.appendChild(el("rect", { x: n.x, y: n.y + 6, width: 3, height: n.h - 12, rx: 1.5,
+      fill: n.color, opacity: dim ? 0.18 : 1 }));
+    const t = el("text", { x: n.x + 12, y: n.y + n.h / 2 + 0.5, "font-size": 11.5,
+      "font-weight": isShared ? 700 : 500, fill: "#1f2937", opacity: dim ? 0.18 : 1 });
+    let label = n.label;
+    while (label.length > 2 && textW(label, 11.5, isShared ? 700 : 500) > n.w - 44) label = label.slice(0, -1);
+    if (label !== n.label) label += "…";
+    t.textContent = label;
+    g.appendChild(t);
+    if (isShared){
+      const b = el("g", {});
+      b.appendChild(el("circle", { cx: n.x + n.w - 15, cy: n.y + n.h / 2, r: 8, fill: "#111827", opacity: dim ? 0.18 : 1 }));
+      const bt = el("text", { x: n.x + n.w - 15, y: n.y + n.h / 2 + 0.5, "font-size": 9,
+        "font-weight": 800, fill: "#fff", "text-anchor": "middle", opacity: dim ? 0.18 : 1 });
+      bt.textContent = "×" + n.weight;
+      b.appendChild(bt);
+      b.appendChild(el("title", {})).textContent = "被 " + n.weight + " 条业务逻辑复用";
+      g.appendChild(b);
+    }
+    g.appendChild(el("title", {})).textContent = n.label;
+    g.style.cursor = "pointer";
+    g.addEventListener("click", ev => { ev.stopPropagation(); openPanel(n.id); });
+    netRefs[n.id] = { g: g, rect: rect, text: t, wx: n.x + n.w/2, wy: n.y + n.h/2 };
+    gN.appendChild(g);
+  });
+  scene.appendChild(gN);
+
+  CONTENT_NET.w = totalW; CONTENT_NET.h = totalH + 60;
+  if (keepView){ state.scale = keepView.s; state.tx = keepView.x; state.ty = keepView.y; applyZoom(); }
+  else fitNet();
+}
+
+const CONTENT_NET = { w: 0, h: 0 };
+const state = { scale: 1, tx: 0, ty: 0 };
+
+function applyZoom(){
+  scene.setAttribute("transform", `translate(${state.tx},${state.ty}) scale(${state.scale})`);
+  $("zoomval").textContent = Math.round(state.scale * 100) + "%";
+}
+function fitNet(){
+  if (!CONTENT_NET.w) return;
+  const W = svg.clientWidth, H = svg.clientHeight;
+  const bar = document.querySelector(".topbar");
+  const padTop = (bar ? bar.offsetHeight : 58) + 18, padBottom = 54, padX = 54;
+  const s = Math.min((W - padX*2) / CONTENT_NET.w, (H - padTop - padBottom) / CONTENT_NET.h, 1.1);
+  state.scale = Math.max(s, 0.12);
+  state.tx = Math.round((W - CONTENT_NET.w * state.scale) / 2);
+  state.ty = Math.round(padTop + (H - padTop - padBottom - CONTENT_NET.h * state.scale) / 2);
+  applyZoom();
+}
+
+/* ================= 模式与交互 ================= */
+const CONTENT_RIB = { w: 0, h: 0 };
+const MORPH_MS = 680;
+
+let armedScenario = null;      // 第一次点击：已淡化、未移动
+let panelCid = null;           // 右侧信息框当前展示的概念
+
+function redraw(keep){
+  if (MODE === "net") renderNet(keep);
+  else ChainView.render(keep);
+}
+function setChip(id){
+  document.querySelectorAll(".chip").forEach(c => {
+    const on = c.dataset.id === (id || "");
+    c.classList.toggle("on", on);
+    c.style.background = on ? (c.dataset.color || "#111827") : "#fff";
+    c.style.borderColor = on ? "transparent" : "#dedad2";
+  });
+}
+
+/* ---------- 通用适配 ---------- */
+function fitTo(w, h){
+  if (!w || !h) return;
+  const W = svg.clientWidth, H = svg.clientHeight;
+  const bar = document.querySelector(".topbar");
+  const padTop = (bar ? bar.offsetHeight : 58) + 18, padBottom = 54, padX = 54;
+  const sc = Math.min((W - padX*2) / w, (H - padTop - padBottom) / h, 1.1);
+  state.scale = Math.max(sc, 0.12);
+  state.tx = Math.round((W - w * state.scale) / 2);
+  state.ty = Math.round(padTop + (H - padTop - padBottom - h * state.scale) / 2);
+  applyZoom();
+}
+
+/* ---------- 位置补间（用布局坐标，不依赖 getBoundingClientRect） ---------- */
+function captureCenters(){
+  const st = { s: state.scale, x: state.tx, y: state.ty };
+  const out = {};
+  Object.keys(netRefs).forEach(cid => {
+    const r = netRefs[cid];
+    if (r.wx == null) return;
+    out[cid] = { x: st.x + r.wx * st.s, y: st.y + r.wy * st.s };
+  });
+  return out;
+}
+function flipFrom(oldPts){
+  const moved = [];
+  const cur = { s: state.scale, x: state.tx, y: state.ty };
+  Object.keys(netRefs).forEach(cid => {
+    const o = oldPts && oldPts[cid], ref = netRefs[cid];
+    if (!o || ref.wx == null) return;
+    const nx = cur.x + ref.wx * cur.s, ny = cur.y + ref.wy * cur.s;
+    const dx = (o.x - nx) / cur.s, dy = (o.y - ny) / cur.s;
+    if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+    ref.g.style.transition = "none";
+    ref.g.style.transform = `translate(${dx}px, ${dy}px)`;
+    ref.g.style.opacity = "0.35";
+    moved.push(ref.g);
+  });
+  if (!moved.length) return;
+  scene.getBoundingClientRect();
+  requestAnimationFrame(() => {
+    moved.forEach(g => {
+      g.style.transition = `transform ${MORPH_MS}ms cubic-bezier(.34,.02,.2,1), opacity .5s ease`;
+      g.style.transform = "translate(0px, 0px)";
+      g.style.opacity = "1";
+    });
+  });
+}
+
+/* ---------- 连贯变形：旧画面整体缩放/位移并溶解到新画面 ---------- */
+function crossMorph(paint, ms){
+  const dur = ms || 680;
+  const old = { s: state.scale, x: state.tx, y: state.ty };
+  let ghost = null;
+  try {
+    const wrap = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    wrap.setAttribute("pointer-events", "none");
+    wrap.appendChild(scene.cloneNode(true));
+    svg.appendChild(wrap);
+    ghost = wrap;
+  } catch (e){ ghost = null; }
+  paint();
+  if (!ghost) return;
+  const neu = { s: state.scale, x: state.tx, y: state.ty };
+  const k = neu.s / old.s;
+  const tx = neu.x - old.x * k, ty = neu.y - old.y * k;
+  ghost.style.transformOrigin = "0 0";
+  ghost.style.transition = `transform ${dur}ms cubic-bezier(.34,.02,.2,1), opacity ${Math.round(dur*0.78)}ms ease`;
+  scene.style.opacity = "0";
+  scene.style.transition = "opacity .12s ease";
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      ghost.style.transform = `translate(${tx}px, ${ty}px) scale(${k})`;
+      ghost.style.opacity = "0";
+      scene.style.opacity = "1";
+      scene.style.transition = `opacity ${Math.round(dur*0.5)}ms ease ${Math.round(dur*0.35)}ms`;
+    });
+  });
+  setTimeout(() => { if (ghost && ghost.parentNode) ghost.parentNode.removeChild(ghost); }, dur + 60);
+}
+
+/* ---------- 第一次点击：聚光灯（淡化无关 + 高亮选中场景与其连线） ---------- */
+function armScenario(id){
+  const sc = scById[id];
+  if (!sc) return;
+  armedScenario = id;
+  netSel = null;
+  curScenario = null;
+  setChip(id);
+  const related = netFocusSet(id);
+
+  // 知识点：相关的保持满亮度并加一点浮起阴影，无关的压到 4%
+  Object.keys(netRefs).forEach(cid => {
+    const g = netRefs[cid].g;
+    const on = related.has(cid);
+    g.style.transition = "opacity .34s ease, filter .34s ease";
+    g.style.opacity = on ? "1" : "0.04";
+    g.style.filter = on ? "drop-shadow(0 2px 6px rgba(15,23,42,.20))" : "none";
+    // 淡化的知识点不接收点击：既点不开详情，也不抢走鼠标
+    g.style.pointerEvents = on ? "auto" : "none";
+    g.style.cursor = on ? "pointer" : "default";
+  });
+
+  // 连线：按端点逐条判定，连到相关知识点的高亮，其余几乎消失
+  if (netEdges){
+    netEdges.style.opacity = "1";
+    netEdges.style.transition = "none";
+    Array.prototype.forEach.call(netEdges.children, p => {
+      p.style.transition = "stroke-opacity .34s ease, stroke-width .34s ease";
+      const w0 = parseFloat(p.getAttribute("data-w") || "1");
+      if (p.getAttribute("data-t") === "1"){       // 母题横贯线
+        p.style.strokeOpacity = "0.04";
+        p.style.strokeWidth = w0 + "px";
+        return;
+      }
+      const a = p.getAttribute("data-a"), b = p.getAttribute("data-b");
+      const k = p.getAttribute("data-k");
+      const ra = related.has(a), rb = related.has(b);
+      if (k === "cc"){
+        // 概念之间的关系：两端都相关 → 最亮；只挂一端 → 中等；无关 → 几乎不见
+        if (ra && rb){ p.style.strokeOpacity = "0.92"; p.style.strokeWidth = (w0 + 0.6) + "px"; }
+        else if (ra || rb){ p.style.strokeOpacity = "0.22"; p.style.strokeWidth = w0 + "px"; }
+        else { p.style.strokeOpacity = "0.02"; p.style.strokeWidth = w0 + "px"; }
+      } else {
+        // 场景 → 知识点：半透明细线，避免糊成蜘蛛网
+        if (ra || rb){ p.style.strokeOpacity = "0.20"; p.style.strokeWidth = (w0 * 0.8) + "px"; }
+        else { p.style.strokeOpacity = "0.02"; p.style.strokeWidth = w0 + "px"; }
+      }
+    });
+  }
+
+  // 装饰：选中的场景卡亮起来，其余场景卡与层标题压暗
+  document.querySelectorAll('#scene g[data-deco="1"]').forEach(g => {
+    const sid = g.getAttribute("data-sc");
+    const isSel = sid === id;
+    const isSc = !!sid;
+    g.style.transition = "opacity .3s ease, filter .3s ease";
+    g.style.opacity = isSel ? "1" : (isSc ? "0.34" : "0.18");
+    g.style.filter = isSel ? "drop-shadow(0 8px 20px rgba(15,23,42,.20))" : "none";
+    if (isSc){
+      const col = (scById[sid] || {}).color || "#374151";
+      const r = g.querySelector("rect"), tx = g.querySelectorAll("text");
+      if (r){
+        r.setAttribute("fill", isSel ? col : "#fff");
+        r.setAttribute("stroke", col);
+        r.setAttribute("data-sel", isSel ? "1" : "0");
+      }
+      const dot = g.querySelector("circle");
+      if (dot) dot.setAttribute("fill", isSel ? "#fff" : col);
+      if (tx[0]) tx[0].setAttribute("fill", isSel ? "#fff" : "#111827");
+      if (tx[1]) tx[1].setAttribute("fill", isSel ? "rgba(255,255,255,.88)" : "#6b7280");
+    }
+  });
+
+  $("panel").classList.remove("show");
+  panelCid = null;
+  $("brandsub").textContent = sc.label + " · 再点一次看链条";
+  $("hint").innerHTML = "<b>已选中</b>这条逻辑：相关知识点与连线高亮 · 再点一次 → 排成细节卡视图";
+}
+
+/* ---------- 第二次点击：连贯地飞成「细节卡视图」 ---------- */
+function focusScenario(id){
+  const sc = scById[id];
+  if (!sc) return;
+  armedScenario = null;
+  netSel = id;
+  curScenario = id;
+  setChip(id);
+  $("panel").classList.remove("show");
+  panelCid = null;
+
+  crossMorph(() => {
+    const cd = chainData(sc);
+    ChainView.setData(cd);
+    ChainView.state.collapsedStage.clear();
+    ChainView.state.collapsedItem.clear();
+    cd.main.forEach((col, i) => {
+      col.items.forEach((it, j) => { if (it.details.length) ChainView.state.collapsedItem.add(i + "-" + j); });
+    });
+    MODE = "chain";
+    ChainView.render(false);
+  });
+
+  $("btn-back").classList.add("show");
+  $("legend").style.display = "none";
+  $("brandsub").textContent = sc.label + " · " + sc.steps.length + " 个环节";
+  $("hint").innerHTML = "<b>点阶段</b>收起/展开 · <b>点环节</b>看细节 · <b>点知识点</b>看详情（再点关闭） · <b>拖拽</b>平移 · <b>滚轮</b>缩放";
+  updateStats();
+}
+
+function backToNet(){
+  if ($("mysqlview").classList.contains("show")) return;
+  const oldPts = null;
+  armedScenario = null; netSel = null; themeSel = null; curScenario = null;
+  MODE = "net";
+  $("themecard").classList.remove("show");
+  renderThemeChips();
+  setChip(null);
+  $("btn-back").classList.remove("show");
+  $("legend").style.display = "";
+  $("panel").classList.remove("show");
+  panelCid = null;
+  $("brandsub").textContent = "点场景高亮 → 再点一次排成长链";
+  $("hint").innerHTML = "<b>点场景</b>淡化无关 · <b>再点一次</b>排成链条 · <b>点知识点</b>看详情 · <b>点母题</b>看横贯线索";
+  renderNet(false);
+  if (oldPts && Object.keys(oldPts).length) flipFrom(oldPts);
+  scene.style.opacity = "0";
+  scene.style.transition = "opacity .26s ease";
+  requestAnimationFrame(() => { scene.style.opacity = "1"; });
+  updateStats();
+}
+
+/* ---------- 环节详情抽屉（保留：知识点 + 细节清单） ---------- */
+function openStepPanel(st){
+  const pi = st.phase;
+  const sc = curScenario ? scById[curScenario] : null;
+  const color = (sc && sc.phases[pi] && sc.phases[pi].color) || "#334155";
+  $("panel-head").innerHTML =
+      `<div class="lay" style="color:${color}">环节 · ${sc ? sc.label : ""}</div>`
+    + `<h2>${st.label}</h2>`
+    + `<div class="aka">${st.details.length} 条细节 · ${st.concepts.length} 个知识点</div>`;
+  const chips = st.concepts.map(cid => {
+    const c = conceptById[cid];
+    const lay = G.layers.find(l => l.id === c.layer) || { label: c.layer, color: "#94a3b8" };
+    return `<a class="kchip" data-cid="${cid}"><i style="background:${lay.color}"></i>${c.label}</a>`;
+  }).join("");
+  const dets = st.details.map(d => `<li>${d}</li>`).join("");
+  $("panel-body").innerHTML =
+      `<h3>关联的知识点（${st.concepts.length}）</h3>`
+    + `<div class="kchips">${chips || '<span style="color:#9ca3af">这个环节没有登记知识点</span>'}</div>`
+    + `<h3>细节（${st.details.length}）</h3>`
+    + (dets ? `<ul>${dets}</ul>` : '<div style="color:#9ca3af">—</div>');
+  $("panel-body").querySelectorAll(".kchip").forEach(a => {
+    a.onclick = () => openPanel(a.dataset.cid);
+  });
+  $("panel").classList.add("show");
+}
+
+/* ================= 侧栏 ================= */
+/* ================= MySQL 栏目（章节卡 → 组卡 → 知识点卡，逐级展开） ================= */
+const MV_COLORS = ["#2563eb", "#0E7490", "#7c3aed", "#dc2626", "#059669", "#ea580c"];
+let mysqlBuilt = false;
+function mEsc(x){
+  return String(x).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+}
+function mToggle(el){ el.parentNode.classList.toggle("open"); }
+function buildMysql(){
+  if (mysqlBuilt) return;
+  mysqlBuilt = true;
+  const cols = MYSQL.chapters.map((ch, ci) => {
+    const col = MV_COLORS[ci % MV_COLORS.length];
+    const groups = ch.groups.map((g, gi) => {
+      const pts = g.points.map(p => {
+        const n = (p.code || []).length;
+        const body = (p.text || []).slice(0, 2).map(t => `<div class="ms">${mEsc(t)}</div>`).join("")
+          + (p.tips || []).slice(0, 1).map(t => `<div class="mo">⚠ ${mEsc(t)}</div>`).join("")
+          + (p.code || []).map(c => `<pre>${mEsc(c)}</pre>`).join("");
+        return `<div class="pt" style="color:${col}">`
+          + `<div class="ph" onclick="mToggle(this)"><span>${mEsc(p.label)}</span>`
+          + (n ? `<i>${n} 段</i>` : "") + `</div>`
+          + `<div class="pb">${body || '<div class="ms">—</div>'}</div></div>`;
+      }).join("");
+      return `<div class="gp" style="color:${col}">`
+        + `<div class="gh" onclick="mToggle(this)"><b>${mEsc(g.label)}</b><em>${g.points.length}</em></div>`
+        + `<div class="gb">${pts}</div></div>`;
+    }).join("");
+    const n = ch.groups.reduce((a, g) => a + g.points.length, 0);
+    return `<div class="mv-col"><div class="mh" style="background:${col}">`
+      + `<i>${ci + 1}</i><h3>${mEsc(ch.label)}</h3><u>${n}</u></div>`
+      + `<div class="mg">${groups}</div></div>`;
+  });
+  $("mv-body").innerHTML = cols.join('<div class="arw">→</div>');
+  $("mv-stat").textContent = MYSQL.meta.chapters + " 章 · " + MYSQL.meta.groups + " 组 · "
+    + MYSQL.meta.points + " 个知识点 · " + MYSQL.meta.withCode + " 段代码 · 来源：" + MYSQL.meta.source;
+}
+function setMysqlView(on){
+  $("mysqlview").classList.toggle("show", on);
+  $("tab-mysql").classList.toggle("on", on);
+  $("tab-graph").classList.toggle("on", !on);
+  if (on){
+    ["themes", "themecard", "legend", "hint", "btn-back"].forEach(id => {
+      const e = $(id); if (e) e.style.display = "none";
+    });
+    $("panel").classList.remove("show");
+    panelCid = null;
+    buildMysql();
+  } else {
+    if (MODE === "chain"){ $("legend").style.display = "none"; $("btn-back").classList.add("show"); }
+    else { $("legend").style.display = ""; $("btn-back").classList.remove("show"); }
+    $("themes").style.display = "";
+    $("hint").style.display = "";
+    $("themecard").style.display = "";
+  }
+}
+function openPanel(cid){
+  const c = conceptById[cid];
+  if (!c) return;
+  const pop = $("panel");
+  if (panelCid === cid && pop.classList.contains("show")){
+    pop.classList.remove("show");
+    panelCid = null;
+    document.querySelectorAll("#scene g.is-active").forEach(g => g.classList.remove("is-active"));
+    return;
+  }
+  panelCid = cid;
+  const lay = G.layers.find(l => l.id === c.layer) || { label: c.layer, color: "#666" };
+  $("panel-head").innerHTML =
+      `<div class="lay" style="color:${lay.color}">${lay.label}</div>`
+    + `<h2>${c.label}</h2>`
+    + (c.aka ? `<div class="aka">${c.aka}</div>` : "");
+  const scs = c.scenarios.map(sid => {
+    const sc = scById[sid];
+    const steps = sc.steps.filter(st => st.concepts.indexOf(cid) >= 0).map(st => st.label);
+    return `<span class="sc"><i style="background:${sc.color}"></i>${sc.label}</span>`
+      + `<ul style="margin:2px 0 10px">${steps.map(s => "<li>" + s + "</li>").join("")}</ul>`;
+  }).join("");
+  const ths = c.themes.map(tid => {
+    const t = G.themes.find(x => x.id === tid);
+    return `<span class="sc" style="background:${t.color}1a;color:${t.color}">${t.label}</span>`;
+  }).join("");
+  const dep = G.edges.filter(e => e.s === cid || e.t === cid).map(e => {
+    const other = conceptById[e.s === cid ? e.t : e.s];
+    const arrow = e.type === "contrast" ? "⇄ 对照" : (e.type === "replaces" ? "→ 替代" : "→ 依赖");
+    if (!other) return "";
+    return `<li>${arrow} <b>${other.label}</b></li>`;
+  }).join("");
+  $("panel-body").innerHTML =
+      `<h3>一句话</h3><div>${c.gloss}</div>`
+    + `<h3>元信息</h3>`
+    + `<div class="kv"><b>首次学习</b><span>${c.learned || '<span style="color:#C2410C;font-weight:700">未学</span>'}</span></div>`
+    + `<div class="kv"><b>对应集数</b><span>${c.ep || "—"}</span></div>`
+    + `<div class="kv"><b>被复用</b><span>${c.weight} 条业务逻辑</span></div>`
+    + (ths ? `<h3>所属母题</h3><div>${ths}</div>` : "")
+    + (scs ? `<h3>出现在</h3>${scs}` : "")
+    + (dep ? `<h3>关系</h3><ul>${dep}</ul>` : "")
+    + `<h3>我的标记</h3><div class="kv"><b>${MARK_NAMES[markGet(cid)]}</b></div>`;
+  $("panel").classList.add("show");
+}
+$("panel-close").onclick = () => $("panel").classList.remove("show");
+
+/* ================= 顶栏 chips / 图例 ================= */
+(function(){
+  const box = $("chips");
+  G.scenarios.forEach(sc => {
+    const b = document.createElement("button");
+    b.className = "chip";
+    b.dataset.id = sc.id; b.dataset.color = sc.color;
+    b.innerHTML = `<i style="background:${sc.color}"></i>${sc.label}`;
+    b.onclick = () => {
+      // MySQL 层打开时，顶栏场景 chip 一律不响应，保证 MySQL 不被关掉
+      if ($("mysqlview").classList.contains("show")) return;
+      if (armedScenario === sc.id) { focusScenario(sc.id); return; }
+      if (armedScenario) backToNet();     // 先清掉上一个的淡化
+      armScenario(sc.id);
+    };
+    box.appendChild(b);
+  });
+  const lg = $("legend");
+  lg.innerHTML = G.layers.map(l => `<span><i style="background:${l.color}"></i>${l.label}</span>`).join("")
+    + `<span style="opacity:.75">虚线框 = 还没学</span>`;
+})();
+
+/* ================= 母题（横贯全图的思想） ================= */
+function renderThemeChips(){
+  const box = $("themes");
+  box.innerHTML = "";
+  G.themes.forEach(t => {
+    const b = document.createElement("button");
+    b.className = "tchip" + (themeSel === t.id ? " on" : "");
+    b.style.background = themeSel === t.id ? t.color : "";
+    b.innerHTML = `<i style="background:${themeSel === t.id ? "#fff" : t.color}"></i>${t.label}`;
+    b.onclick = () => toggleTheme(t.id);
+    box.appendChild(b);
+  });
+  const back = document.createElement("a");
+  back.className = "tchip";
+  back.href = "index.html";
+  back.title = "回到经典导图 / 长链视图";
+  back.textContent = "↩ 经典导图";
+  box.appendChild(back);
+}
+function toggleTheme(id){
+  if (MODE !== "net") backToNet();
+  themeSel = (themeSel === id) ? null : id;
+  netSel = null;
+  setChip(null);
+  renderThemeChips();
+  const card = $("themecard");
+  if (!themeSel){
+    card.classList.remove("show");
+    renderNet(false);
+    return;
+  }
+  const t = themeById[themeSel];
+  const rows = t.members.map((cid, i) => {
+    const c = conceptById[cid];
+    const lay = G.layers.find(l => l.id === c.layer) || { label: c.layer };
+    return `<li>${i + 1}. <b>${c.label}</b><span class="ly">${lay.label}${c.learned ? "" : " · 未学"}</span></li>`;
+  }).join("");
+  card.innerHTML = `<button class="x" id="tcard-x">×</button>`
+    + `<h4 style="color:${t.color}">${t.label}</h4>`
+    + `<p class="note">${t.note}</p>`
+    + `<ol>${rows}</ol>`;
+  card.classList.add("show");
+  card.querySelector("#tcard-x").onclick = () => { themeSel = null; card.classList.remove("show"); renderThemeChips(); renderNet(false); };
+  renderNet(false);
+}
+
+$("btn-back").onclick = backToNet;
+$("tab-mysql").onclick = () => setMysqlView(true);
+$("tab-graph").onclick = () => setMysqlView(false);
+
+$("btn-fit").onclick = () => redraw(false);
+$("btn-in").onclick = () => { state.scale = Math.min(state.scale * 1.18, 3); applyZoom(); };
+$("btn-out").onclick = () => { state.scale = Math.max(state.scale / 1.18, 0.08); applyZoom(); };
+
+svg.addEventListener("wheel", e => {
+  e.preventDefault();
+  const r = svg.getBoundingClientRect();
+  const mx = e.clientX - r.left, my = e.clientY - r.top;
+  const k = e.deltaY < 0 ? 1.12 : 1/1.12;
+  const st = (MODE === "chain") ? ChainView.state : state;
+  const ns = Math.min(Math.max(st.scale * k, 0.08), 3);
+  const q = ns / st.scale;
+  st.tx = mx - (mx - st.tx) * q;
+  st.ty = my - (my - st.ty) * q;
+  st.scale = ns;
+  if (MODE === "chain") ChainView.apply(); else applyZoom();
+}, { passive: false });
+
+let drag = false, lx = 0, ly = 0;
+svg.addEventListener("mousedown", e => { drag = true; lx = e.clientX; ly = e.clientY; svg.classList.add("dragging"); });
+window.addEventListener("mousemove", e => {
+  if (!drag) return;
+  const st = (MODE === "chain") ? ChainView.state : state;
+  st.tx += e.clientX - lx; st.ty += e.clientY - ly;
+  lx = e.clientX; ly = e.clientY;
+  if (MODE === "chain") ChainView.apply(); else applyZoom();
+});
+window.addEventListener("mouseup", () => { drag = false; svg.classList.remove("dragging"); });
+svg.addEventListener("click", () => { /* 点空白：保留，便于后续取消选中 */ });
+window.addEventListener("resize", () => { clearTimeout(window._t); window._t = setTimeout(() => redraw(false), 150); });
+
+/* ================= 启动 ================= */
+(function(){
+  const migrated = migrateOldMarks();
+  renderNet(false);
+  updateStats();
+  renderThemeChips();
+  if (migrated){
+    $("hint").innerHTML += ' · <b>已迁移旧标记 ' + migrated + ' 条</b>';
+  }
+  const q = new URLSearchParams(location.search);
+  /* 净图模式：隐藏所有界面元素，导海报用 */
+  if (q.get("clean") === "1"){
+    document.querySelector(".topbar").style.display = "none";
+    ["hint", "legend", "themes", "themecard", "btn-back"].forEach(id => {
+      const e = $(id); if (e) e.style.display = "none";
+    });
+    document.body.style.backgroundImage = "none";
+  }
+  const want = q.get("s");
+  if (want && scById[want]) focusScenario(want);
+  if (q.get("tab") === "mysql") setMysqlView(true);
+  const wantT = q.get("t");
+  if (wantT && themeById[wantT]) toggleTheme(wantT);
+})();
+</script>
+</body>
+</html>

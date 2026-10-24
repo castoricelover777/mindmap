@@ -1,0 +1,12 @@
+# 隶属于「全栈知识库」的页面，不放进 mindmap 仓库
+blog.html
+
+# 过期的旧海报（合并前的两 tab UI）
+preview.png
+chain-preview.png
+
+# 系统/临时文件
+.DS_Store
+Thumbs.db
+*.tmp
+*.log

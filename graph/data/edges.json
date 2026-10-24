@@ -1,0 +1,237 @@
+[
+ {
+  "s": "c.vue.model",
+  "t": "c.js.object",
+  "type": "depends"
+ },
+ {
+  "s": "c.axios.post",
+  "t": "c.json",
+  "type": "depends"
+ },
+ {
+  "s": "c.js.async",
+  "t": "c.axios.post",
+  "type": "depends"
+ },
+ {
+  "s": "c.json",
+  "t": "c.http.request",
+  "type": "depends"
+ },
+ {
+  "s": "c.http.request",
+  "t": "c.tcp",
+  "type": "depends"
+ },
+ {
+  "s": "c.http.response",
+  "t": "c.http.status",
+  "type": "depends"
+ },
+ {
+  "s": "c.http.request",
+  "t": "c.http.content-type",
+  "type": "depends"
+ },
+ {
+  "s": "c.annotation.requestbody",
+  "t": "c.http.content-type",
+  "type": "depends"
+ },
+ {
+  "s": "c.annotation.requestbody",
+  "t": "c.jackson",
+  "type": "depends"
+ },
+ {
+  "s": "c.annotation.requestbody",
+  "t": "c.json",
+  "type": "depends"
+ },
+ {
+  "s": "c.tomcat",
+  "t": "c.servlet.request",
+  "type": "depends"
+ },
+ {
+  "s": "c.nginx.proxy",
+  "t": "c.tomcat",
+  "type": "depends"
+ },
+ {
+  "s": "c.springmvc.dispatcher",
+  "t": "c.springmvc.mapping",
+  "type": "depends"
+ },
+ {
+  "s": "c.springmvc.mapping",
+  "t": "c.annotation.method-mapping",
+  "type": "depends"
+ },
+ {
+  "s": "c.annotation.restcontroller",
+  "t": "c.jackson",
+  "type": "depends"
+ },
+ {
+  "s": "c.spring.di",
+  "t": "c.spring.ioc",
+  "type": "depends"
+ },
+ {
+  "s": "c.annotation.autowired",
+  "t": "c.spring.di",
+  "type": "depends"
+ },
+ {
+  "s": "c.annotation.component",
+  "t": "c.spring.ioc",
+  "type": "depends"
+ },
+ {
+  "s": "c.arch.controller",
+  "t": "c.arch.three-layer",
+  "type": "depends"
+ },
+ {
+  "s": "c.arch.service",
+  "t": "c.arch.mapper",
+  "type": "depends"
+ },
+ {
+  "s": "c.arch.service",
+  "t": "c.biz.validation",
+  "type": "depends"
+ },
+ {
+  "s": "c.arch.service",
+  "t": "c.biz.transaction",
+  "type": "depends"
+ },
+ {
+  "s": "c.result.wrapper",
+  "t": "c.jackson",
+  "type": "depends"
+ },
+ {
+  "s": "c.exception.handler",
+  "t": "c.result.wrapper",
+  "type": "depends"
+ },
+ {
+  "s": "c.mybatis.mapper",
+  "t": "c.mybatis.proxy",
+  "type": "depends"
+ },
+ {
+  "s": "c.mybatis.mapper",
+  "t": "c.mybatis.mapping",
+  "type": "depends"
+ },
+ {
+  "s": "c.mybatis.mapping",
+  "t": "c.mybatis.hash",
+  "type": "depends"
+ },
+ {
+  "s": "c.mybatis.hash",
+  "t": "c.mybatis.dollar",
+  "type": "contrast"
+ },
+ {
+  "s": "c.mybatis.resultmap",
+  "t": "c.mybatis.camel-case",
+  "type": "depends"
+ },
+ {
+  "s": "c.pool.hikari",
+  "t": "c.jdbc",
+  "type": "depends"
+ },
+ {
+  "s": "c.jdbc",
+  "t": "c.sql",
+  "type": "depends"
+ },
+ {
+  "s": "c.jdbc",
+  "t": "c.jdbc.driver",
+  "type": "depends"
+ },
+ {
+  "s": "c.sql.dml",
+  "t": "c.sql",
+  "type": "depends"
+ },
+ {
+  "s": "c.sql.ddl",
+  "t": "c.mysql",
+  "type": "depends"
+ },
+ {
+  "s": "c.log.logback",
+  "t": "c.log.slf4j",
+  "type": "depends"
+ },
+ {
+  "s": "c.log.level",
+  "t": "c.log.logback",
+  "type": "depends"
+ },
+ {
+  "s": "c.log.logback",
+  "t": "c.log.println",
+  "type": "replaces"
+ },
+ {
+  "s": "c.restful",
+  "t": "c.spec.api-doc",
+  "type": "depends"
+ },
+ {
+  "s": "c.restful",
+  "t": "c.http.method",
+  "type": "depends"
+ },
+ {
+  "s": "c.tool.apifox",
+  "t": "c.spec.api-doc",
+  "type": "depends"
+ },
+ {
+  "s": "c.springboot.app",
+  "t": "c.springboot.scan",
+  "type": "depends"
+ },
+ {
+  "s": "c.springboot.app",
+  "t": "c.tomcat",
+  "type": "depends"
+ },
+ {
+  "s": "c.springmvc.mapping-class",
+  "t": "c.springmvc.mapping",
+  "type": "depends"
+ },
+ {
+  "s": "c.param.simple",
+  "t": "c.annotation.requestparam",
+  "type": "depends"
+ },
+ {
+  "s": "c.annotation.pathvariable",
+  "t": "c.url",
+  "type": "depends"
+ },
+ {
+  "s": "c.config.yml",
+  "t": "c.springboot.app",
+  "type": "depends"
+ },
+ {
+  "s": "c.frontend.xss",
+  "t": "c.mybatis.dollar",
+  "type": "contrast"
+ }
+]

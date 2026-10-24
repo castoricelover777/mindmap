@@ -1,0 +1,54 @@
+[
+ {
+  "id": "t.std-impl",
+  "label": "标准 vs 实现",
+  "color": "#111827",
+  "note": "上层只依赖标准接口，底层可换实现；你笔记里记了四次。",
+  "members": [
+   "c.sql",
+   "c.mysql",
+   "c.jdbc",
+   "c.jdbc.driver",
+   "c.java.interface",
+   "c.log.slf4j",
+   "c.log.logback"
+  ]
+ },
+ {
+  "id": "t.data-as-code",
+  "label": "把数据当代码执行",
+  "color": "#DC2626",
+  "note": "XSS 与 SQL 注入是同一个病；解法都是让数据和代码分开。",
+  "members": [
+   "c.frontend.xss",
+   "c.mybatis.dollar",
+   "c.mybatis.hash"
+  ]
+ },
+ {
+  "id": "t.convention",
+  "label": "约定优于手写",
+  "color": "#047857",
+  "note": "能推导出来的，就不该让人再写一遍。",
+  "members": [
+   "c.mybatis.camel-case",
+   "c.mybatis.hash",
+   "c.result.wrapper",
+   "c.spec.api-doc",
+   "c.arch.package",
+   "c.springmvc.mapping-class"
+  ]
+ },
+ {
+  "id": "t.config-out",
+  "label": "把变化挪出代码",
+  "color": "#B45309",
+  "note": "yml、logback.xml、开关，都是同一件事。",
+  "members": [
+   "c.config.yml",
+   "c.log.logback",
+   "c.log.level",
+   "c.mybatis.camel-case"
+  ]
+ }
+]

@@ -1,0 +1,4501 @@
+{
+ "meta": {
+  "built": "2026-10-23 14:20",
+  "layers": 7,
+  "concepts": 92,
+  "scenarios": 4,
+  "steps": 94,
+  "details": 558,
+  "edges": 190,
+  "themes": 4,
+  "shared": 35
+ },
+ "layers": [
+  {
+   "id": "frontend",
+   "label": "前端",
+   "color": "#2563EB"
+  },
+  {
+   "id": "protocol",
+   "label": "网络协议",
+   "color": "#0E7490"
+  },
+  {
+   "id": "server",
+   "label": "容器部署",
+   "color": "#7C3AED"
+  },
+  {
+   "id": "framework",
+   "label": "框架架构",
+   "color": "#047857"
+  },
+  {
+   "id": "persistence",
+   "label": "持久层",
+   "color": "#C2410C"
+  },
+  {
+   "id": "database",
+   "label": "数据库",
+   "color": "#BE123C"
+  },
+  {
+   "id": "tooling",
+   "label": "工程工具",
+   "color": "#B45309"
+  }
+ ],
+ "concepts": [
+  {
+   "id": "c.html-form",
+   "label": "HTML 表单",
+   "aka": "form / input",
+   "layer": "frontend",
+   "gloss": "form 把一组输入框聚合成一次提交，input 采集单个字段",
+   "learned": "2026-10-11",
+   "ep": "第1~10集",
+   "scenarios": [
+    "s.register"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.vue.model",
+   "label": "v-model 双向绑定",
+   "aka": "v-model",
+   "layer": "frontend",
+   "gloss": "data 与输入框互相同步，是 :value + @input 的语法糖",
+   "learned": "2026-10-13",
+   "ep": "第19~26集",
+   "scenarios": [
+    "s.register"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.vue.event",
+   "label": "@click 事件绑定",
+   "aka": "v-on:click",
+   "layer": "frontend",
+   "gloss": "把 DOM 点击事件绑到 methods 里的方法上",
+   "learned": "2026-10-13",
+   "ep": "第19~26集",
+   "scenarios": [
+    "s.register"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.js.object",
+   "label": "JS 对象字面量",
+   "aka": "{}",
+   "layer": "frontend",
+   "gloss": "花括号直接构成对象，是前端这一层的通用货币",
+   "learned": "2026-10-12",
+   "ep": "第18集",
+   "scenarios": [
+    "s.register"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.js.async",
+   "label": "async/await 异步等待",
+   "aka": "async / await",
+   "layer": "frontend",
+   "gloss": "await 只挂起当前函数，页面不冻结",
+   "learned": "2026-10-14",
+   "ep": "第27~32集",
+   "scenarios": [
+    "s.register",
+    "s.ref"
+   ],
+   "themes": [],
+   "weight": 2
+  },
+  {
+   "id": "c.axios.post",
+   "label": "axios.post",
+   "aka": "axios",
+   "layer": "frontend",
+   "gloss": "自动 JSON.stringify + 自动设 Content-Type",
+   "learned": "2026-10-14",
+   "ep": "第27~32集",
+   "scenarios": [
+    "s.register"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.json",
+   "label": "JSON 格式",
+   "aka": "JSON",
+   "layer": "frontend",
+   "gloss": "前后端唯一都认的数据格式，键必须双引号",
+   "learned": "2026-10-12",
+   "ep": "第18集",
+   "scenarios": [
+    "s.register",
+    "s.dept",
+    "s.emp"
+   ],
+   "themes": [],
+   "weight": 3
+  },
+  {
+   "id": "c.validate.client",
+   "label": "前端校验",
+   "aka": "",
+   "layer": "frontend",
+   "gloss": "提升体验但挡不住绕过，后端必须再校验",
+   "learned": "2026-10-14",
+   "ep": "第30集",
+   "scenarios": [
+    "s.register"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.dom.render",
+   "label": "数据驱动渲染",
+   "aka": "v-for / v-html",
+   "layer": "frontend",
+   "gloss": "数据一变视图自动更新，不用手动操作 DOM",
+   "learned": "2026-10-13",
+   "ep": "第26集",
+   "scenarios": [
+    "s.register"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.frontend.xss",
+   "label": "innerHTML 与 XSS",
+   "aka": "",
+   "layer": "frontend",
+   "gloss": "把用户输入当 HTML 解析执行，本质是「把数据当代码」",
+   "learned": "2026-10-12",
+   "ep": "第18集",
+   "scenarios": [],
+   "themes": [
+    "t.data-as-code"
+   ],
+   "weight": 0
+  },
+  {
+   "id": "c.tcp",
+   "label": "TCP 连接",
+   "aka": "三次握手",
+   "layer": "protocol",
+   "gloss": "HTTP 建立在 TCP 之上，先建连再发报文",
+   "learned": "2026-10-16",
+   "ep": "第39~47集",
+   "scenarios": [
+    "s.register"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.http.request",
+   "label": "HTTP 请求报文",
+   "aka": "请求行/头/空行/体",
+   "layer": "protocol",
+   "gloss": "四部分：请求行 + 请求头 + 空行 + 请求体",
+   "learned": "2026-10-16",
+   "ep": "第40集",
+   "scenarios": [
+    "s.register",
+    "s.dept"
+   ],
+   "themes": [],
+   "weight": 2
+  },
+  {
+   "id": "c.http.response",
+   "label": "HTTP 响应报文",
+   "aka": "状态行/头/体",
+   "layer": "protocol",
+   "gloss": "三部分：状态行 + 响应头 + 响应体",
+   "learned": "2026-10-16",
+   "ep": "第41集",
+   "scenarios": [
+    "s.register"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.http.method",
+   "label": "HTTP 请求方法",
+   "aka": "GET / POST / PUT / DELETE",
+   "layer": "protocol",
+   "gloss": "GET 查、POST 增、PUT 改、DELETE 删",
+   "learned": "2026-10-16",
+   "ep": "第41集",
+   "scenarios": [
+    "s.register",
+    "s.dept"
+   ],
+   "themes": [],
+   "weight": 2
+  },
+  {
+   "id": "c.http.status",
+   "label": "HTTP 状态码",
+   "aka": "200 / 404 / 405 / 415 / 500",
+   "layer": "protocol",
+   "gloss": "4xx 是你的请求有问题，5xx 是服务器有问题",
+   "learned": "2026-10-16",
+   "ep": "第41集",
+   "scenarios": [
+    "s.register"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.http.content-type",
+   "label": "Content-Type",
+   "aka": "application/json",
+   "layer": "protocol",
+   "gloss": "决定后端用哪个 HttpMessageConverter 解析请求体",
+   "learned": "2026-10-16",
+   "ep": "第40集",
+   "scenarios": [
+    "s.register",
+    "s.dept",
+    "s.ref"
+   ],
+   "themes": [],
+   "weight": 3
+  },
+  {
+   "id": "c.url",
+   "label": "URL 结构",
+   "aka": "协议://主机:端口/路径?查询#锚点",
+   "layer": "protocol",
+   "gloss": "路径交给路由查表，查询串交给参数绑定",
+   "learned": "2026-10-16",
+   "ep": "第42集",
+   "scenarios": [
+    "s.register",
+    "s.dept",
+    "s.ref"
+   ],
+   "themes": [],
+   "weight": 3
+  },
+  {
+   "id": "c.cors",
+   "label": "跨域与预检",
+   "aka": "CORS / OPTIONS",
+   "layer": "protocol",
+   "gloss": "同源策略是浏览器限制，服务端要靠响应头放行",
+   "learned": "2026-10-16",
+   "ep": "第46集",
+   "scenarios": [
+    "s.register",
+    "s.dept"
+   ],
+   "themes": [],
+   "weight": 2
+  },
+  {
+   "id": "c.restful",
+   "label": "RESTful 风格",
+   "aka": "REST",
+   "layer": "protocol",
+   "gloss": "URL 定位资源，HTTP 动词描述操作；复数表资源",
+   "learned": "2026-10-20",
+   "ep": "第75集",
+   "scenarios": [
+    "s.dept"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.tomcat",
+   "label": "内嵌 Tomcat",
+   "aka": "",
+   "layer": "server",
+   "gloss": "SpringBoot 把容器打成依赖，一个 jar 就能跑",
+   "learned": "2026-10-16",
+   "ep": "第44集",
+   "scenarios": [
+    "s.register",
+    "s.dept",
+    "s.ref"
+   ],
+   "themes": [],
+   "weight": 3
+  },
+  {
+   "id": "c.servlet.request",
+   "label": "HttpServletRequest",
+   "aka": "",
+   "layer": "server",
+   "gloss": "Tomcat 把字节流解析成 Request/Response 对象",
+   "learned": "2026-10-16",
+   "ep": "第44集",
+   "scenarios": [
+    "s.register"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.nginx.proxy",
+   "label": "Nginx 反向代理",
+   "aka": "proxy_pass",
+   "layer": "server",
+   "gloss": "浏览器 → Nginx(:90) → Tomcat，多一层转发/安全/负载均衡",
+   "learned": "2026-10-21",
+   "ep": "第79集",
+   "scenarios": [
+    "s.dept"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.springboot.app",
+   "label": "SpringBoot 启动类",
+   "aka": "@SpringBootApplication",
+   "layer": "framework",
+   "gloss": "三个注解的合体：配置类 + 自动配置 + 组件扫描",
+   "learned": "2026-10-16",
+   "ep": "第44集",
+   "scenarios": [
+    "s.register",
+    "s.dept"
+   ],
+   "themes": [],
+   "weight": 2
+  },
+  {
+   "id": "c.springboot.scan",
+   "label": "组件扫描范围",
+   "aka": "@ComponentScan",
+   "layer": "framework",
+   "gloss": "启动类必须放在所有业务类的父包下，否则扫不到",
+   "learned": "2026-10-16",
+   "ep": "第44集",
+   "scenarios": [
+    "s.register"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.spring.ioc",
+   "label": "IoC 控制反转",
+   "aka": "",
+   "layer": "framework",
+   "gloss": "对象创建权从程序员手里交给容器",
+   "learned": "2026-10-17",
+   "ep": "第48集",
+   "scenarios": [
+    "s.register"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.spring.di",
+   "label": "DI 依赖注入",
+   "aka": "",
+   "layer": "framework",
+   "gloss": "要什么让容器给，注入的是接口而不是实现类",
+   "learned": "2026-10-17",
+   "ep": "第49集",
+   "scenarios": [
+    "s.register",
+    "s.ref"
+   ],
+   "themes": [],
+   "weight": 2
+  },
+  {
+   "id": "c.annotation.autowired",
+   "label": "@Autowired",
+   "aka": "",
+   "layer": "framework",
+   "gloss": "按类型注入；同类型多个要用 @Qualifier / @Primary",
+   "learned": "2026-10-17",
+   "ep": "第49集",
+   "scenarios": [
+    "s.register"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.annotation.component",
+   "label": "@Service / @Repository",
+   "aka": "@Component",
+   "layer": "framework",
+   "gloss": "标记为组件交给容器管理，默认单例",
+   "learned": "2026-10-17",
+   "ep": "第50集",
+   "scenarios": [
+    "s.register",
+    "s.emp"
+   ],
+   "themes": [],
+   "weight": 2
+  },
+  {
+   "id": "c.springmvc.dispatcher",
+   "label": "DispatcherServlet",
+   "aka": "",
+   "layer": "framework",
+   "gloss": "前端控制器：问 HandlerMapping 这个路径该谁处理",
+   "learned": "2026-10-16",
+   "ep": "第45集",
+   "scenarios": [
+    "s.register",
+    "s.ref"
+   ],
+   "themes": [],
+   "weight": 2
+  },
+  {
+   "id": "c.springmvc.mapping",
+   "label": "@RequestMapping 路由",
+   "aka": "@GetMapping …",
+   "layer": "framework",
+   "gloss": "路径 + 方法 → 处理函数；衍生注解把方法定死",
+   "learned": "2026-10-16",
+   "ep": "第45集",
+   "scenarios": [
+    "s.register",
+    "s.dept"
+   ],
+   "themes": [],
+   "weight": 2
+  },
+  {
+   "id": "c.springmvc.mapping-class",
+   "label": "类级路径抽取",
+   "aka": "@RequestMapping(\"/depts\")",
+   "layer": "framework",
+   "gloss": "完整路径 = 类上 + 方法上；消除重复前缀",
+   "learned": "2026-10-22",
+   "ep": "第83集",
+   "scenarios": [
+    "s.register",
+    "s.dept"
+   ],
+   "themes": [
+    "t.convention"
+   ],
+   "weight": 2
+  },
+  {
+   "id": "c.annotation.method-mapping",
+   "label": "请求方式映射",
+   "aka": "@GetMapping/@PostMapping/@PutMapping/@DeleteMapping",
+   "layer": "framework",
+   "gloss": "@RequestMapping 按 method 定死的衍生注解",
+   "learned": "2026-10-21",
+   "ep": "第77集",
+   "scenarios": [
+    "s.register",
+    "s.dept",
+    "s.emp",
+    "s.ref"
+   ],
+   "themes": [],
+   "weight": 4
+  },
+  {
+   "id": "c.annotation.restcontroller",
+   "label": "@RestController",
+   "aka": "= @Controller + @ResponseBody",
+   "layer": "framework",
+   "gloss": "返回值直接写进响应体，不当视图名解析",
+   "learned": "2026-10-16",
+   "ep": "第45集",
+   "scenarios": [
+    "s.register"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.annotation.requestbody",
+   "label": "@RequestBody",
+   "aka": "",
+   "layer": "framework",
+   "gloss": "读整个请求体，交给 Jackson 反序列化成对象",
+   "learned": "2026-10-16",
+   "ep": "第45集",
+   "scenarios": [
+    "s.register",
+    "s.dept",
+    "s.emp"
+   ],
+   "themes": [],
+   "weight": 3
+  },
+  {
+   "id": "c.annotation.requestparam",
+   "label": "@RequestParam",
+   "aka": "",
+   "layer": "framework",
+   "gloss": "取 query 参数或表单字段；名字对上可省略",
+   "learned": "2026-10-22",
+   "ep": "第80集",
+   "scenarios": [
+    "s.dept",
+    "s.emp"
+   ],
+   "themes": [],
+   "weight": 2
+  },
+  {
+   "id": "c.annotation.pathvariable",
+   "label": "@PathVariable",
+   "aka": "",
+   "layer": "framework",
+   "gloss": "取路径占位 /depts/{id} 里的参数",
+   "learned": "2026-10-22",
+   "ep": "第82集",
+   "scenarios": [
+    "s.dept"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.param.simple",
+   "label": "简单参数接收三方案",
+   "aka": "request.getParameter / @RequestParam / 同名形参",
+   "layer": "framework",
+   "gloss": "本质是「参数在 HTTP 的哪个位置」",
+   "learned": "2026-10-22",
+   "ep": "第80集",
+   "scenarios": [
+    "s.dept"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.arch.three-layer",
+   "label": "三层架构",
+   "aka": "Controller / Service / Mapper",
+   "layer": "framework",
+   "gloss": "每层只做自己的事，靠约定串起来",
+   "learned": "2026-10-16",
+   "ep": "第47集",
+   "scenarios": [
+    "s.register",
+    "s.dept",
+    "s.ref"
+   ],
+   "themes": [],
+   "weight": 3
+  },
+  {
+   "id": "c.arch.controller",
+   "label": "Controller 职责",
+   "aka": "",
+   "layer": "framework",
+   "gloss": "接参、调 Service、包返回；不写 SQL、不写事务",
+   "learned": "2026-10-16",
+   "ep": "第47集",
+   "scenarios": [
+    "s.register",
+    "s.dept"
+   ],
+   "themes": [],
+   "weight": 2
+  },
+  {
+   "id": "c.arch.service",
+   "label": "Service 职责",
+   "aka": "",
+   "layer": "framework",
+   "gloss": "业务规则、校验、事务边界、补全公共字段",
+   "learned": "2026-10-16",
+   "ep": "第47集",
+   "scenarios": [
+    "s.register",
+    "s.dept",
+    "s.emp"
+   ],
+   "themes": [],
+   "weight": 3
+  },
+  {
+   "id": "c.arch.mapper",
+   "label": "Mapper 职责",
+   "aka": "",
+   "layer": "framework",
+   "gloss": "只管 SQL，不关心业务",
+   "learned": "2026-10-16",
+   "ep": "第47集",
+   "scenarios": [
+    "s.register",
+    "s.dept"
+   ],
+   "themes": [],
+   "weight": 2
+  },
+  {
+   "id": "c.result.wrapper",
+   "label": "Result 统一响应",
+   "aka": "{code,msg,data}",
+   "layer": "framework",
+   "gloss": "前端只写一套解析逻辑；契约落在代码结构上",
+   "learned": "2026-10-21",
+   "ep": "第78集",
+   "scenarios": [
+    "s.register",
+    "s.dept"
+   ],
+   "themes": [
+    "t.convention"
+   ],
+   "weight": 2
+  },
+  {
+   "id": "c.jackson",
+   "label": "Jackson 序列化",
+   "aka": "",
+   "layer": "framework",
+   "gloss": "Java 对象 ⇄ JSON，@RestController 自动调用",
+   "learned": "2026-10-16",
+   "ep": "第45集",
+   "scenarios": [
+    "s.register"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.exception.handler",
+   "label": "全局异常处理",
+   "aka": "@RestControllerAdvice",
+   "layer": "framework",
+   "gloss": "别把 500 和堆栈直接甩给前端",
+   "learned": "2026-10-22",
+   "ep": "第84集",
+   "scenarios": [
+    "s.register"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.biz.validation",
+   "label": "业务校验",
+   "aka": "",
+   "layer": "framework",
+   "gloss": "后端才是安全边界，前端校验可被绕过",
+   "learned": "2026-10-21",
+   "ep": "第81集",
+   "scenarios": [
+    "s.register",
+    "s.dept"
+   ],
+   "themes": [],
+   "weight": 2
+  },
+  {
+   "id": "c.biz.transaction",
+   "label": "事务 @Transactional",
+   "aka": "",
+   "layer": "framework",
+   "gloss": "多表操作要么全成功要么全回滚",
+   "learned": "2026-10-21",
+   "ep": "第64集",
+   "scenarios": [
+    "s.register",
+    "s.emp"
+   ],
+   "themes": [],
+   "weight": 2
+  },
+  {
+   "id": "c.arch.separation",
+   "label": "前后端分离",
+   "aka": "",
+   "layer": "framework",
+   "gloss": "拆成两个工程，靠接口文档对齐",
+   "learned": "2026-10-20",
+   "ep": "第74集",
+   "scenarios": [
+    "s.dept"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.spec.api-doc",
+   "label": "接口文档",
+   "aka": "",
+   "layer": "framework",
+   "gloss": "前后端的合同：地址、参数、响应类型",
+   "learned": "2026-10-20",
+   "ep": "第74集",
+   "scenarios": [
+    "s.dept"
+   ],
+   "themes": [
+    "t.convention"
+   ],
+   "weight": 1
+  },
+  {
+   "id": "c.java.interface",
+   "label": "接口与实现类",
+   "aka": "",
+   "layer": "framework",
+   "gloss": "面向接口编程，换实现不改调用方",
+   "learned": "2026-10-05",
+   "ep": "Java day4",
+   "scenarios": [
+    "s.register"
+   ],
+   "themes": [
+    "t.std-impl"
+   ],
+   "weight": 1
+  },
+  {
+   "id": "c.mybatis.mapper",
+   "label": "@Mapper 接口",
+   "aka": "",
+   "layer": "persistence",
+   "gloss": "只有签名没有实现，启动时由 MyBatis 生成",
+   "learned": "2026-10-18",
+   "ep": "第60集",
+   "scenarios": [
+    "s.register",
+    "s.dept",
+    "s.emp",
+    "s.ref"
+   ],
+   "themes": [],
+   "weight": 4
+  },
+  {
+   "id": "c.mybatis.proxy",
+   "label": "动态代理",
+   "aka": "JDK Proxy",
+   "layer": "persistence",
+   "gloss": "接口名/方法名/namespace/id 必须严丝合缝对上",
+   "learned": "2026-10-18",
+   "ep": "第60集",
+   "scenarios": [
+    "s.register"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.mybatis.mapping",
+   "label": "注解 vs XML 写 SQL",
+   "aka": "@Select / <select>",
+   "layer": "persistence",
+   "gloss": "简单用注解，动态 SQL 用 XML",
+   "learned": "2026-10-19",
+   "ep": "第70集",
+   "scenarios": [
+    "s.register",
+    "s.emp",
+    "s.ref"
+   ],
+   "themes": [],
+   "weight": 3
+  },
+  {
+   "id": "c.mybatis.hash",
+   "label": "#{} 预编译占位符",
+   "aka": "？",
+   "layer": "persistence",
+   "gloss": "编译成 ? 走 PreparedStatement，值永远是值",
+   "learned": "2026-10-19",
+   "ep": "第70集",
+   "scenarios": [
+    "s.register",
+    "s.dept",
+    "s.ref"
+   ],
+   "themes": [
+    "t.data-as-code",
+    "t.convention"
+   ],
+   "weight": 3
+  },
+  {
+   "id": "c.mybatis.dollar",
+   "label": "${} 字符串拼接",
+   "aka": "",
+   "layer": "persistence",
+   "gloss": "直接拼进 SQL，有注入风险；只能用于表名/字段名",
+   "learned": "2026-10-19",
+   "ep": "第70集",
+   "scenarios": [
+    "s.register",
+    "s.ref"
+   ],
+   "themes": [
+    "t.data-as-code"
+   ],
+   "weight": 2
+  },
+  {
+   "id": "c.mybatis.resultmap",
+   "label": "结果映射",
+   "aka": "resultType / RowMapper",
+   "layer": "persistence",
+   "gloss": "数据库的行变成 Java 对象，靠列名匹配属性名",
+   "learned": "2026-10-18",
+   "ep": "第62集",
+   "scenarios": [
+    "s.register",
+    "s.dept",
+    "s.emp"
+   ],
+   "themes": [],
+   "weight": 3
+  },
+  {
+   "id": "c.mybatis.camel-case",
+   "label": "驼峰映射开关",
+   "aka": "map-underscore-to-camel-case",
+   "layer": "persistence",
+   "gloss": "create_time → createTime；不开就静悄悄留 null",
+   "learned": "2026-10-21",
+   "ep": "第78集",
+   "scenarios": [
+    "s.register",
+    "s.dept",
+    "s.emp",
+    "s.ref"
+   ],
+   "themes": [
+    "t.convention",
+    "t.config-out"
+   ],
+   "weight": 4
+  },
+  {
+   "id": "c.mybatis.generated-keys",
+   "label": "主键回填",
+   "aka": "@Options(useGeneratedKeys,keyProperty)",
+   "layer": "persistence",
+   "gloss": "插入后自增 id 回填到对象上",
+   "learned": "2026-10-18",
+   "ep": "第63集",
+   "scenarios": [
+    "s.emp"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.jdbc",
+   "label": "JDBC",
+   "aka": "",
+   "layer": "persistence",
+   "gloss": "一套访问数据库的标准接口，六步模板代码",
+   "learned": "2026-10-18",
+   "ep": "第56集",
+   "scenarios": [
+    "s.ref"
+   ],
+   "themes": [
+    "t.std-impl"
+   ],
+   "weight": 1
+  },
+  {
+   "id": "c.jdbc.driver",
+   "label": "JDBC 驱动",
+   "aka": "mysql-connector-j",
+   "layer": "persistence",
+   "gloss": "标准接口的具体实现，换数据库只换驱动",
+   "learned": "2026-10-18",
+   "ep": "第56集",
+   "scenarios": [],
+   "themes": [
+    "t.std-impl"
+   ],
+   "weight": 0
+  },
+  {
+   "id": "c.pool.hikari",
+   "label": "HikariCP 连接池",
+   "aka": "",
+   "layer": "persistence",
+   "gloss": "借还代替建销，把连接成本摊到启动时",
+   "learned": "2026-10-19",
+   "ep": "第68集",
+   "scenarios": [
+    "s.register",
+    "s.ref"
+   ],
+   "themes": [],
+   "weight": 2
+  },
+  {
+   "id": "c.sql",
+   "label": "SQL 语言",
+   "aka": "",
+   "layer": "database",
+   "gloss": "标准；MySQL/Oracle 是各自的实现",
+   "learned": "2026-10-17",
+   "ep": "第48集",
+   "scenarios": [
+    "s.register",
+    "s.dept",
+    "s.emp",
+    "s.ref"
+   ],
+   "themes": [
+    "t.std-impl"
+   ],
+   "weight": 4
+  },
+  {
+   "id": "c.sql.dml",
+   "label": "DML 增删改",
+   "aka": "insert/update/delete",
+   "layer": "database",
+   "gloss": "影响的是数据行，返回受影响行数",
+   "learned": "2026-10-18",
+   "ep": "第57集",
+   "scenarios": [
+    "s.register",
+    "s.dept"
+   ],
+   "themes": [],
+   "weight": 2
+  },
+  {
+   "id": "c.sql.ddl",
+   "label": "建库建表",
+   "aka": "create table",
+   "layer": "database",
+   "gloss": "dept 表：id/name/create_time/update_time",
+   "learned": "2026-10-21",
+   "ep": "第76集",
+   "scenarios": [
+    "s.dept"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.mysql",
+   "label": "MySQL",
+   "aka": "",
+   "layer": "database",
+   "gloss": "只懂 SQL，不关心是谁在问",
+   "learned": "2026-10-17",
+   "ep": "第52集",
+   "scenarios": [
+    "s.dept",
+    "s.ref"
+   ],
+   "themes": [
+    "t.std-impl"
+   ],
+   "weight": 2
+  },
+  {
+   "id": "c.tool.maven",
+   "label": "Maven",
+   "aka": "pom.xml",
+   "layer": "tooling",
+   "gloss": "依赖管理与标准构建，版本要锁死",
+   "learned": "2026-10-14",
+   "ep": "第31~32集",
+   "scenarios": [
+    "s.dept"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.tool.apifox",
+   "label": "Apifox",
+   "aka": "",
+   "layer": "tooling",
+   "gloss": "接口文档 + 调试 + Mock；浏览器只能发 GET 所以要它",
+   "learned": "2026-10-20",
+   "ep": "第75集",
+   "scenarios": [
+    "s.dept"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.config.yml",
+   "label": "application.yml",
+   "aka": "",
+   "layer": "tooling",
+   "gloss": "缩进即层级，不能 Tab；把变化挪出代码",
+   "learned": "2026-10-20",
+   "ep": "第73集",
+   "scenarios": [
+    "s.dept",
+    "s.emp"
+   ],
+   "themes": [
+    "t.config-out"
+   ],
+   "weight": 2
+  },
+  {
+   "id": "c.log.slf4j",
+   "label": "Slf4j 日志门面",
+   "aka": "",
+   "layer": "tooling",
+   "gloss": "一套标准接口，底下可以换任意日志实现",
+   "learned": "2026-10-22",
+   "ep": "第84集",
+   "scenarios": [
+    "s.dept"
+   ],
+   "themes": [
+    "t.std-impl"
+   ],
+   "weight": 1
+  },
+  {
+   "id": "c.log.logback",
+   "label": "Logback",
+   "aka": "logback.xml",
+   "layer": "tooling",
+   "gloss": "Slf4j 的实现，按配置输出到控制台/文件",
+   "learned": "2026-10-22",
+   "ep": "第84集",
+   "scenarios": [
+    "s.dept"
+   ],
+   "themes": [
+    "t.std-impl",
+    "t.config-out"
+   ],
+   "weight": 1
+  },
+  {
+   "id": "c.log.println",
+   "label": "System.out.println",
+   "aka": "",
+   "layer": "tooling",
+   "gloss": "硬编码、只到控制台、不分级 —— 日志要替代它",
+   "learned": "2026-10-22",
+   "ep": "第84集",
+   "scenarios": [
+    "s.dept"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.log.level",
+   "label": "日志级别",
+   "aka": "ALL/DEBUG/INFO/WARN/ERROR",
+   "layer": "tooling",
+   "gloss": "优先级由低到高，配置文件里控制输出到哪一级",
+   "learned": "2026-10-22",
+   "ep": "第85集",
+   "scenarios": [
+    "s.dept"
+   ],
+   "themes": [
+    "t.config-out"
+   ],
+   "weight": 1
+  },
+  {
+   "id": "c.arch.package",
+   "label": "包结构约定",
+   "aka": "controller/service/mapper/pojo",
+   "layer": "tooling",
+   "gloss": "约定优于配置，扫包靠它",
+   "learned": "2026-10-21",
+   "ep": "第76集",
+   "scenarios": [
+    "s.dept"
+   ],
+   "themes": [
+    "t.convention"
+   ],
+   "weight": 1
+  },
+  {
+   "id": "c.db.fk",
+   "label": "外键约束",
+   "aka": "foreign key",
+   "layer": "database",
+   "gloss": "为多的一方加外键指向一的一方主键，保证数据一致与完整",
+   "learned": null,
+   "ep": null,
+   "scenarios": [
+    "s.emp"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.db.fk-physical",
+   "label": "物理外键 vs 逻辑外键",
+   "aka": "",
+   "layer": "database",
+   "gloss": "物理外键影响增删改效率、只适合单节点；项目里多用逻辑外键",
+   "learned": null,
+   "ep": null,
+   "scenarios": [
+    "s.emp"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.db.relation",
+   "label": "多表关系",
+   "aka": "一对一/一对多/多对多",
+   "layer": "database",
+   "gloss": "一对多靠外键，多对多靠中间表，一对一多用于单表拆分",
+   "learned": null,
+   "ep": null,
+   "scenarios": [
+    "s.emp"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.sql.cartesian",
+   "label": "笛卡尔积",
+   "aka": "",
+   "layer": "database",
+   "gloss": "两表直接相连得到所有组合（30×6=180），必须用连接条件消除",
+   "learned": null,
+   "ep": null,
+   "scenarios": [
+    "s.emp"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.sql.join",
+   "label": "多表连接查询",
+   "aka": "inner / left / right join",
+   "layer": "database",
+   "gloss": "内连接取交集，外连接保留一侧全部；员工列表用左外连接",
+   "learned": null,
+   "ep": null,
+   "scenarios": [
+    "s.emp"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.sql.subquery",
+   "label": "子查询四类",
+   "aka": "标量/列/行/表",
+   "layer": "database",
+   "gloss": "SQL 里嵌 select，按结果形状分标量、列、行、表四种",
+   "learned": null,
+   "ep": null,
+   "scenarios": [
+    "s.emp"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.sql.aggregate",
+   "label": "聚合与分组",
+   "aka": "count / avg / group by",
+   "layer": "database",
+   "gloss": "按维度聚合统计；「低于本部门平均工资」是相关子查询的经典题",
+   "learned": null,
+   "ep": null,
+   "scenarios": [
+    "s.emp"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.page.limit",
+   "label": "LIMIT 分页",
+   "aka": "limit 开始索引, 条数",
+   "layer": "persistence",
+   "gloss": "开始索引 = (页码-1) × 每页条数；接口还要返回总记录数",
+   "learned": null,
+   "ep": null,
+   "scenarios": [
+    "s.emp"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.query.param-object",
+   "label": "查询参数对象封装",
+   "aka": "EmpQueryParam",
+   "layer": "framework",
+   "gloss": "6 个散参改成 1 个对象，前端参数名与属性名对齐即可自动绑定",
+   "learned": null,
+   "ep": null,
+   "scenarios": [
+    "s.emp"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.mybatis.dynamic-sql",
+   "label": "动态 SQL",
+   "aka": "<where> / <if>",
+   "layer": "persistence",
+   "gloss": "SQL 随条件变化；<where> 自动处理多余 and，无条���时不输出 where",
+   "learned": null,
+   "ep": null,
+   "scenarios": [
+    "s.emp"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.mybatis.batch",
+   "label": "批量保存",
+   "aka": "<foreach>",
+   "layer": "persistence",
+   "gloss": "工作经历多条一次写入；需要员工自增 id 先回填",
+   "learned": null,
+   "ep": null,
+   "scenarios": [
+    "s.emp"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.tx.atomic",
+   "label": "要么全成功要么全失败",
+   "aka": "",
+   "layer": "framework",
+   "gloss": "多条写操作必须作为一个整体，否则出现「部分成功」的数据不一致",
+   "learned": null,
+   "ep": null,
+   "scenarios": [
+    "s.emp"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.tx.rollbackfor",
+   "label": "rollbackFor 回滚属性",
+   "aka": "rollbackFor",
+   "layer": "framework",
+   "gloss": "@Transactional 默认只回滚 RuntimeException，受检异常要显式指定",
+   "learned": null,
+   "ep": null,
+   "scenarios": [
+    "s.emp"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.tx.propagation",
+   "label": "事务传播行为",
+   "aka": "propagation",
+   "layer": "framework",
+   "gloss": "解决事务方法与事务方法互相调用时的边界问题（REQUIRED / REQUIRES_NEW）",
+   "learned": null,
+   "ep": null,
+   "scenarios": [
+    "s.emp"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.tx.acid",
+   "label": "事务四大特性",
+   "aka": "ACID",
+   "layer": "framework",
+   "gloss": "原子性、一致性、隔离性、持久性；分别靠 undo log、约束、锁、redo log",
+   "learned": null,
+   "ep": null,
+   "scenarios": [
+    "s.emp"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.file.multipart",
+   "label": "MultipartFile",
+   "aka": "MultipartFile",
+   "layer": "framework",
+   "gloss": "Spring 接收上传文件的类型，能拿文件名、大小、字节流",
+   "learned": null,
+   "ep": null,
+   "scenarios": [
+    "s.emp"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.file.local",
+   "label": "本地磁盘存储",
+   "aka": "",
+   "layer": "server",
+   "gloss": "写到服务器目录再返回 URL；扩容或迁移后文件就丢了",
+   "learned": null,
+   "ep": null,
+   "scenarios": [
+    "s.emp"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.file.oss",
+   "label": "阿里云 OSS",
+   "aka": "OSS / Bucket",
+   "layer": "tooling",
+   "gloss": "对象存储：开通建 Bucket → 拿 AccessKey → SDK 上传，只存 URL 到库",
+   "learned": null,
+   "ep": null,
+   "scenarios": [
+    "s.emp"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.file.config",
+   "label": "上传大小限制",
+   "aka": "max-file-size",
+   "layer": "tooling",
+   "gloss": "默认单文件 1MB、单请求 10MB，要在配置里统一放开",
+   "learned": null,
+   "ep": null,
+   "scenarios": [
+    "s.emp"
+   ],
+   "themes": [],
+   "weight": 1
+  },
+  {
+   "id": "c.springboot.props",
+   "label": "配置绑定 @ConfigurationProperties",
+   "aka": "",
+   "layer": "tooling",
+   "gloss": "把 OSS 的 endpoint/bucket 等写进 yml 再绑定到实体，不写死在代码里",
+   "learned": null,
+   "ep": null,
+   "scenarios": [
+    "s.emp"
+   ],
+   "themes": [],
+   "weight": 1
+  }
+ ],
+ "scenarios": [
+  {
+   "id": "s.register",
+   "label": "用户注册全链路",
+   "sub": "前端点击 → 落库 → 响应",
+   "color": "#2563EB",
+   "source": "source.md / 原思维导图",
+   "phases": [
+    {
+     "label": "阶段一：前端数据采集与发送（HTML + Vue + Axios）",
+     "color": "#2563EB"
+    },
+    {
+     "label": "阶段二：网络传输（HTTP 协议）",
+     "color": "#0E7490"
+    },
+    {
+     "label": "阶段三：后端接客与参数解析（SpringBoot + SpringMVC + Controller）",
+     "color": "#7C3AED"
+    },
+    {
+     "label": "阶段四：业务处理与依赖注入（Service + IOC/DI）",
+     "color": "#047857"
+    },
+    {
+     "label": "阶段五：数据持久化（MyBatis + HikariCP + MySQL）",
+     "color": "#C2410C"
+    },
+    {
+     "label": "阶段六：响应返回与前端渲染（HTTP Response + Axios）",
+     "color": "#BE123C"
+    }
+   ],
+   "steps": [
+    {
+     "id": "st.register.1.0",
+     "label": "1.1 HTML 表单：先把「容器」搭好",
+     "phase": 0,
+     "color": "#2563EB",
+     "concepts": [
+      "c.html-form"
+     ],
+     "details": [
+      "知识点：HTML 表单元素——form 标签负责把一组输入框聚合成一次「提交」；input 负责采集单个字段",
+      "详细过程：页面里先写好结构：一个用户名输入框、一个密码输入框、一个注册按钮",
+      "关键细节：type=\"text\" 是明文；type=\"password\" 输入时显示圆点但值仍是明文，加密必须靠后端",
+      "关键细节：input 必须绑定一个「归宿」——在 Vue 里就是 data 中的字段，否则输入的值抓不到",
+      "常见坑：input 忘了写 v-model，用户输入了但 form.username 一直是空字符串"
+     ],
+     "path": "r-1-0"
+    },
+    {
+     "id": "st.register.1.1",
+     "label": "1.2 Vue 的 v-model：把输入框和 data 焊在一起",
+     "phase": 0,
+     "color": "#2563EB",
+     "concepts": [
+      "c.vue.model"
+     ],
+     "details": [
+      "知识点：v-model 双向绑定——它是语法糖，等价于 :value + @input 的合体",
+      "拆开看本质：一是「数据 → 视图」：data 变了，输入框的值跟着变",
+      "拆开看本质：二是「视图 → 数据」：用户敲键盘触发 input 事件，Vue 自动把新值写回 data",
+      "详细过程：写 v-model=\"form.username\"，用户每敲一个字符，form.username 立刻同步更新，不需要手动读 DOM",
+      "为什么不用 document.getElementById：手动取 DOM 要自己监听事件、自己赋值、还得处理中文输入法组合态；v-model 全部替你做了",
+      "常见坑：v-model 绑定到一个未在 data 里声明的字段，Vue3 下会不响应（要先声明）"
+     ],
+     "path": "r-1-1"
+    },
+    {
+     "id": "st.register.1.2",
+     "label": "1.3 前端校验：能在这里拦住的就不要发网络请求",
+     "phase": 0,
+     "color": "#2563EB",
+     "concepts": [
+      "c.validate.client"
+     ],
+     "details": [
+      "知识点：表单校验——校验越靠前越省钱——前端拦住一次，就省一次网络往返 + 一次后端处理 + 一次数据库查询",
+      "详细过程：点注册前先判断：用户名非空、长度 3~20、密码长度不少于 6 位；不通过就直接提示，不发请求",
+      "关键细节：前端校验只提升体验，不能当安全防线——用户可以绕过前端直接调接口，所以后端必须再校验一遍",
+      "对应到本项目：知识库后端的 Service 层就写了「标题不能为空 / 分类不能为空 / 正文不能为空」的校验，和前端校验是两道关卡"
+     ],
+     "path": "r-1-2"
+    },
+    {
+     "id": "st.register.1.3",
+     "label": "1.4 @click 事件：真正的触发点",
+     "phase": 0,
+     "color": "#2563EB",
+     "concepts": [
+      "c.vue.event"
+     ],
+     "details": [
+      "知识点：Vue 事件绑定 @click——v-on:click 的简写，把「点击」这个 DOM 事件绑到 methods 里的一个方法上",
+      "详细过程：给注册按钮写 @click=\"register\"，点击时调用 register() 方法",
+      "为什么触发的是方法而不是直接发请求：把「事件」和「请求」拆开，好处是方法里可以先校验、可以置 loading、可以防重复提交",
+      "关键细节：若用 form 原生提交，要写 @submit.prevent，否则浏览器会刷新整页，Ajax 白写",
+      "常见坑：按钮写在 form 里但没写 type=\"button\"，点一下触发表单默认提交，页面闪一下刷新",
+      "常见坑：防重复提交：点完没禁用按钮，用户连点三次就注册了三条记录"
+     ],
+     "path": "r-1-3"
+    },
+    {
+     "id": "st.register.1.4",
+     "label": "1.5 组装参数：JS 对象是这一层的通用货币",
+     "phase": 0,
+     "color": "#2563EB",
+     "concepts": [
+      "c.js.object"
+     ],
+     "details": [
+      "知识点：JS 对象 / 字面量——前端发出去的不是「两个变量」，而是一个结构化的对象",
+      "详细过程：方法里组装 const data = { username: form.username, password: form.password }",
+      "关键细节：字段名必须和后端 Java 实体类的属性名一致——这是前后端唯一的「口头约定」，对不上后端收到 null",
+      "关键细节：不要直接把 form 整个发过去，可能夹带无关字段（比如确认密码），后端要么忽略要么报错"
+     ],
+     "path": "r-1-4"
+    },
+    {
+     "id": "st.register.1.5",
+     "label": "1.6 Axios 的 POST 请求：把对象变成网络报文",
+     "phase": 0,
+     "color": "#2563EB",
+     "concepts": [
+      "c.axios.post",
+      "c.http.content-type",
+      "c.json"
+     ],
+     "details": [
+      "知识点：axios.post——axios.post(url, data) 发一个 POST 请求",
+      "详细过程：调用 axios.post('/api/users/register', data)，url 里的 /api 是后端统一前缀",
+      "关键细节：Axios 自动做了两件事——一是把 JS 对象序列化成 JSON 字符串",
+      "关键细节：Axios 自动做了两件事——二是自动设置请求头 Content-Type: application/json",
+      "如果手写原生 fetch 会怎样：要自己 JSON.stringify、自己设 header，Axios 把这些默认行为都封好了",
+      "常见坑：发给后端却报 415 Unsupported Media Type，多半是 Content-Type 没设成 application/json",
+      "常见坑：路径写成相对路径时，基准是当前页面地址；页面地址变了就会 404，建议统一从配置里读 baseURL"
+     ],
+     "path": "r-1-5"
+    },
+    {
+     "id": "st.register.1.6",
+     "label": "1.7 async/await：等待但不卡死",
+     "phase": 0,
+     "color": "#2563EB",
+     "concepts": [
+      "c.js.async"
+     ],
+     "details": [
+      "知识点：async/await 异步等待——await 让异步代码读起来像同步，但底层仍然是「先挂起、结果回来再继续」",
+      "详细过程：register() 声明成 async，里面 const res = await axios.post(...)；执行到 await 时函数暂停，把控制权交回浏览器，页面仍可滚动、仍可点别的",
+      "关键细节：await 挂起的是「当前 async 函数」，不是整个页面——所以不会像同步请求那样把界面冻住",
+      "等价写法：不写 async/await 就用 axios.post(...).then(res => {...}).catch(err => {...})，本质上一样",
+      "关键细节：必须用 try/catch 包住 await，否则网络错误会变成未捕获异常，提示框弹不出来",
+      "常见坑：忘了写 await，拿到的是 Promise 对象而不是响应数据，后面 res.data 全是 undefined"
+     ],
+     "path": "r-1-6"
+    },
+    {
+     "id": "st.register.1.7",
+     "label": "1.8 JSON：前端与后端唯一都认的数据格式",
+     "phase": 0,
+     "color": "#2563EB",
+     "concepts": [
+      "c.json"
+     ],
+     "details": [
+      "知识点：JSON 格式——一种纯文本的数据交换格式，键值对 + 数组，语言无关",
+      "为什么不用 JS 对象直接发：网络只能传字节流；JSON 是文本，能安全穿过 HTTP 请求体",
+      "JSON 与 JS 对象的区别：JSON 的键必须用双引号；不能有注释；不能有 undefined；不能有函数",
+      "详细过程：浏览器里 { username: \"wuji\", password: \"123\" } 是 JS 对象",
+      "详细过程：发出后变成文本 {\"username\":\"wuji\",\"password\":\"123\"} 这才是 JSON",
+      "常见坑：后端返回的字段名和前端.js 里写的对不上（比如 note_date 与 noteDate），页面一片空白"
+     ],
+     "path": "r-1-7"
+    },
+    {
+     "id": "st.register.2.0",
+     "label": "2.1 建立连接：先握手再说话",
+     "phase": 1,
+     "color": "#0E7490",
+     "concepts": [
+      "c.tcp"
+     ],
+     "details": [
+      "知识点：TCP 三次握手——HTTP 建立在 TCP 之上；发请求前先建立可靠连接",
+      "详细过程：客户端发 SYN → 服务端回 SYN+ACK → 客户端回 ACK，连接建立后才会发 HTTP 报文",
+      "关键细节：本机访问 127.0.0.1 走 loopback，不经过网卡，所以几乎无延迟",
+      "关键细节：HTTP/1.1 默认 keep-alive，连接可复用，不是每个请求都重新握手"
+     ],
+     "path": "r-2-0"
+    },
+    {
+     "id": "st.register.2.1",
+     "label": "2.2 HTTP 请求报文：三个部分一个空行",
+     "phase": 1,
+     "color": "#0E7490",
+     "concepts": [
+      "c.http.request",
+      "c.http.content-type"
+     ],
+     "details": [
+      "知识点：请求行——格式是「方法 + 路径 + 协议版本」",
+      "详细过程：请求行实例——POST /api/users/register HTTP/1.1",
+      "知识点：请求头——一组「键: 值」，告诉服务器这次请求的元信息",
+      "详细过程：请求头关键项——Host：目标主机和端口",
+      "详细过程：请求头关键项——Content-Type: application/json：请求体是 JSON，这是后端能否用 @RequestBody 解析的关键",
+      "详细过程：请求头关键项——Content-Length：请求体的字节长度",
+      "详细过程：请求头关键项——Accept: application/json：希望返回 JSON",
+      "详细过程：请求头关键项——User-Agent：浏览器身份",
+      "详细过程：请求头关键项——Cookie：若已登录，会话信息在这里",
+      "知识点：空行——请求头和请求体之间的分界线，一个空行，告诉服务器「头结束了」",
+      "知识点：请求体——真正要传的业务数据，只在 POST/PUT 里有",
+      "详细过程：请求体实例——{\"username\":\"wuji\",\"password\":\"123\"}",
+      "关键细节：请求头里能看出「是什么格式」，请求体里才是「内容」，两者配合才能正确解析"
+     ],
+     "path": "r-2-1"
+    },
+    {
+     "id": "st.register.2.2",
+     "label": "2.3 POST 与 GET 的区别：为什么注册必须用 POST",
+     "phase": 1,
+     "color": "#0E7490",
+     "concepts": [
+      "c.http.method"
+     ],
+     "details": [
+      "知识点：参数位置不同——GET 把参数拼在 URL 的问号后面（query string）；POST 把参数放在请求体里",
+      "知识点：语义不同——GET 用于「取」，应该是只读、可重复的；POST 用于「提交」，会改变服务器状态",
+      "知识点：安全性不同——GET 参数暴露在 URL 里，会被浏览器历史、日志、代理服务器记录；POST 放在 body 里相对隐蔽",
+      "关键细节：注意「相对隐蔽」不等于「安全」——POST 照样可以被抓包，真正安全要靠 HTTPS",
+      "知识点：长度限制不同——GET 受 URL 长度限制（不同浏览器几千字符）；POST 理论上没有硬限制",
+      "知识点：缓存与幂等不同——GET 可被缓存、可重复执行结果不变（幂等）；POST 一般不被缓存、重复执行会产生多条数据（非幂等）",
+      "详细过程：对照表——注册用 POST：/api/users/register + body 里放 username/password",
+      "详细过程：对照表——查询用户用 GET：/api/users?page=1&size=10",
+      "常见坑：用 GET 传密码，密码直接出现在 URL 和访问日志里，属于低级安全事故"
+     ],
+     "path": "r-2-2"
+    },
+    {
+     "id": "st.register.2.3",
+     "label": "2.4 URL 的拆解：请求到底发到哪",
+     "phase": 1,
+     "color": "#0E7490",
+     "concepts": [
+      "c.url"
+     ],
+     "details": [
+      "知识点：URL 结构——协议://主机:端口/路径?查询参数#锚点",
+      "详细过程：http://127.0.0.1:8080/api/users/register",
+      "逐段拆解：http：协议",
+      "逐段拆解：127.0.0.1：主机（本机回环地址）",
+      "逐段拆解：8080：端口，对应 SpringBoot 内嵌 Tomcat 的监听端口",
+      "逐段拆解：/api/users/register：路径，SpringMVC 就是靠它查路由表的",
+      "关键细节：端口不对会直接连接被拒（ERR_CONNECTION_REFUSED），根本不是 404——两者要分清"
+     ],
+     "path": "r-2-3"
+    },
+    {
+     "id": "st.register.2.4",
+     "label": "2.5 跨域与预检：本地开发的高频坑",
+     "phase": 1,
+     "color": "#0E7490",
+     "concepts": [
+      "c.cors"
+     ],
+     "details": [
+      "知识点：同源策略——浏览器的安全策略：协议 + 域名 + 端口三者完全相同才算同源，否则 Ajax 被拦",
+      "知识点：CORS——服务端通过响应头 Access-Control-Allow-Origin 等声明「允许哪些来源访问」",
+      "详细过程：若前端跑在 5173、后端在 8080，就是跨域；浏览器会先发一个 OPTIONS 预检请求，服务端允许后才发真正的 POST",
+      "关键细节：这是浏览器的限制，不是服务器的限制——用 Postman 直接调接口不会跨域，因为 Postman 不是浏览器",
+      "常见坑：file:// 协议下打开页面，Ajax 一律失败：这是本地文件跨域限制，必须用本地服务器打开"
+     ],
+     "path": "r-2-4"
+    },
+    {
+     "id": "st.register.3.0",
+     "label": "3.1 SpringBoot 启动类：一切的起点",
+     "phase": 2,
+     "color": "#7C3AED",
+     "concepts": [
+      "c.springboot.app",
+      "c.springboot.scan"
+     ],
+     "details": [
+      "知识点：@SpringBootApplication——它是三个注解的合体：@SpringBootConfiguration + @EnableAutoConfiguration + @ComponentScan",
+      "逐个解释：@SpringBootConfiguration：声明这是配置类",
+      "逐个解释：@EnableAutoConfiguration：自动配置，按依赖推断要装配什么（比如引了 web 依赖就自动配 Tomcat）",
+      "逐个解释：@ComponentScan：从启动类所在包向下扫描所有 @Component/@Service/@Repository/@RestController",
+      "详细过程：main 方法里调 SpringApplication.run(XxxApplication.class, args)，容器启动、Bean 创建、Tomcat 拉起",
+      "关键细节：包的位置很关键——启动类必须放在所有业务类的「父包」下，否则扫不到——这就是为什么 Controller 注入 Service 会变成 null 的常见原因"
+     ],
+     "path": "r-3-0"
+    },
+    {
+     "id": "st.register.3.1",
+     "label": "3.2 内嵌 Tomcat：不用单独装服务器",
+     "phase": 2,
+     "color": "#7C3AED",
+     "concepts": [
+      "c.tomcat"
+     ],
+     "details": [
+      "知识点：内嵌 Tomcat——SpringBoot 把 Tomcat 打进了 jar 里，启动应用就等于启动服务器",
+      "详细过程：启动日志里会出现 Tomcat started on port 8080 和 Started XxxApplication in x.xx seconds",
+      "为什么可以内嵌：传统做法是把 war 丢进外部 Tomcat；SpringBoot 反过来把容器作为依赖引入，做到「一个 jar 就能跑」",
+      "关键细节：端口可在 application.yml 里改 server.port；被占用时启动会直接失败，报 Port 8080 was already in use",
+      "关键细节：Tomcat 内部用线程池处理请求，每个请求占一个线程，所以 Service 里不要写死循环或长阻塞"
+     ],
+     "path": "r-3-1"
+    },
+    {
+     "id": "st.register.3.2",
+     "label": "3.3 请求进入 Tomcat：从字节流到 Request 对象",
+     "phase": 2,
+     "color": "#7C3AED",
+     "concepts": [
+      "c.servlet.request"
+     ],
+     "details": [
+      "知识点：Connector 与线程池——Tomcat 的 Connector 组件监听端口，收到 TCP 数据后交给工作线程处理",
+      "详细过程：Tomcat 解析 HTTP 报文，把请求行、请求头、请求体封装成 HttpServletRequest 对象，响应封装成 HttpServletResponse",
+      "关键细节：到这里 Tomcat 并不知道「用户注册」是什么业务，它只管把报文解析成对象"
+     ],
+     "path": "r-3-2"
+    },
+    {
+     "id": "st.register.3.3",
+     "label": "3.4 SpringMVC 路由分发：DispatcherServlet 是总调度",
+     "phase": 2,
+     "color": "#7C3AED",
+     "concepts": [
+      "c.springmvc.dispatcher",
+      "c.springmvc.mapping"
+     ],
+     "details": [
+      "知识点：DispatcherServlet——SpringMVC 的前端控制器（Front Controller），所有请求的入口，负责统筹而不是自己干活",
+      "详细过程：请求先到 DispatcherServlet → 它问 HandlerMapping「这个路径该谁处理」→ HandlerMapping 查路由表 → 返回对应的 Controller 方法",
+      "关键细节：路由表是启动时扫出来的：扫描所有 @RequestMapping/@GetMapping/@PostMapping，建立「路径 + 方法 → 处理函数」的映射",
+      "常见坑：路径对得上但请求方法不对（代码写 @PostMapping、你发的是 GET），会返回 405 Method Not Allowed——这是接口层面最容易被误判成 404 的错误"
+     ],
+     "path": "r-3-3"
+    },
+    {
+     "id": "st.register.3.4",
+     "label": "3.5 路由映射的两种写法",
+     "phase": 2,
+     "color": "#7C3AED",
+     "concepts": [
+      "c.springmvc.mapping",
+      "c.springmvc.mapping-class"
+     ],
+     "details": [
+      "知识点：类级 + 方法级组合——类上写 @RequestMapping(\"/api/users\") 作为前缀，方法上写 @PostMapping(\"/register\")",
+      "详细过程：最终路径——两者拼接得到 /api/users/register，这才和前端 axios 里的 url 对上",
+      "另一种写法：方法上直接写完整路径 @PostMapping(\"/api/users/register\")，效果一样但不利于统一管理",
+      "关键细节：路径前有没有斜杠、末尾有没有斜杠，都可能影响匹配，团队要统一约定"
+     ],
+     "path": "r-3-4"
+    },
+    {
+     "id": "st.register.3.5",
+     "label": "3.6 @RestController：告诉 Spring「我是接口」",
+     "phase": 2,
+     "color": "#7C3AED",
+     "concepts": [
+      "c.annotation.restcontroller",
+      "c.jackson"
+     ],
+     "details": [
+      "知识点：@RestController——等于 @Controller + @ResponseBody 的组合注解",
+      "拆开看：@Controller：声明这是一个控制器，要被 Spring 管理",
+      "拆开看：@ResponseBody：方法返回值不再当「视图名」解析，而是直接写进响应体",
+      "详细过程：返回一个 User 对象，Spring 用 Jackson 自动把它序列化成 JSON 字符串放进响应体",
+      "关键细节：如果用 @Controller 而忘了 @ResponseBody，Spring 会把返回值当模板名去找页面，结果报 404 或视图解析错误——这是新手最常见的坑之一"
+     ],
+     "path": "r-3-5"
+    },
+    {
+     "id": "st.register.3.6",
+     "label": "3.7 @PostMapping：只接 POST",
+     "phase": 2,
+     "color": "#7C3AED",
+     "concepts": [
+      "c.annotation.method-mapping",
+      "c.springmvc.mapping"
+     ],
+     "details": [
+      "知识点：@PostMapping——限定只有 POST 请求才进这个方法，是 @RequestMapping(method = RequestMethod.POST) 的简写",
+      "详细过程：@PostMapping(\"/register\") 贴在方法上，表示「/register 且是 POST」才匹配",
+      "家族成员：@GetMapping / @PostMapping / @PutMapping / @DeleteMapping 分别对应查/增/改/删，和 RESTful 风格一一对应",
+      "常见坑：前端用了 axios.get 而后端写的是 @PostMapping，报 405；反过来也一样"
+     ],
+     "path": "r-3-6"
+    },
+    {
+     "id": "st.register.3.7",
+     "label": "3.8 @RequestBody：把 JSON 变成 Java 对象",
+     "phase": 2,
+     "color": "#7C3AED",
+     "concepts": [
+      "c.annotation.requestbody",
+      "c.jackson",
+      "c.http.content-type"
+     ],
+     "details": [
+      "知识点：@RequestBody——告诉 Spring「把请求体整个读出来，转成这个参数类型的对象」",
+      "详细过程：方法签名写 public Result register(@RequestBody User user)，Spring 会：",
+      "详细过程：第一步——读取请求体里的 JSON 字符串",
+      "详细过程：第二步——根据 Content-Type 选择 HttpMessageConverter（JSON 对应 Jackson 的 MappingJackson2HttpMessageConverter）",
+      "详细过程：第三步——Jackson 把 JSON 的键和 User 的属性名逐一匹配、反序列化成 new User(...)",
+      "关键细节：这就是为什么前端字段名和后端实体属性名必须一致——不一致就映射不上，拿到 null",
+      "关键细节：Content-Type 必须是 application/json，否则会报 415 Unsupported Media Type",
+      "与 @RequestParam 的区别：@RequestParam 取的是 URL 上的参数或表单字段（key=value）；@RequestBody 取的是请求体的整体内容",
+      "与 @PathVariable 的区别：@PathVariable 取的是路径里的占位（/users/{id}）；@RequestBody 取的是 body",
+      "常见坑：一个方法里既想接 body 又想接 query 参数是可以的，但不能写两个 @RequestBody"
+     ],
+     "path": "r-3-7"
+    },
+    {
+     "id": "st.register.3.8",
+     "label": "3.9 Controller 的职责边界：接客不干活",
+     "phase": 2,
+     "color": "#7C3AED",
+     "concepts": [
+      "c.arch.controller",
+      "c.arch.three-layer"
+     ],
+     "details": [
+      "知识点：Controller 层是「前台」——只做三件事：接收参数、调用 Service、包装返回结果",
+      "详细过程：Controller 里不应该出现 SQL、不应该出现复杂判断、不应该出现事务 —— 那些都属于 Service",
+      "关键细节：Controller 保持薄，一旦业务变复杂，改 Service 就够了，接口层不用动"
+     ],
+     "path": "r-3-8"
+    },
+    {
+     "id": "st.register.4.0",
+     "label": "4.1 IOC：对象创建权交给容器",
+     "phase": 3,
+     "color": "#047857",
+     "concepts": [
+      "c.spring.ioc"
+     ],
+     "details": [
+      "知识点：IOC（控制反转）——传统写法是「我要用什么，我自己 new」；IOC 是「我要用什么，容器给我」",
+      "反转了什么：反转的是「对象的创建权与生命周期管理权」——从程序员手里转到了 Spring 容器",
+      "详细过程：Spring 启动时扫描到 @Service、@RestController、@Repository、@Component、@Mapper，把它们实例化成对象放进容器，这些对象统称 Bean",
+      "为什么要这么做：一是解耦（换个实现类不用改调用方）；二是统一管理（生命周期、作用域、AOP 增强都集中处理）"
+     ],
+     "path": "r-4-0"
+    },
+    {
+     "id": "st.register.4.1",
+     "label": "4.2 @Service：把类注册成 Bean",
+     "phase": 3,
+     "color": "#047857",
+     "concepts": [
+      "c.annotation.component"
+     ],
+     "details": [
+      "知识点：@Service——语义上标记「这是一个业务层组件」，本质上和 @Component 一样，都是让容器扫描并实例化",
+      "详细过程：在 UserServiceImpl 类上加 @Service，Spring 启动时就会创建它的实例放进容器",
+      "关键细节：默认单例——一个 @Service 类在容器里只有一个实例，被所有请求共享；所以不要在 Service 里用成员变量存「这个请求的数据」，会串数据",
+      "家族成员：@Controller/@RestController 用于接口层，@Service 用于业务层，@Repository 用于持久层，@Component 是通用兜底"
+     ],
+     "path": "r-4-1"
+    },
+    {
+     "id": "st.register.4.2",
+     "label": "4.3 @Autowired：依赖注入，替代手动 new",
+     "phase": 3,
+     "color": "#047857",
+     "concepts": [
+      "c.spring.di",
+      "c.annotation.autowired"
+     ],
+     "details": [
+      "知识点：@Autowired（DI 依赖注入）——声明「这个字段需要的对象，请容器帮我注入进来」",
+      "详细过程：对比两种写法——老写法：private UserService userService = new UserServiceImpl();",
+      "详细过程：对比两种写法——新写法：@Autowired private UserService userService;",
+      "关键细节：注意注入的是「接口类型」而不是实现类——这就是利用多态解耦：以后把 UserServiceImpl 换成 UserServiceImplV2，Controller 一行都不用改",
+      "注入方式：字段注入——直接标在字段上，写法最简，但不利于单元测试",
+      "注入方式：构造器注入——把依赖作为构造参数，Spring 自动传入；官方推荐，因为依赖不可变（final）、便于测试、能早暴露循环依赖",
+      "关键细节：@Autowired 默认按「类型」找 Bean；同类型有多个时要用 @Qualifier 指定名字，或 @Primary 标记首选",
+      "常见坑：注入到的是 null，通常三个原因：类没加 @Service/@Repository；类不在启动类扫描范围内；Bean 还没创建就用了"
+     ],
+     "path": "r-4-2"
+    },
+    {
+     "id": "st.register.4.3",
+     "label": "4.4 Controller 调用 Service：进入业务层",
+     "phase": 3,
+     "color": "#047857",
+     "concepts": [
+      "c.arch.service",
+      "c.arch.three-layer"
+     ],
+     "details": [
+      "详细过程：Controller 里 userService.register(user) 一行调用，控制权交给 Service",
+      "关键细节：这一行「看起来很简单」，但背后是：Spring 已经提前把 UserService 的实例准备好并注入到 Controller 里了"
+     ],
+     "path": "r-4-3"
+    },
+    {
+     "id": "st.register.4.4",
+     "label": "4.5 Service 里的业务逻辑：真正「有脑子」的一层",
+     "phase": 3,
+     "color": "#047857",
+     "concepts": [
+      "c.biz.validation",
+      "c.biz.transaction"
+     ],
+     "details": [
+      "知识点：业务校验——即便前端校验过，后端仍然要再校验一遍：用户名非空、长度合规、密码强度",
+      "为什么后端还要校验：前端可以绕过（Postman 直接调接口），所以后端才是真正的安全边界",
+      "知识点：唯一性检查——先查库里是否已存在同名用户，存在就抛业务异常（用户名已存在）",
+      "关键细节：严格来说「先查再插」在高并发下有竞态问题，真正可靠的做法是数据库唯一索引兜底",
+      "知识点：密码加密——绝不能明文存库；常见做法是 BCrypt（自带盐、可调强度）或 MD5+随机盐",
+      "关键细节：加密后存的是密文，登录时是把「用户输入的密码」用同样规则算出密文再比对，不是解密",
+      "知识点：事务——如果注册涉及多张表（用户表 + 用户角色表），要加 @Transactional，保证要么全成功要么全回滚",
+      "知识点：业务异常——校验不通过时抛自定义异常（如 ApiException），交给全局异常处理器统一转成错误响应"
+     ],
+     "path": "r-4-4"
+    },
+    {
+     "id": "st.register.4.5",
+     "label": "4.6 Service 调用 Mapper：业务层不写 SQL",
+     "phase": 3,
+     "color": "#047857",
+     "concepts": [
+      "c.arch.mapper"
+     ],
+     "details": [
+      "详细过程：Service 里调用 userMapper.insert(user)，把「持久化」这件事委托出去",
+      "关键细节：Service 只关心「要保存这个用户」，不关心「SQL 怎么写、连接从哪来」——这就是分层带来的好处"
+     ],
+     "path": "r-4-5"
+    },
+    {
+     "id": "st.register.5.0",
+     "label": "5.1 @Mapper 接口：只有签名，没有实现",
+     "phase": 4,
+     "color": "#C2410C",
+     "concepts": [
+      "c.mybatis.mapper"
+     ],
+     "details": [
+      "知识点：@Mapper——标记这是一个 MyBatis 的持久层接口，告诉 MyBatis「启动时请为它生成实现」",
+      "详细过程：写 public interface UserMapper { int insert(User user); } —— 只有方法签名，没有方法体",
+      "关键细节：@Mapper 可以逐接口标注，也可以在启动类上用 @MapperScan 批量扫描包"
+     ],
+     "path": "r-5-0"
+    },
+    {
+     "id": "st.register.5.1",
+     "label": "5.2 动态代理：实现类是运行时生成的",
+     "phase": 4,
+     "color": "#C2410C",
+     "concepts": [
+      "c.mybatis.proxy",
+      "c.java.interface"
+     ],
+     "details": [
+      "知识点：MyBatis 动态代理——MyBatis 用 JDK 动态代理（java.lang.reflect.Proxy）在运行时生成接口的实现类对象",
+      "详细过程：调用 userMapper.insert(user) 时，实际进入的是代理对象的 invoke 方法，代理再根据「接口名 + 方法名」找到对应的 SQL 并执行",
+      "关键细节：所以 Mapper 接口不需要你写实现类；但这也意味着「接口名 / 方法名 / namespace / id」必须严丝合缝对上，否则报 Invalid bound statement (not found)",
+      "关键细节：代理对象同样被注册进 Spring 容器，所以 Service 里可以用 @Autowired 注入它"
+     ],
+     "path": "r-5-1"
+    },
+    {
+     "id": "st.register.5.2",
+     "label": "5.3 SQL 映射：注解写还是 XML 写",
+     "phase": 4,
+     "color": "#C2410C",
+     "concepts": [
+      "c.mybatis.mapping"
+     ],
+     "details": [
+      "知识点：注解方式——在方法上直接写 @Insert(\"insert into user(username, password) values(#{username}, #{password})\")",
+      "知识点：XML 方式——在 resources/mapper/UserMapper.xml 里写 mapper + insert，namespace 指向接口全限定名、id 等于方法名",
+      "怎么选：简单 SQL 用注解；复杂/动态 SQL（if、where、foreach）用 XML，可读性更好",
+      "关键细节：XML 必须放在 mybatis.mapper-locations 配置的路径下（如 classpath:mapper/*.xml），否则打包后找不到"
+     ],
+     "path": "r-5-2"
+    },
+    {
+     "id": "st.register.5.3",
+     "label": "5.4 #{} 占位符：防 SQL 注入的关键",
+     "phase": 4,
+     "color": "#C2410C",
+     "concepts": [
+      "c.mybatis.hash",
+      "c.mybatis.dollar"
+     ],
+     "details": [
+      "知识点：#{} 预编译占位符——MyBatis 把 #{username} 编译成 JDBC 的 ?，交给 PreparedStatement 设参",
+      "详细过程：最终执行的 SQL 是 INSERT INTO user(username, password) VALUES(?, ?)",
+      "为什么能防注入：因为 SQL 的「结构」在预编译阶段就固定了，用户输入只作为「值」被传入，不会被当成 SQL 语法的一部分",
+      "对比 ${} 字符串拼接：${} 是直接文本替换，如果用户输入 ' or '1'='1，整条语句语义就被改掉",
+      "详细过程：注入攻击示例——假设 SQL 是 select * from user where username = '${username}'，输入 ' or '1'='1 后变成 where username = '' or '1'='1'，条件永远成立",
+      "关键细节：结论：99% 的场景用 #{}；只有表名、字段名这类「不能用 ? 替代」的地方才考虑 ${}，而且必须自己做白名单校验",
+      "这个坑你踩过两次：前端用 innerHTML 拼用户输入会 XSS；SQL 用字符串拼接会注入 —— 本质都是「把数据当代码执行」"
+     ],
+     "path": "r-5-3"
+    },
+    {
+     "id": "st.register.5.4",
+     "label": "5.5 HikariCP 连接池：借连接而不是造连接",
+     "phase": 4,
+     "color": "#C2410C",
+     "concepts": [
+      "c.pool.hikari"
+     ],
+     "details": [
+      "知识点：为什么需要连接池——建立一次数据库连接要做网络握手、身份认证、分配资源，成本很高；每个请求都新建连接，高并发下会把数据库拖死",
+      "知识点：连接池机制——应用启动时预先建好一批连接放进池子；用时「借出」，用完「归还」，而不是关闭",
+      "详细过程：MyBatis 执行 SQL 前向 HikariCP 借一个 Connection → 执行 → 归还",
+      "关键细节：SpringBoot 引入 JDBC/MyBatis 依赖后默认就用 HikariCP，不需要额外配置；application.yml 里可调最大连接数、超时等",
+      "关键细节：连接池的参数本质是「并发上限」：池子满了，后来的请求只能排队等"
+     ],
+     "path": "r-5-4"
+    },
+    {
+     "id": "st.register.5.5",
+     "label": "5.6 执行 INSERT：DML 与事务",
+     "phase": 4,
+     "color": "#C2410C",
+     "concepts": [
+      "c.sql.dml",
+      "c.sql",
+      "c.biz.transaction"
+     ],
+     "details": [
+      "知识点：DML 语句——INSERT 属于 DML（数据操作语言），影响的是「数据行」而不是「表结构」",
+      "详细过程：PreparedStatement 设好两个参数 → executeUpdate() 执行 → MySQL 写入数据页并更新索引",
+      "关键细节：数据库默认 autocommit=true，一条 DML 执行完立即提交；如果加了 @Transactional，则要在方法结束时统一提交",
+      "知识点：主键回填——如果是自增主键，需要配置 useGeneratedKeys=true + keyProperty=\"id\"，插入后新 id 会回填到传入的 User 对象上",
+      "关键细节：不配回填，插入完你就拿不到新记录的 id，后续想用 id 做跳转或关联就没法做"
+     ],
+     "path": "r-5-5"
+    },
+    {
+     "id": "st.register.5.6",
+     "label": "5.7 结果映射：数据库的行变成 Java 的对象",
+     "phase": 4,
+     "color": "#C2410C",
+     "concepts": [
+      "c.mybatis.resultmap",
+      "c.mybatis.camel-case"
+     ],
+     "details": [
+      "知识点：结果映射——查询时 MySQL 返回 ResultSet（结果集），MyBatis 负责把「一行」映射成「一个 Java 对象」",
+      "详细过程：INSERT 的返回——插入方法通常声明返回 int，值等于「受影响的行数」；返回 0 说明一条都没插进去",
+      "详细过程：查询的返回——select 方法声明返回 User 或 List<User>，MyBatis 按列名匹配属性名自动填充",
+      "关键细节：列名 user_name 与属性名 userName 默认映射不上，需要在 SQL 里 as 起别名，或开启 map-underscore-to-camel-case",
+      "常见坑：同一条 SQL 在数据库工具里查得到数据，程序里对象却全是 null —— 多半就是命名没对上"
+     ],
+     "path": "r-5-6"
+    },
+    {
+     "id": "st.register.6.0",
+     "label": "6.1 Service 返回结果给 Controller",
+     "phase": 5,
+     "color": "#BE123C",
+     "concepts": [
+      "c.arch.service"
+     ],
+     "details": [
+      "详细过程：userService.register(user) 执行完返回（void 或 int 或其他），Controller 拿到这个结果",
+      "关键细节：如果 Service 里抛了异常，流程不会走到这里，而是直接进入全局异常处理分支"
+     ],
+     "path": "r-6-0"
+    },
+    {
+     "id": "st.register.6.1",
+     "label": "6.2 统一响应封装：Result 是前后端的「契约」",
+     "phase": 5,
+     "color": "#BE123C",
+     "concepts": [
+      "c.result.wrapper"
+     ],
+     "details": [
+      "知识点：统一响应结果类——把所有接口的返回都统一成 { code, msg, data } 三段式",
+      "为什么需要统一：前端只需要写一套解析逻辑：先看 code，再决定取 data 还是弹 msg；不用为每个接口写不同的判断",
+      "详细过程：Controller 返回 Result.success(\"注册成功\")，或 Result.error(\"用户名已存在\")",
+      "关键细节：code 的约定要固定下来：0 或 200 表示成功，非 0 表示失败；失败时要带上可读的 msg",
+      "对照你的项目：知识库后端的接口就返回统一结构，出错时由 @RestControllerAdvice 统一转成错误 JSON，前端不用逐个接口写 try"
+     ],
+     "path": "r-6-1"
+    },
+    {
+     "id": "st.register.6.2",
+     "label": "6.3 @RestController 序列化：Result 对象变 JSON",
+     "phase": 5,
+     "color": "#BE123C",
+     "concepts": [
+      "c.jackson",
+      "c.annotation.restcontroller"
+     ],
+     "details": [
+      "知识点：Jackson 序列化——Spring 内置 Jackson，把 Java 对象转成 JSON 字符串",
+      "详细过程：Result 对象的 code/msg/data 三个属性 → {\"code\":0,\"msg\":\"注册成功\",\"data\":null}",
+      "关键细节：serialization 时对象里的 null 字段默认会被写成 null；日期默认是时间戳或 ISO 格式，必要时用 @JsonFormat 指定格式"
+     ],
+     "path": "r-6-2"
+    },
+    {
+     "id": "st.register.6.3",
+     "label": "6.4 HTTP 响应报文：状态行 + 响应头 + 响应体",
+     "phase": 5,
+     "color": "#BE123C",
+     "concepts": [
+      "c.http.response",
+      "c.http.content-type"
+     ],
+     "details": [
+      "知识点：状态行——格式是「协议版本 + 状态码 + 状态描述」",
+      "详细过程：状态行实例——HTTP/1.1 200 OK",
+      "知识点：响应头——Content-Type: application/json;charset=UTF-8（告诉浏览器这是 JSON，别乱解析）",
+      "详细过程：响应头关键项——Content-Length：响应体字节长度",
+      "详细过程：响应头关键项——Date：服务器时间",
+      "详细过程：响应头关键项——Set-Cookie：需要建立会话时在这里下发 Cookie",
+      "知识点：响应体——真正的业务数据，就是那段 JSON",
+      "详细过程：响应体实例——{\"code\":0,\"msg\":\"注册成功\",\"data\":null}"
+     ],
+     "path": "r-6-3"
+    },
+    {
+     "id": "st.register.6.4",
+     "label": "6.5 状态码：HTTP 层的「一句话结论」",
+     "phase": 5,
+     "color": "#BE123C",
+     "concepts": [
+      "c.http.status"
+     ],
+     "details": [
+      "知识点：200 OK——请求成功，业务是否成功还要看响应体里的 code",
+      "知识点：201 Created——资源创建成功（新增接口更规范的做法）；很多项目统一用 200，但要和前端约定好",
+      "知识点：400 Bad Request——请求参数有问题，比如 JSON 格式错、必填字段缺失",
+      "知识点：401 / 403——未认证 / 已认证但无权限",
+      "知识点：404 Not Found——路径找不到——注意区分「路径错」与「端口错」，端口错是连接被拒",
+      "知识点：405 Method Not Allowed——路径对了但请求方法不对（该 POST 发了 GET）",
+      "知识点：415 Unsupported Media Type——Content-Type 不对，@RequestBody 解析不了",
+      "知识点：500 Internal Server Error——服务端代码抛了未被捕获的异常，比如空指针、SQL 语法错、连接池耗尽",
+      "关键细节：一句话区分：4xx 是「你的请求有问题」，5xx 是「我的服务器有问题」"
+     ],
+     "path": "r-6-4"
+    },
+    {
+     "id": "st.register.6.5",
+     "label": "6.6 全局异常处理：别让 500 直接甩给用户",
+     "phase": 5,
+     "color": "#BE123C",
+     "concepts": [
+      "c.exception.handler"
+     ],
+     "details": [
+      "知识点：@RestControllerAdvice + @ExceptionHandler——统一捕获 Controller 层抛出的异常，转成规范的 JSON 响应",
+      "详细过程：自定义异常（如用户名已存在）→ 被 @ExceptionHandler 捕获 → 返回 400 + {code:xxx, msg:\"用户名已存在\"}",
+      "关键细节：没有全局处理时，未捕获异常会导致 500 并可能把堆栈信息暴露给前端，既不友好也不安全"
+     ],
+     "path": "r-6-5"
+    },
+    {
+     "id": "st.register.6.6",
+     "label": "6.7 Tomcat 发回响应",
+     "phase": 5,
+     "color": "#BE123C",
+     "concepts": [
+      "c.tomcat"
+     ],
+     "details": [
+      "详细过程：Tomcat 把响应对象序列化成 HTTP 响应报文字节流，通过 TCP 连接写回浏览器",
+      "关键细节：如果前面是跨域请求，Tomcat 返回时还要带上 CORS 相关响应头，否则浏览器仍然会拦"
+     ],
+     "path": "r-6-6"
+    },
+    {
+     "id": "st.register.6.7",
+     "label": "6.8 前端接收：await 恢复执行",
+     "phase": 5,
+     "color": "#BE123C",
+     "concepts": [
+      "c.js.async",
+      "c.axios.post"
+     ],
+     "details": [
+      "知识点：Promise 的 resolve——网络响应回来后，之前挂起的 await 恢复执行，axios 把响应包装成 response 对象",
+      "详细过程：const res = await axios.post(...)；res 里有 status（HTTP 状态码）、data（响应体 JSON 解析后的对象）",
+      "关键细节：axios 已经帮你做了 JSON.parse；如果响应不是 JSON（比如返回 HTML 错误页），会解析失败",
+      "关键细节：HTTP 状态码非 2xx 时，axios 默认会走 catch 而不是 then，需要用 try/catch 或在拦截器里统一处理"
+     ],
+     "path": "r-6-7"
+    },
+    {
+     "id": "st.register.6.8",
+     "label": "6.9 判断与渲染：把结果变成用户能看懂的东西",
+     "phase": 5,
+     "color": "#BE123C",
+     "concepts": [
+      "c.dom.render",
+      "c.http.status"
+     ],
+     "details": [
+      "详细过程：判断 res.data.code 是否为成功值",
+      "成功分支：弹出「注册成功」提示 → 清空表单 → 延迟跳转到登录页（路由跳转而不是 window.location，避免整页刷新）",
+      "失败分支：把 res.data.msg 显示在页面上（比如「用户名已存在」），让用户知道下一步该改什么",
+      "关键细节：loading 状态要在这时关闭（无论成功失败），否则按钮会一直转圈",
+      "关键细节：提示信息要具体，「操作失败」这种话对用户毫无帮助"
+     ],
+     "path": "r-6-8"
+    }
+   ],
+   "extras": [
+    {
+     "id": "ex.register.0",
+     "label": "阶段〇：全景速览（先建立全局认知）",
+     "color": "#475569",
+     "items": [
+      {
+       "t": "0.1 一句话主线：用户在前端点「注册」→ 浏览器把数据打成 HTTP 请求发出去 → 内嵌 Tomcat 收到 → SpringMVC 按路由找到 Controller → Controller 调 Service 做业务 → Service 调 Mapper → MyBatis 生成 SQL 交给连接池执行 → MySQL 落库 → 结果原路返回 → 前端拿到 JSON 渲染提示",
+       "details": []
+      },
+      {
+       "t": "0.2 六段式时间轴（严格按此顺序）",
+       "details": [
+        "阶段一：前端采集与发送——前端：HTML 表单 → v-model 双向绑定 → 校验 → @click 触发 → 组装 JS 对象 → axios.post → await 挂起等待",
+        "阶段二：网络传输——网络：TCP 建连 → HTTP 请求报文（请求行 + 请求头 + 空行 + 请求体）→ 到达服务器端口",
+        "阶段三：后端接收与参数解析——后端：内嵌 Tomcat 监听 → DispatcherServlet 拦截 → HandlerMapping 查路由 → @PostMapping 命中 → @RequestBody 反序列化",
+        "阶段四：业务处理与依赖注入——业务：@Autowired 拿到 Service Bean → @Service 里的业务校验 → 调 Mapper",
+        "阶段五：数据持久化——持久层：@Mapper 动态代理 → #{} 预编译 → HikariCP 借连接 → INSERT → 返回受影响行数 → 归还连接",
+        "阶段六：响应返回——响应：封装 Result → Jackson 转 JSON → 200 状态码 → Tomcat 发回 → 前端 await 恢复 → 判断 code → 提示/跳转"
+       ]
+      },
+      {
+       "t": "0.3 四个角色与各自的语言",
+       "details": [
+        "浏览器（前端）：只懂 JS 对象、JSON、HTTP；不关心数据库长什么样",
+        "Tomcat（容器）：只懂 TCP 连接、HTTP 报文；不关心业务",
+        "Spring（框架）：负责路由、参数转换、对象创建、依赖注入；把杂乱的基础工作收走",
+        "MySQL（数据库）：只懂 SQL；不关心是谁在问、为什么要问"
+       ]
+      },
+      {
+       "t": "0.4 一次注册请求的耗时分层（体感）",
+       "details": [
+        "前端处理：输入、校验、序列化：约 1ms 以内，肉眼无感",
+        "网络往返：本机 loopback 约 1~3ms；公网 20~200ms",
+        "后端处理：路由 + 业务 + SQL 解析：约 5~30ms",
+        "数据库写入：INSERT + 索引更新 + 事务提交：约 1~10ms",
+        "渲染反馈：弹提示、跳转：约 1ms"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "ex.register.7",
+     "label": "附录 A：全链路文字时序图",
+     "color": "#0F766E",
+     "items": [
+      {
+       "t": "A.1 正常流程（逐步）",
+       "details": [
+        "步骤 1：用户输入 → v-model 同步到 form.username / form.password",
+        "步骤 2：点击按钮 → @click 触发 register()",
+        "步骤 3：前端校验通过 → 组装 data 对象",
+        "步骤 4：axios.post('/api/users/register', data) → 序列化成 JSON",
+        "步骤 5：浏览器发出 HTTP 请求：请求行 + 请求头（Content-Type: application/json）+ 空行 + 请求体",
+        "步骤 6：TCP 连接建立 → 请求到达 127.0.0.1:8080",
+        "步骤 7：Tomcat 解析报文 → 封装成 HttpServletRequest",
+        "步骤 8：DispatcherServlet → HandlerMapping 查到 UserController.register 方法",
+        "步骤 9：@RequestBody 用 Jackson 把 JSON 反序列化成 User 对象",
+        "步骤 10：@Autowired 注入的 UserService 被调用 → 执行业务校验与加密",
+        "步骤 11：Service 调用 @Autowired 注入的 UserMapper（动态代理对象）",
+        "步骤 12：MyBatis 找到对应 SQL，#{} 编译成 ?，从 HikariCP 借连接",
+        "步骤 13：执行 INSERT → MySQL 写入磁盘 → 返回受影响行数",
+        "步骤 14：连接归还池中 → int 结果一路上传：Mapper → Service → Controller",
+        "步骤 15：Controller 封装 Result.success(\"注册成功\")",
+        "步骤 16：Jackson 序列化成 JSON → 写入 HTTP 响应体 → 状态码 200",
+        "步骤 17：Tomcat 发回浏览器 → await 恢复 → 判断 code → 提示并跳转"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "ex.register.8",
+     "label": "附录 B：常见错误对照表",
+     "color": "#9333EA",
+     "items": [
+      {
+       "t": "B.1 前端侧",
+       "details": [
+        "页面不刷新 / 数据不变：v-model 绑定的字段未在 data 中声明，或字段名写错",
+        "请求根本没发出：按钮在 form 内且未 preventDefault，触发了页面刷新；或 @click 方法名写错",
+        "请求 404：axios 的 url 与后端 @RequestMapping 拼出来的路径不一致",
+        "请求 405：请求方法与后端注解不匹配（GET 打了 @PostMapping）",
+        "请求 415：Content-Type 不是 application/json，或没传 body",
+        "拿到 undefined：await 漏写，res 还是个 Promise",
+        "报跨域错误：前后端不同源且后端没配 CORS；或页面是 file:// 打开的"
+       ]
+      },
+      {
+       "t": "B.2 后端侧",
+       "details": [
+        "启动失败 Port already in use：8080 被占用，改 server.port 或杀掉占用进程",
+        "注入的 Service 为 null：类没加 @Service，或不在启动类扫描的包范围内",
+        "收到的参数全是 null：前端字段名与实体属性名不一致；或漏了 @RequestBody",
+        "Invalid bound statement (not found)：XML 的 namespace 不是接口全限定名、select 的 id 与方法名不一致，或 XML 不在 mapper-locations 路径",
+        "查得到数据但对象全 null：数据库下划线命名与 Java 驼峰命名没做映射",
+        "500 空指针：Service 里没判空就调用了方法，或注入失败",
+        "中文乱码：数据库/表不是 utf8mb4，或连接串没指定字符集",
+        "时间差 8 小时：连接串没配 serverTimezone=Asia/Shanghai"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "ex.register.9",
+     "label": "附录 C：面试高频追问",
+     "color": "#B45309",
+     "items": [
+      {
+       "t": "C.1 为什么 Controller 不直接操作数据库",
+       "details": [
+        "答案要点：职责分离：Controller 负责协议层（接参、返参），Service 负责业务规则与事务边界，Mapper 负责 SQL；分层让「改业务」和「改 SQL」互不影响，也让单元测试更可行"
+       ]
+      },
+      {
+       "t": "C.2 @Autowired 注入的是接口，能调用吗",
+       "details": [
+        "答案要点：能。Spring 注入的是接口的「实现类实例」，通过多态调用；这也是面向接口编程的价值——换实现不用改调用方"
+       ]
+      },
+      {
+       "t": "C.3 #{} 和 ${} 到底差在哪",
+       "details": [
+        "答案要点：#{} 编译成 JDBC 的 ? 走预编译，值永远是值；${} 是文本替换，值可能变成语法的一部分。前者安全，后者只在表名/字段名这类无法用 ? 的场景使用，且必须白名单校验"
+       ]
+      },
+      {
+       "t": "C.4 为什么有了 JDBC 还要 MyBatis",
+       "details": [
+        "答案要点：JDBC 一个查询要写连接、PreparedStatement、设参、遍历 ResultSet、关资源，模板代码占了大头；MyBatis 把模板收走，只留「接口方法 + SQL」，本质是「把重复收进壳里」"
+       ]
+      },
+      {
+       "t": "C.5 连接池解决了什么问题",
+       "details": [
+        "答案要点：建连接成本高（握手、认证、分配资源），连接池把连接复用起来，用「借/还」代替「建/销」，把开销从「每请求一次」降到「启动时一批」"
+       ]
+      },
+      {
+       "t": "C.6 一次请求经过了多少层",
+       "details": [
+        "答案要点：浏览器 → TCP → Tomcat → DispatcherServlet → HandlerMapping → Controller → Service → Mapper 代理 → MyBatis → 连接池 → MySQL → 原路返回。每层只做自己的事，靠「约定」（路径、字段名、返回结构）串起来"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "ex.register.10",
+     "label": "附录 D：这张图怎么用",
+     "color": "#4B5563",
+     "items": [
+      {
+       "t": "D.1 顺向背一遍：从阶段一读到阶段六，每个阶段问自己：「这一层的输入是什么、输出是什么、出了什么错」",
+       "details": []
+      },
+      {
+       "t": "D.2 逆向查一遍：从报错倒推：看到 404 想「路径匹配」，看到 405 想「请求方法」，看到 500 想「服务端异常」，看到 null 想「字段映射」",
+       "details": []
+      },
+      {
+       "t": "D.3 画一遍再讲一遍：合上这张图，自己在纸上画出六段式，然后对着空气讲给「一个不懂的人」听——能讲通，才算真会",
+       "details": []
+      }
+     ]
+    }
+   ],
+   "flow": [
+    "JSON 字符串",
+    "HTTP 请求报文",
+    "User 对象",
+    "insert(user)",
+    "受影响行数 int"
+   ],
+   "returnNote": "响应 JSON + 200 回到前端，渲染提示"
+  },
+  {
+   "id": "s.dept",
+   "label": "部门管理 CRUD",
+   "sub": "接口定义 → 三层实现 → 联调 → 日志",
+   "color": "#0E7490",
+   "source": "课件 07-后端Web实战(部门管理) + tlias 源码",
+   "phases": [
+    {
+     "label": "准备工作",
+     "color": "#334155"
+    },
+    {
+     "label": "查询",
+     "color": "#2563EB"
+    },
+    {
+     "label": "删除",
+     "color": "#C2410C"
+    },
+    {
+     "label": "新增",
+     "color": "#047857"
+    },
+    {
+     "label": "修改",
+     "color": "#7C3AED"
+    },
+    {
+     "label": "日志",
+     "color": "#B45309"
+    }
+   ],
+   "steps": [
+    {
+     "id": "st.dept.0",
+     "label": "1.1 前后端分离与接口文档",
+     "phase": 0,
+     "color": "#334155",
+     "concepts": [
+      "c.arch.separation",
+      "c.spec.api-doc"
+     ],
+     "details": [
+      "企业开发有两种模式：前后台混合开发、前后台分离开发。",
+      "混合开发把前台后台代码写在同一个工程里，缺点有四条。",
+      "缺点一·沟通成本高：后台发现前端有问题，要找前端改，改完再交回来。",
+      "缺点二·分工不明确：后台也要写部分前端代码，很难培养专业人才。",
+      "缺点三·不便管理：所有代码都在一个工程里。",
+      "缺点四·难以维护：前端只改一点，整个工程（含后台）都要重新打包部署。",
+      "分离开发把工程拆成前端工程 + 后端工程，各由专业人员开发，前端发异步请求取数据。",
+      "分离之后冒出真问题：前端怎么知道后端返回什么格式？后端怎么知道前端要什么？",
+      "答案是前后端统一制定一套规范——接口文档，两边都按它开发。",
+      "接口文档有离线版和在线版；内容由后端开发者根据产品经理的产品原型 + 需求文档撰写。",
+      "后端开发一个功能的完整流程：需求分析 → 接口定义 → 前后台并行开发 → 测试 → 前后端联调测试。",
+      "需求分析：读需求文档，分析、理解需求。",
+      "接口定义：查接口文档里该需求的接口定义，包括地址、参数、响应数据类型。",
+      "前后台并行开发：各自按接口文档开发、各自按接口文档测试。",
+      "前后端联调测试：前端工程请求后端工程，验证功能。"
+     ]
+    },
+    {
+     "id": "st.dept.1",
+     "label": "1.2 RESTful 风格",
+     "phase": 0,
+     "color": "#334155",
+     "concepts": [
+      "c.restful",
+      "c.http.method",
+      "c.url"
+     ],
+     "details": [
+      "REST = Representational State Transfer，表述性状态转换，是一种软件架构风格。",
+      "传统 URL 的例子：/user/getById?id=1（GET 查询）、/user/saveUser（POST 新增）。",
+      "传统 URL 三个毛病：定义复杂；把资源的访问行为暴露在 URL 里；每人命名习惯不同。",
+      "命名不一致的后果：getById / selectById / queryById / loadById 到处都是，几十上百人的项目没法维护。",
+      "REST 风格写法：/users/1 GET 查询、/users POST 新增、/users PUT 修改、/users/1 DELETE 删除。",
+      "一句话总结：通过 URL 定位要操作的资源，通过 HTTP 动词（请求方式）描述具体操作。",
+      "四种请求方式对应增删改查：GET 查询、POST 新增、PUT 修改、DELETE 删除。",
+      "REST 让 URL 更简洁、更规范、更优雅。",
+      "注意事项一：REST 是风格、是约定，约定不是规定，可以打破。",
+      "注意事项二：描述模块功能通常用复数（users / emps / books），表示这类资源而不是单个。",
+      "后端开发人员必须严格遵守接口文档开发，才能保证前端对得上。"
+     ]
+    },
+    {
+     "id": "st.dept.2",
+     "label": "1.3 Apifox 与接口测试",
+     "phase": 0,
+     "color": "#334155",
+     "concepts": [
+      "c.tool.apifox",
+      "c.http.method"
+     ],
+     "details": [
+      "本案例要测四种请求方式：POST、DELETE、PUT、GET。",
+      "关键限制：浏览器地址栏发起的请求全是 GET。",
+      "由此引出两个问题：后端开发完接口怎么测？前端开发时怎么拿数据测页面？",
+      "工具方案：Postman、Apipost、Apifox，用法基本类似。",
+      "课程选 Apifox，因为功能更强大、更完善。",
+      "Apifox = 集成了 API 文档、API 调试、API Mock、API 测试的一体化协作平台。",
+      "三个作用：接口文档管理、接口请求测试、Mock 服务。",
+      "一个工具品类的诞生，往往只是某个环境缺了一个很基础的能力。"
+     ]
+    },
+    {
+     "id": "st.dept.3",
+     "label": "1.4 工程搭建：四步",
+     "phase": 0,
+     "color": "#334155",
+     "concepts": [
+      "c.tool.maven",
+      "c.springboot.app",
+      "c.sql.ddl",
+      "c.sql",
+      "c.mysql",
+      "c.config.yml",
+      "c.arch.package",
+      "c.result.wrapper",
+      "c.mybatis.camel-case"
+     ],
+     "details": [
+      "第一步：创建 SpringBoot 工程，引入 web 起步依赖 + mybatis + mysql 驱动 + lombok。",
+      "第二步：创建 tlias 数据库与 dept 部门表。",
+      "建表语句要点：id int unsigned 主键自增、name varchar(10) 非空唯一、create_time、update_time 两个 datetime。",
+      "第三步：application.yml 配数据源——driver-class-name、url（jdbc:mysql://localhost:3306/tlias）、username、password。",
+      "第四步：准备基础包结构 controller / service（+ impl）/ mapper / pojo。",
+      "实体类 Dept：id / name / createTime / updateTime，用 lombok 的 @Data + 全参/无参构造。",
+      "统一响应 Result：code（1 成功 / 0 失败）+ msg + data。",
+      "Result 提供三个静态工厂：success()、success(Object)、error(String)。",
+      "Result 的意义：让「怎么造一个合法响应」只有一种写法，避免每人手搓出花样。",
+      "四个空壳类同时建好：DeptMapper、DeptService、DeptServiceImpl、DeptController。",
+      "包结构本身就是约定：扫描靠它，不靠额外配置。"
+     ]
+    },
+    {
+     "id": "st.dept.4",
+     "label": "2.1 列表查询：三层各写一行",
+     "phase": 1,
+     "color": "#2563EB",
+     "concepts": [
+      "c.arch.three-layer",
+      "c.arch.controller",
+      "c.arch.service",
+      "c.arch.mapper",
+      "c.mybatis.mapper",
+      "c.mybatis.resultmap"
+     ],
+     "details": [
+      "需求：查询所有部门数据，展示在部门管理页面。",
+      "接口：参照接口文档「部门管理 → 部门列表查询」。",
+      "思路先分三层职责，再动手写代码。",
+      "Controller 层：接收前端请求，调 Service 查询数据，再响应结果。",
+      "Service 层：调 Mapper 接口方法，查询所有部门数据。",
+      "Mapper 层：执行「查询所有部门」的 SQL。",
+      "Mapper 写法：@Mapper 接口 + @Select(\"select * from dept\") 返回 List<Dept>。",
+      "Service 接口声明 List<Dept> findAll()；实现类加 @Service，@Autowired 注入 DeptMapper。",
+      "Controller 加 @RestController，@Autowired 注入 DeptService，方法里 return Result.success(list)。",
+      "自下往上读更好懂：SQL 是根，Service 是透传，Controller 只做协议层。",
+      "写完之后启动项目，用 Apifox 测，返回 json 且与接口文档一致。"
+     ]
+    },
+    {
+     "id": "st.dept.5",
+     "label": "2.2 限定请求方式：@GetMapping",
+     "phase": 1,
+     "color": "#2563EB",
+     "concepts": [
+      "c.annotation.method-mapping",
+      "c.springmvc.mapping"
+     ],
+     "details": [
+      "测试中的意外：用 POST、PUT、DELETE 去请求，居然也能查到数据。",
+      "但接口文档明确要求这个接口是 GET，所以是问题。",
+      "方式一：在 @RequestMapping 里用 method 属性限定 RequestMethod.GET。",
+      "方式二（推荐）：直接用衍生注解 @GetMapping，简洁优雅。",
+      "四个衍生注解：@GetMapping 查、@PostMapping 增、@PutMapping 改、@DeleteMapping 删。",
+      "记忆法：记不住就记「祖宗」——@RequestMapping 管通用能力，衍生注解把请求方式定死。"
+     ]
+    },
+    {
+     "id": "st.dept.6",
+     "label": "2.3 数据封装：createTime 为什么是 null",
+     "phase": 1,
+     "color": "#2563EB",
+     "concepts": [
+      "c.mybatis.camel-case",
+      "c.mybatis.resultmap"
+     ],
+     "details": [
+      "现象：id、name 有值，createTime、updateTime 却是 null，而数据库里明明有值。",
+      "原因：实体类属性名与查询返回的字段名一致时 MyBatis 才自动封装，不一致就不封装。",
+      "表里叫 create_time，类里叫 createTime —— 名字对不上，静悄悄留 null。",
+      "最阴的地方是「部分成功」：不报错、不提示，不逐字段核对就发现不了。",
+      "方案一·手动结果映射：@Results({@Result(column=\"create_time\", property=\"createTime\")})。",
+      "方案二·起别名：SQL 里写 select create_time createTime, update_time updateTime from dept。",
+      "方案三·开启驼峰命名（推荐）：yml 里配 map-underscore-to-camel-case: true。",
+      "驼峰规则：abc_xyz → abcXyz。",
+      "前提：实体类属性与表字段名必须严格遵守驼峰命名。",
+      "三种解法的层次不同：前两个在每个 SQL 上打补丁，第三个在整个项目上定一条规则。",
+      "能在一个地方定规则，就别在十个地方打补丁。"
+     ]
+    },
+    {
+     "id": "st.dept.7",
+     "label": "2.4 前后端联调：Nginx 反向代理",
+     "phase": 1,
+     "color": "#2563EB",
+     "concepts": [
+      "c.nginx.proxy",
+      "c.http.request",
+      "c.cors",
+      "c.url",
+      "c.tomcat"
+     ],
+     "details": [
+      "联调步骤一：把「前端环境」压缩包拷到没有中文、不带空格的目录。",
+      "步骤二：解压到当前目录。",
+      "步骤三：双击 nginx.exe 启动，一闪而过就是启动成功；任务管理器里能看到两个进程。",
+      "步骤四：浏览器访问 http://localhost:90。",
+      "关键问题：前端请求 http://localhost:90/api/depts，怎么就跑到后端 Tomcat 上了？",
+      "答案：靠 Nginx 的反向代理。",
+      "链路：浏览器请求 localhost:90，请求的其实是 Nginx；Nginx 不处理，转发给后端 Tomcat。",
+      "为什么不直接请求 Tomcat——理由一·安全：后端一般是集群，全暴露给前端很危险。",
+      "理由二·灵活：后端增减服务器，前端无感知，只改 Nginx 配置。",
+      "理由三·负载均衡：基于反向代理可以很方便地做 Tomcat 负载均衡。",
+      "配置三个指令：location（定义匹配规则）、rewrite（重写 URI）、proxy_pass（代理转发）。",
+      "^~ /api/ 表示精确匹配以 /api/ 开头的路径。",
+      "架构认知：Controller 上面不是浏览器，中间还隔着一层服务器；这一层与业务无关，配错就接不上。"
+     ]
+    },
+    {
+     "id": "st.dept.8",
+     "label": "3.1 删除：需求与三层职责",
+     "phase": 2,
+     "color": "#C2410C",
+     "concepts": [
+      "c.arch.three-layer",
+      "c.annotation.method-mapping"
+     ],
+     "details": [
+      "需求：点击「删除」按钮，根据 ID 删除部门数据。",
+      "接口：参照接口文档「部门管理 → 删除部门」。",
+      "Controller 层：接收请求参数并调用 Service 的删除方法，最后响应结果。",
+      "Service 层：调 Mapper 完成删除。",
+      "Mapper 层：执行 delete 语句。",
+      "这里第一次遇到「Controller 要接前端传的参数」，于是引出参数接收的话题。"
+     ]
+    },
+    {
+     "id": "st.dept.9",
+     "label": "3.2 简单参数接收：三种方案",
+     "phase": 2,
+     "color": "#C2410C",
+     "concepts": [
+      "c.param.simple",
+      "c.annotation.requestparam"
+     ],
+     "details": [
+      "方案一：用原生 HttpServletRequest 的 request.getParameter(\"id\")。",
+      "方案一的缺点：实现繁琐，还要手动类型转换（Integer.parseInt），项目开发很少用。",
+      "方案二：@RequestParam(\"id\") Integer deptId，把请求参数绑定给方法形参。",
+      "方案二的约束：@RequestParam 的 value 必须与前端传的参数名保持一致。",
+      "@RequestParam 的 required 默认 true，不传会报错；参数可选时设为 false。",
+      "方案三：请求参数名与形参变量名相同时，直接定义方法形参即可，省略 @RequestParam。",
+      "讲义推荐方案三。",
+      "演进逻辑：能推导出来的，就不该让人再写一遍。",
+      "三种方案的差别不在写法，而在「谁来保证名字对得上」。"
+     ]
+    },
+    {
+     "id": "st.dept.10",
+     "label": "3.3 删除实现与 DML 返回值",
+     "phase": 2,
+     "color": "#C2410C",
+     "concepts": [
+      "c.sql.dml",
+      "c.mybatis.hash",
+      "c.biz.validation"
+     ],
+     "details": [
+      "Controller：@DeleteMapping(\"/depts\") + delete(Integer id)，调 Service 后 return Result.success()。",
+      "Service 接口声明 void deleteById(Integer id)；实现类里直接 deptMapper.deleteById(id)。",
+      "Mapper：@Delete(\"delete from dept where id = #{id}\") void deleteById(Integer id)。",
+      "细节一：Mapper 方法只有一个普通类型参数时，#{…} 里的属性名可以随便写（#{id}、#{value} 都行）。",
+      "细节二：DML 语句也有返回值，代表影响的记录数，所以返回值可以设成 Integer。",
+      "但一般开发不需要这个返回值，写成 void 即可。",
+      "写完后启动服务，用 Apifox 测 delete 接口。"
+     ]
+    },
+    {
+     "id": "st.dept.11",
+     "label": "4.1 新增：JSON 参数接收",
+     "phase": 3,
+     "color": "#047857",
+     "concepts": [
+      "c.annotation.requestbody",
+      "c.json",
+      "c.http.content-type"
+     ],
+     "details": [
+      "需求：点「新增部门」弹表单，填部门名称，点确定保存。",
+      "接口：参照接口文档「部门管理 → 新增部门」。",
+      "关键点：前端传的是 json 格式的请求参数。",
+      "规则：JSON 格式的参数通常用一个实体对象来接收。",
+      "进一步规则：JSON 的键名与形参对象的属性名相同，并且必须用 @RequestBody 标识。",
+      "前端传 {\"name\":\"研发部\"}，就用一个有 name 属性的对象接。",
+      "为什么必须 @RequestBody：告诉 Spring 把请求体整个读出来并反序列化成这个类型。",
+      "参数在 HTTP 的哪个位置，决定了用哪个注解——body 里就用 @RequestBody。",
+      "补充：一个方法里既想接 body 又想接 query 是可以的，但不能写两个 @RequestBody。"
+     ]
+    },
+    {
+     "id": "st.dept.12",
+     "label": "4.2 新增实现与公共字段补全",
+     "phase": 3,
+     "color": "#047857",
+     "concepts": [
+      "c.biz.validation",
+      "c.arch.service",
+      "c.sql.dml",
+      "c.mybatis.hash"
+     ],
+     "details": [
+      "Controller：@PostMapping(\"/depts\") + save(@RequestBody Dept dept)。",
+      "Service 实现里要「补全基础属性」：setCreateTime(LocalDateTime.now())、setUpdateTime(...)。",
+      "为什么在 Service 补：这些公共字段不该让前端传，Service 就是干业务规则的地方。",
+      "Mapper：@Insert(\"insert into dept(name,create_time,update_time) values(#{name},#{createTime},#{updateTime})\")。",
+      "Mapper 需要传多个参数时，把多个参数封装到一个对象里再传。",
+      "#{} 里写的是对象的属性名（createTime），不是表的字段名（create_time）。",
+      "这一步印证了分层：Controller 只管协议，Service 管规则，Mapper 管 SQL。"
+     ]
+    },
+    {
+     "id": "st.dept.13",
+     "label": "5.1 查询回显：路径参数 @PathVariable",
+     "phase": 4,
+     "color": "#7C3AED",
+     "concepts": [
+      "c.annotation.pathvariable",
+      "c.url",
+      "c.springmvc.mapping"
+     ],
+     "details": [
+      "讲义第一条结论：任何业务的「修改」功能一般分两步——查询回显、修改数据。",
+      "需求：点「编辑」时按 ID 查部门数据，用于页面回显。",
+      "接口：参照接口文档「部门管理 → 根据ID查询」。",
+      "/depts/1、/depts/2 这种在 URL 里直接传递的参数叫路径参数。",
+      "标识方式：在映射路径里用 {…} 占位，如 @GetMapping(\"/depts/{id}\")。",
+      "接收方式：用 @PathVariable 获取路径参数。",
+      "路径参数名与形参名一致时，@PathVariable 的 value 可以省略。",
+      "至此三种来源三种注解齐了：query → @RequestParam，路径 → @PathVariable，body → @RequestBody。",
+      "看到接口文档就能反应出该用哪个注解，是这个模块最大的收获。"
+     ]
+    },
+    {
+     "id": "st.dept.14",
+     "label": "5.2 修改数据：@PutMapping",
+     "phase": 4,
+     "color": "#7C3AED",
+     "concepts": [
+      "c.annotation.requestbody",
+      "c.annotation.method-mapping",
+      "c.sql.dml",
+      "c.biz.validation"
+     ],
+     "details": [
+      "需求：回显回来后改部门信息，点确定提交修改。",
+      "前端传的也是 json，所以 Controller 用 @PutMapping(\"/depts\") + @RequestBody Dept dept。",
+      "Service 每次修改都要更新 updateTime：setUpdateTime(LocalDateTime.now())。",
+      "Mapper：@Update(\"update dept set name = #{name},update_time = #{updateTime} where id = #{id}\")。",
+      "改动要检查返回值：受影响 0 行说明这个 id 不存在。",
+      "修改与新增的差别：新增补 createTime + updateTime，修改只补 updateTime。",
+      "三步套路固定：需求 → 接口文档 → 三层职责，然后填空。"
+     ]
+    },
+    {
+     "id": "st.dept.15",
+     "label": "5.3 @RequestMapping 抽取到类上",
+     "phase": 4,
+     "color": "#7C3AED",
+     "concepts": [
+      "c.springmvc.mapping-class",
+      "c.springmvc.mapping"
+     ],
+     "details": [
+      "增删改查写完会发现：所有方法的请求路径都以 /depts 开头，前缀重复了 5 遍。",
+      "做法：把公共路径抽到类上——类上加 @RequestMapping(\"/depts\")。",
+      "各方法上就不用再写 /depts，只写 @GetMapping / @PostMapping / @GetMapping(\"/{id}\") 等。",
+      "一条规则记住就不会晕：完整请求路径 = 类上 @RequestMapping 的 value + 方法上的 value。",
+      "消除重复不是「少打字」，是少一个改错的地方。",
+      "到这里部门管理的基础增删改查就全部实现了。"
+     ]
+    },
+    {
+     "id": "st.dept.16",
+     "label": "6.1 日志概述与框架选型",
+     "phase": 5,
+     "color": "#B45309",
+     "concepts": [
+      "c.log.println",
+      "c.log.slf4j",
+      "c.log.logback"
+     ],
+     "details": [
+      "日志记录应用程序的运行信息、状态信息、错误信息。",
+      "四个作用：追踪数据和执行过程、便于性能优化、出问题好排查、监控系统运行状态。",
+      "为什么不用 System.out.println——理由一：硬编码，想不输出只能回去删代码。",
+      "理由二：只能输出到控制台，不能输出到文件、不能分级。",
+      "理由三：不便于扩展和维护，没有格式、没有级别、没有滚动。",
+      "四个日志框架：JUL（官方，配置简单但不够灵活、性能较差）。",
+      "Log4j：流行的日志框架，配置灵活，支持多种输出目标。",
+      "Logback：基于 Log4j 升级而来，功能更多、性能优于 Log4j。",
+      "Slf4j：简单日志门面，一套标准接口，允许应用使用不同的底层日志框架。",
+      "第四次遇到「标准 vs 实现」：SQL↔MySQL、JDBC↔驱动、Java 接口↔实现类、Slf4j↔Logback。",
+      "同一个思想出现在四个层次上：想换掉底层实现，上层就得靠一套标准接口撑着。"
+     ]
+    },
+    {
+     "id": "st.dept.17",
+     "label": "6.2 Logback 入门三步",
+     "phase": 5,
+     "color": "#B45309",
+     "concepts": [
+      "c.log.logback",
+      "c.log.slf4j"
+     ],
+     "details": [
+      "第一步·引依赖：SpringBoot 中无需自己引入，已经传递了 logback-classic。",
+      "第二步·引配置：把 logback.xml 放到 src/main/resources 目录下。",
+      "第三步·写日志：定义 Logger 对象，再调用 log.debug / log.info。",
+      "写法：private static final Logger log = LoggerFactory.getLogger(LogTest.class)。",
+      "日志输出里除了消息，还有输出时间、线程名、是哪个类输出的。",
+      "这正是 System.out.println 做不到的——没有这些信息，日志就没法用来排查问题。",
+      "实操：先写一个测试方法打两条 debug、一条 info，观察输出格式。"
+     ]
+    },
+    {
+     "id": "st.dept.18",
+     "label": "6.3 logback.xml 与日志级别",
+     "phase": 5,
+     "color": "#B45309",
+     "concepts": [
+      "c.log.level",
+      "c.log.logback",
+      "c.config.yml"
+     ],
+     "details": [
+      "logback.xml 是对 Logback 输出进行控制的配置文件。",
+      "它能配置：输出格式、输出位置、日志开关。",
+      "日志级别是日志信息的类型，常见级别优先级由低到高：ALL、DEBUG、INFO、WARN、ERROR。",
+      "配置里写 level 决定输出到哪一级以上。",
+      "输出到文件要配 RollingFileAppender 的滚动策略（按大小或时间切分）。",
+      "和 application.yml 是同一个思路：把变化的东西挪出代码。",
+      "想关掉某条日志，改配置而不是改代码——这就是「配置 vs 写死」的区别。"
+     ]
+    }
+   ],
+   "flow": [
+    "建好表与工程环境",
+    "列表接口跑通",
+    "简单参数打通",
+    "JSON 参数打通",
+    "增删改查完成"
+   ],
+   "returnNote": "每个接口都统一返回 Result{code, msg, data}"
+  },
+  {
+   "id": "s.emp",
+   "label": "员工管理 CRUD",
+   "sub": "多表查询 → 分页 → 事务 → 文件上传",
+   "color": "#9333EA",
+   "source": "课件 08-后端Web实战(员工管理) + 09",
+   "phases": [
+    {
+     "label": "多表基础",
+     "color": "#BE123C"
+    },
+    {
+     "label": "列表查询",
+     "color": "#2563EB"
+    },
+    {
+     "label": "新增员工",
+     "color": "#047857"
+    },
+    {
+     "label": "事务管理",
+     "color": "#C2410C"
+    },
+    {
+     "label": "文件上传",
+     "color": "#7C3AED"
+    }
+   ],
+   "flow": [
+    "表关系与连接查询",
+    "分页列表跑通",
+    "嵌套 JSON 落库",
+    "事务兜住一致性",
+    "文件存到 OSS"
+   ],
+   "returnNote": "前半段是「一次查多张表」，后半段是「一次写多张表」",
+   "steps": [
+    {
+     "id": "st.emp.0",
+     "label": "1.1 多表关系与外键约束",
+     "phase": 0,
+     "color": "#BE123C",
+     "concepts": [
+      "c.db.relation",
+      "c.db.fk",
+      "c.db.fk-physical"
+     ],
+     "details": [
+      "员工表和部门表是一对多：一个部门下关联多个员工。",
+      "问题现象：删掉 3 号部门后，仍有 7 个员工归属该部门，数据不完整、不一致。",
+      "原因：两张表在数据库层面没有建立关联，无法保证一致性与完整性。",
+      "解决方案：用外键约束，把员工表的 dept_id 关联到部门表主键。",
+      "加外键的前提：当前数据必须完整，所以得先把删掉的部门补回来。",
+      "一对多的落地：在多的一方（员工表）加外键，指向一的一方（部门表）主键。",
+      "一对一：多用于单表拆分，任意一方加外键并加唯一约束。",
+      "多对多：必须引入第三张中间表，维护两张表主键的对应关系。",
+      "物理外键缺点一：影响增删改效率，每次都要检查外键关系。",
+      "缺点二：仅适用于单节点数据库，不适用于分布式、集群场景。",
+      "缺点三：容易引发死锁，消耗性能。",
+      "逻辑外键：数据库不建约束，由业务代码保证一致性——项目里更常用这个。"
+     ]
+    },
+    {
+     "id": "st.emp.1",
+     "label": "1.2 多表查询与笛卡尔积",
+     "phase": 0,
+     "color": "#BE123C",
+     "concepts": [
+      "c.sql.join",
+      "c.sql.cartesian"
+     ],
+     "details": [
+      "多表查询：一次查询从多张表获取所需数据。",
+      "直接查员工表和部门表，返回 30 × 6 = 180 条记录。",
+      "这就是笛卡尔积：两个集合的所有组合情况，其中大部分是无效数据。",
+      "多表查询必须消除无效笛卡尔积，只保留表关联部分的数据。",
+      "消除办法：给多表查询加上连接查询条件。",
+      "内连接：相当于查询 A、B 交集部分数据。",
+      "左外连接：查询左表所有数据（包含两表交集部分）。",
+      "右外连接：查询右表所有数据（包含两表交集部分）。",
+      "员工列表必须用左外连接：即使员工没有部门（id 29、30 无 dept_id）也要查出来。",
+      "内连接可以写成隐式（逗号 + where）或显式（join … on），显式可读性更好。"
+     ]
+    },
+    {
+     "id": "st.emp.2",
+     "label": "1.3 子查询四类",
+     "phase": 0,
+     "color": "#BE123C",
+     "concepts": [
+      "c.sql.subquery",
+      "c.sql.aggregate"
+     ],
+     "details": [
+      "子查询：在 SQL 语句中嵌套 select 语句，又称嵌套查询。",
+      "外部语句可以是 insert / update / delete / select，最常见的是 select。",
+      "按结果形状分四类：标量子查询（一行一列）、列子查询（一列多行）、行子查询（一行多列）、表子查询（多行多列）。",
+      "标量子查询常用操作符：= <> > >= < <=；案例：查询最早入职的员工信息。",
+      "标量子查询案例：查询在「阮小五」入职之后入职的员工信息。",
+      "列子查询常用操作符：in / not in / any / some / all；案例：查询「教研部」和「咨询部」的所有员工。",
+      "行子查询常用操作符：= <> in not in；案例：查与「李忠」薪资和职位都相同的员工。",
+      "表子查询结果是一张临时表；案例：获取每个部门中薪资最高的员工信息。",
+      "最难的题：查询工资低于本部门平均工资的员工——要用到相关子查询。",
+      "子查询写多了会发现：能一次 join 出来的，就别嵌套三层。"
+     ]
+    },
+    {
+     "id": "st.emp.3",
+     "label": "2.1 员工列表：左外连接 + 别名",
+     "phase": 1,
+     "color": "#2563EB",
+     "concepts": [
+      "c.sql.join",
+      "c.mybatis.mapper",
+      "c.mybatis.camel-case",
+      "c.mybatis.resultmap"
+     ],
+     "details": [
+      "准备工作：员工管理相关表结构、Emp 与 EmpExpr 实体类、Controller/Service/Mapper 基础结构。",
+      "SQL 用左外连接，保证「没有部门的员工」也能被查出来。",
+      "部门名称要起别名 deptName，因为接口文档要求返回字段就叫 deptName。",
+      "Emp 实体里必须有 deptName 属性，查询返回的字段名与属性名一一对应才能封装。",
+      "这是「字段名 ↔ 属性名」规则在多表场景的延伸：单表靠驼峰，多表还要管别名。",
+      "接口文档是约束方：字段名不是你觉得好听就行，是文档说什么就得叫什么。"
+     ]
+    },
+    {
+     "id": "st.emp.4",
+     "label": "2.2 分页查询：LIMIT",
+     "phase": 1,
+     "color": "#2563EB",
+     "concepts": [
+      "c.page.limit",
+      "c.sql"
+     ],
+     "details": [
+      "问题：数据有几千几万条时，全部查出来展示不现实。",
+      "方案：分页，每次只展示一页（比如 10 条），点页码切换。",
+      "数据库层用 LIMIT 关键字，格式：limit 开始索引, 每页显示的条数。",
+      "第 1 页：limit 0, 10；第 2 页：limit 10, 10；第 3 页：limit 20, 10。",
+      "规律：开始索引 = (页码 - 1) × 每页条数。",
+      "接口还要返回总记录数，前端才能算出总页数。",
+      "分页参数名（page / pageSize）同样由接口文档规定。"
+     ]
+    },
+    {
+     "id": "st.emp.5",
+     "label": "2.3 条件分页：三条件与参数对象",
+     "phase": 1,
+     "color": "#2563EB",
+     "concepts": [
+      "c.query.param-object",
+      "c.annotation.requestparam",
+      "c.annotation.method-mapping"
+     ],
+     "details": [
+      "需求：在分页基础上加搜索条件。",
+      "三个条件：姓名（模糊匹配）、性别（精确匹配）、入职日期（范围匹配）。",
+      "接口：GET /emps?name=张&gender=1&begin=2007-09-01&end=2022-09-01&page=1&pageSize=10",
+      "初级写法：Controller 方法直接声明 6 个形参，功能能实现但不方便维护。",
+      "优化一：定义 EmpQueryParam 实体类封装这几个参数。",
+      "约束：前端传递的请求参数名必须与实体类属性名一致，Spring 才会自动绑定。",
+      "参数一多就该收成对象——这和「公共字段不该让前端传」是同一个思路。"
+     ]
+    },
+    {
+     "id": "st.emp.6",
+     "label": "2.4 动态 SQL：条件不能写死",
+     "phase": 1,
+     "color": "#2563EB",
+     "concepts": [
+      "c.mybatis.dynamic-sql",
+      "c.mybatis.mapping"
+     ],
+     "details": [
+      "现状：Mapper 映射文件里的查询条件是写死的。",
+      "但条件是可选的：只输入姓名、只输入性别、两个都输入，SQL 都不一样。",
+      "所谓动态 SQL，就是随用户输入或外部条件变化而变化的 SQL 语句。",
+      "MyBatis 用 <where> + <if> 实现：<if> 判断条件是否为空。",
+      "<where> 很聪明：自动去掉第一个多余的 and，并且没有任何条件时不输出 where 关键字。",
+      "这就是之前手写 StringBuilder 拼 where 1=1 的正式解法。",
+      "动态 SQL 写在 XML 里比注解清晰——注解里几百字符的 SQL 根本没法读。",
+      "注解 vs XML 的选择规则在这里再次成立：简单的用注解，动态的用 XML。"
+     ]
+    },
+    {
+     "id": "st.emp.7",
+     "label": "3.1 新增员工：需求与嵌套 JSON",
+     "phase": 2,
+     "color": "#047857",
+     "concepts": [
+      "c.annotation.requestbody",
+      "c.json"
+     ],
+     "details": [
+      "需求：点「新增员工」填表单（含多条工作经历），保存。",
+      "请求体是嵌套 JSON：员工基本信息 + 工作经历列表。",
+      "Emp 实体类里增加 exprList 属性用来接收工作经历数据。",
+      "需要 EmpExprMapper 接口与 EmpExprMapper.xml 映射配置文件。",
+      "嵌套 JSON 用对象接收时，属性名与 JSON 键名仍然要一一对应。"
+     ]
+    },
+    {
+     "id": "st.emp.8",
+     "label": "3.2 保存基本信息与批量保存工作经历",
+     "phase": 2,
+     "color": "#047857",
+     "concepts": [
+      "c.mybatis.batch",
+      "c.mybatis.generated-keys",
+      "c.arch.service"
+     ],
+     "details": [
+      "Controller：save(@RequestBody Emp emp)，只做转发。",
+      "Service：先 empMapper.insert(emp) 保存员工基本信息。",
+      "关键前提：insert 必须配 useGeneratedKeys + keyProperty，新员工 id 才会回填到 emp 对象上。",
+      "拿到 id 之后，遍历 exprList 逐条（或批量）写入工作经历表。",
+      "两条写操作分属两张表，但它们是一件事——这就引出了下面的问题。"
+     ]
+    },
+    {
+     "id": "st.emp.9",
+     "label": "4.1 事务问题：部分成功",
+     "phase": 3,
+     "color": "#C2410C",
+     "concepts": [
+      "c.tx.atomic",
+      "c.biz.transaction"
+     ],
+     "details": [
+      "现象：员工信息保存成功，工作经历保存失败，数据不完整不一致。",
+      "复现：保存完员工基本信息后执行 1/0 抛异常。",
+      "原因：异常之前的 insert 已经提交，之后的代码不会执行。",
+      "本质：两条写操作各自独立，属于「部分成功」。",
+      "目标：让涉及两个业务操作新增要么全部成功，要么全部失败。",
+      "这就是事务要解决的问题：保证操作前后数据的一致性。"
+     ]
+    },
+    {
+     "id": "st.emp.10",
+     "label": "4.2 @Transactional 与它的位置",
+     "phase": 3,
+     "color": "#C2410C",
+     "concepts": [
+      "c.biz.transaction",
+      "c.annotation.component"
+     ],
+     "details": [
+      "@Transactional 作用：方法执行前开启事务，正常执行完提交，过程中出异常就回滚。",
+      "位置一·方法上：只有当前方法交给 Spring 管理事务。",
+      "位置二·类上：当前类中所有方法都交给 Spring 管理事务。",
+      "位置三·接口上：该接口下所有实现类的所有方法都纳入事务。",
+      "实践：在业务方法 save 上加 @Transactional 即可。",
+      "注意：只对 public 方法生效，且同类内部调用不走代理（事务会失效）。"
+     ]
+    },
+    {
+     "id": "st.emp.11",
+     "label": "4.3 事务进阶：rollbackFor 与传播行为",
+     "phase": 3,
+     "color": "#C2410C",
+     "concepts": [
+      "c.tx.rollbackfor",
+      "c.tx.propagation",
+      "c.tx.acid"
+     ],
+     "details": [
+      "@Transactional 两个常用属性：rollbackFor（回滚）与 propagation（传播行为）。",
+      "rollbackFor：默认只回滚 RuntimeException，受检异常必须显式写 rollbackFor = Exception.class。",
+      "propagation：一个事务方法调用另一个事务方法时的边界规则。",
+      "常用两种：REQUIRED（有事务就加入，没有就新建）、REQUIRES_NEW（总是新建、挂起外层）。",
+      "事务四大特性（ACID）：原子性、一致性、隔离性、持久性。",
+      "原子性靠 undo log 回滚，持久性靠 redo log 保证，隔离性靠锁与 MVCC。"
+     ]
+    },
+    {
+     "id": "st.emp.12",
+     "label": "5.1 文件上传：MultipartFile 与本地存储",
+     "phase": 4,
+     "color": "#7C3AED",
+     "concepts": [
+      "c.file.multipart",
+      "c.file.local",
+      "c.file.config"
+     ],
+     "details": [
+      "文件上传：把本地文件传送到服务器保存。",
+      "Spring 用 MultipartFile 类型接收上传的文件。",
+      "本地存储做法：把文件写到服务器磁盘目录，再返回可访问的 URL。",
+      "必须在配置里放开上传大小限制：默认单文件 1MB、单请求 10MB。",
+      "本地存储的致命问题：服务器扩容、迁移后文件就丢了，多台服务器之间也不共享。",
+      "所以真实项目要用对象存储。"
+     ]
+    },
+    {
+     "id": "st.emp.13",
+     "label": "5.2 阿里云 OSS 入门",
+     "phase": 4,
+     "color": "#7C3AED",
+     "concepts": [
+      "c.file.oss"
+     ],
+     "details": [
+      "OSS 是对象存储服务，专门用来存文件，按量计费。",
+      "三步：开通服务并创建 Bucket → 拿 AccessKey → 参照官方 SDK 示例写入门程序。",
+      "引入阿里云 OSS 的 SDK 依赖。",
+      "入门程序里要改成自己的四个参数：endpoint、bucketName、objectName、file。",
+      "运行后文件就传到 OSS 上了，返回一个 URL。",
+      "数据库只存这个 URL，不存文件本身——这是对象存储的核心用法。"
+     ]
+    },
+    {
+     "id": "st.emp.14",
+     "label": "5.3 上传功能优化：配置化",
+     "phase": 4,
+     "color": "#7C3AED",
+     "concepts": [
+      "c.springboot.props",
+      "c.file.config",
+      "c.config.yml"
+     ],
+     "details": [
+      "问题：endpoint、AccessKey、bucket 写死在代码里，换环境就要改代码。",
+      "优化一：把这些参数写进 application.yml。",
+      "优化二：用 @ConfigurationProperties 把配置绑定到一个实体类上，注入即用。",
+      "优化三：文件名用 UUID 保证唯一，避免同名覆盖。",
+      "优化四：上传大小限制在配置里统一调整，不写在代码里。",
+      "又一次回到那条原则：把变化的东西挪出代码。"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "s.ref",
+   "label": "参考与附录",
+   "sub": "阶段〇 / 附录 A~D",
+   "color": "#475569",
+   "source": "原导图的阶段〇与附录",
+   "phases": [
+    {
+     "label": "阶段〇：全景速览（先建立全局认知）",
+     "color": "#475569"
+    },
+    {
+     "label": "附录 A：全链路文字时序图",
+     "color": "#0F766E"
+    },
+    {
+     "label": "附录 B：常见错误对照表",
+     "color": "#9333EA"
+    },
+    {
+     "label": "附录 C：面试高频追问",
+     "color": "#B45309"
+    },
+    {
+     "label": "附录 D：这张图怎么用",
+     "color": "#4B5563"
+    }
+   ],
+   "steps": [
+    {
+     "id": "st.ref.0.0",
+     "label": "0.1 一句话主线：用户在前端点「注册」→ 浏览器把数据打成 HTTP 请求发出去 → 内嵌 Tomcat 收到 → SpringMVC 按路由找到 Controller → Controller 调 Service 做业务 → Service 调 Mapper → MyBatis 生成 SQL 交给连接池执行 → MySQL 落库 → 结果原路返回 → 前端拿到 JSON 渲染提示",
+     "phase": 0,
+     "color": "#475569",
+     "path": "r-0-0",
+     "concepts": [],
+     "details": []
+    },
+    {
+     "id": "st.ref.0.1",
+     "label": "0.2 六段式时间轴（严格按此顺序）",
+     "phase": 0,
+     "color": "#475569",
+     "path": "r-0-1",
+     "concepts": [],
+     "details": [
+      "阶段一：前端采集与发送——前端：HTML 表单 → v-model 双向绑定 → 校验 → @click 触发 → 组装 JS 对象 → axios.post → await 挂起等待",
+      "阶段二：网络传输——网络：TCP 建连 → HTTP 请求报文（请求行 + 请求头 + 空行 + 请求体）→ 到达服务器端口",
+      "阶段三：后端接收与参数解析——后端：内嵌 Tomcat 监听 → DispatcherServlet 拦截 → HandlerMapping 查路由 → @PostMapping 命中 → @RequestBody 反序列化",
+      "阶段四：业务处理与依赖注入——业务：@Autowired 拿到 Service Bean → @Service 里的业务校验 → 调 Mapper",
+      "阶段五：数据持久化——持久层：@Mapper 动态代理 → #{} 预编译 → HikariCP 借连接 → INSERT → 返回受影响行数 → 归还连接",
+      "阶段六：响应返回——响应：封装 Result → Jackson 转 JSON → 200 状态码 → Tomcat 发回 → 前端 await 恢复 → 判断 code → 提示/跳转"
+     ]
+    },
+    {
+     "id": "st.ref.0.2",
+     "label": "0.3 四个角色与各自的语言",
+     "phase": 0,
+     "color": "#475569",
+     "path": "r-0-2",
+     "concepts": [
+      "c.tomcat",
+      "c.mysql",
+      "c.springmvc.dispatcher",
+      "c.arch.three-layer"
+     ],
+     "details": [
+      "浏览器（前端）：只懂 JS 对象、JSON、HTTP；不关心数据库长什么样",
+      "Tomcat（容器）：只懂 TCP 连接、HTTP 报文；不关心业务",
+      "Spring（框架）：负责路由、参数转换、对象创建、依赖注入；把杂乱的基础工作收走",
+      "MySQL（数据库）：只懂 SQL；不关心是谁在问、为什么要问"
+     ]
+    },
+    {
+     "id": "st.ref.0.3",
+     "label": "0.4 一次注册请求的耗时分层（体感）",
+     "phase": 0,
+     "color": "#475569",
+     "path": "r-0-3",
+     "concepts": [],
+     "details": [
+      "前端处理：输入、校验、序列化：约 1ms 以内，肉眼无感",
+      "网络往返：本机 loopback 约 1~3ms；公网 20~200ms",
+      "后端处理：路由 + 业务 + SQL 解析：约 5~30ms",
+      "数据库写入：INSERT + 索引更新 + 事务提交：约 1~10ms",
+      "渲染反馈：弹提示、跳转：约 1ms"
+     ]
+    },
+    {
+     "id": "st.ref.7.0",
+     "label": "A.1 正常流程（逐步）",
+     "phase": 1,
+     "color": "#0F766E",
+     "path": "r-7-0",
+     "concepts": [],
+     "details": [
+      "步骤 1：用户输入 → v-model 同步到 form.username / form.password",
+      "步骤 2：点击按钮 → @click 触发 register()",
+      "步骤 3：前端校验通过 → 组装 data 对象",
+      "步骤 4：axios.post('/api/users/register', data) → 序列化成 JSON",
+      "步骤 5：浏览器发出 HTTP 请求：请求行 + 请求头（Content-Type: application/json）+ 空行 + 请求体",
+      "步骤 6：TCP 连接建立 → 请求到达 127.0.0.1:8080",
+      "步骤 7：Tomcat 解析报文 → 封装成 HttpServletRequest",
+      "步骤 8：DispatcherServlet → HandlerMapping 查到 UserController.register 方法",
+      "步骤 9：@RequestBody 用 Jackson 把 JSON 反序列化成 User 对象",
+      "步骤 10：@Autowired 注入的 UserService 被调用 → 执行业务校验与加密",
+      "步骤 11：Service 调用 @Autowired 注入的 UserMapper（动态代理对象）",
+      "步骤 12：MyBatis 找到对应 SQL，#{} 编译成 ?，从 HikariCP 借连接",
+      "步骤 13：执行 INSERT → MySQL 写入磁盘 → 返回受影响行数",
+      "步骤 14：连接归还池中 → int 结果一路上传：Mapper → Service → Controller",
+      "步骤 15：Controller 封装 Result.success(\"注册成功\")",
+      "步骤 16：Jackson 序列化成 JSON → 写入 HTTP 响应体 → 状态码 200",
+      "步骤 17：Tomcat 发回浏览器 → await 恢复 → 判断 code → 提示并跳转"
+     ]
+    },
+    {
+     "id": "st.ref.8.0",
+     "label": "B.1 前端侧",
+     "phase": 2,
+     "color": "#9333EA",
+     "path": "r-8-0",
+     "concepts": [
+      "c.url",
+      "c.annotation.method-mapping",
+      "c.http.content-type",
+      "c.js.async"
+     ],
+     "details": [
+      "页面不刷新 / 数据不变：v-model 绑定的字段未在 data 中声明，或字段名写错",
+      "请求根本没发出：按钮在 form 内且未 preventDefault，触发了页面刷新；或 @click 方法名写错",
+      "请求 404：axios 的 url 与后端 @RequestMapping 拼出来的路径不一致",
+      "请求 405：请求方法与后端注解不匹配（GET 打了 @PostMapping）",
+      "请求 415：Content-Type 不是 application/json，或没传 body",
+      "拿到 undefined：await 漏写，res 还是个 Promise",
+      "报跨域错误：前后端不同源且后端没配 CORS；或页面是 file:// 打开的"
+     ]
+    },
+    {
+     "id": "st.ref.8.1",
+     "label": "B.2 后端侧",
+     "phase": 2,
+     "color": "#9333EA",
+     "path": "r-8-1",
+     "concepts": [
+      "c.mybatis.mapping",
+      "c.mybatis.camel-case",
+      "c.spring.di",
+      "c.sql"
+     ],
+     "details": [
+      "启动失败 Port already in use：8080 被占用，改 server.port 或杀掉占用进程",
+      "注入的 Service 为 null：类没加 @Service，或不在启动类扫描的包范围内",
+      "收到的参数全是 null：前端字段名与实体属性名不一致；或漏了 @RequestBody",
+      "Invalid bound statement (not found)：XML 的 namespace 不是接口全限定名、select 的 id 与方法名不一致，或 XML 不在 mapper-locations 路径",
+      "查得到数据但对象全 null：数据库下划线命名与 Java 驼峰命名没做映射",
+      "500 空指针：Service 里没判空就调用了方法，或注入失败",
+      "中文乱码：数据库/表不是 utf8mb4，或连接串没指定字符集",
+      "时间差 8 小时：连接串没配 serverTimezone=Asia/Shanghai"
+     ]
+    },
+    {
+     "id": "st.ref.9.0",
+     "label": "C.1 为什么 Controller 不直接操作数据库",
+     "phase": 3,
+     "color": "#B45309",
+     "path": "r-9-0",
+     "concepts": [
+      "c.arch.three-layer"
+     ],
+     "details": [
+      "答案要点：职责分离：Controller 负责协议层（接参、返参），Service 负责业务规则与事务边界，Mapper 负责 SQL；分层让「改业务」和「改 SQL」互不影响，也让单元测试更可行"
+     ]
+    },
+    {
+     "id": "st.ref.9.1",
+     "label": "C.2 @Autowired 注入的是接口，能调用吗",
+     "phase": 3,
+     "color": "#B45309",
+     "path": "r-9-1",
+     "concepts": [
+      "c.spring.di"
+     ],
+     "details": [
+      "答案要点：能。Spring 注入的是接口的「实现类实例」，通过多态调用；这也是面向接口编程的价值——换实现不用改调用方"
+     ]
+    },
+    {
+     "id": "st.ref.9.2",
+     "label": "C.3 #{} 和 ${} 到底差在哪",
+     "phase": 3,
+     "color": "#B45309",
+     "path": "r-9-2",
+     "concepts": [
+      "c.mybatis.hash",
+      "c.mybatis.dollar"
+     ],
+     "details": [
+      "答案要点：#{} 编译成 JDBC 的 ? 走预编译，值永远是值；${} 是文本替换，值可能变成语法的一部分。前者安全，后者只在表名/字段名这类无法用 ? 的场景使用，且必须白名单校验"
+     ]
+    },
+    {
+     "id": "st.ref.9.3",
+     "label": "C.4 为什么有了 JDBC 还要 MyBatis",
+     "phase": 3,
+     "color": "#B45309",
+     "path": "r-9-3",
+     "concepts": [
+      "c.jdbc",
+      "c.mybatis.mapper"
+     ],
+     "details": [
+      "答案要点：JDBC 一个查询要写连接、PreparedStatement、设参、遍历 ResultSet、关资源，模板代码占了大头；MyBatis 把模板收走，只留「接口方法 + SQL」，本质是「把重复收进壳里」"
+     ]
+    },
+    {
+     "id": "st.ref.9.4",
+     "label": "C.5 连接池解决了什么问题",
+     "phase": 3,
+     "color": "#B45309",
+     "path": "r-9-4",
+     "concepts": [
+      "c.pool.hikari"
+     ],
+     "details": [
+      "答案要点：建连接成本高（握手、认证、分配资源），连接池把连接复用起来，用「借/还」代替「建/销」，把开销从「每请求一次」降到「启动时一批」"
+     ]
+    },
+    {
+     "id": "st.ref.9.5",
+     "label": "C.6 一次请求经过了多少层",
+     "phase": 3,
+     "color": "#B45309",
+     "path": "r-9-5",
+     "concepts": [
+      "c.tomcat",
+      "c.springmvc.dispatcher",
+      "c.arch.three-layer"
+     ],
+     "details": [
+      "答案要点：浏览器 → TCP → Tomcat → DispatcherServlet → HandlerMapping → Controller → Service → Mapper 代理 → MyBatis → 连接池 → MySQL → 原路返回。每层只做自己的事，靠「约定」（路径、字段名、返回结构）串起来"
+     ]
+    },
+    {
+     "id": "st.ref.10.0",
+     "label": "D.1 顺向背一遍：从阶段一读到阶段六，每个阶段问自己：「这一层的输入是什么、输出是什么、出了什么错」",
+     "phase": 4,
+     "color": "#4B5563",
+     "path": "r-10-0",
+     "concepts": [],
+     "details": []
+    },
+    {
+     "id": "st.ref.10.1",
+     "label": "D.2 逆向查一遍：从报错倒推：看到 404 想「路径匹配」，看到 405 想「请求方法」，看到 500 想「服务端异常」，看到 null 想「字段映射」",
+     "phase": 4,
+     "color": "#4B5563",
+     "path": "r-10-1",
+     "concepts": [],
+     "details": []
+    },
+    {
+     "id": "st.ref.10.2",
+     "label": "D.3 画一遍再讲一遍：合上这张图，自己在纸上画出六段式，然后对着空气讲给「一个不懂的人」听——能讲通，才算真会",
+     "phase": 4,
+     "color": "#4B5563",
+     "path": "r-10-2",
+     "concepts": [],
+     "details": []
+    }
+   ],
+   "flow": [
+    "总览",
+    "时序图",
+    "错误对照",
+    "面试追问",
+    "使用方法"
+   ],
+   "returnNote": "这些不是业务链路，是查漏补缺用的索引页"
+  }
+ ],
+ "edges": [
+  {
+   "s": "c.vue.model",
+   "t": "c.js.object",
+   "type": "depends"
+  },
+  {
+   "s": "c.axios.post",
+   "t": "c.json",
+   "type": "depends"
+  },
+  {
+   "s": "c.js.async",
+   "t": "c.axios.post",
+   "type": "depends"
+  },
+  {
+   "s": "c.json",
+   "t": "c.http.request",
+   "type": "depends"
+  },
+  {
+   "s": "c.http.request",
+   "t": "c.tcp",
+   "type": "depends"
+  },
+  {
+   "s": "c.http.response",
+   "t": "c.http.status",
+   "type": "depends"
+  },
+  {
+   "s": "c.http.request",
+   "t": "c.http.content-type",
+   "type": "depends"
+  },
+  {
+   "s": "c.annotation.requestbody",
+   "t": "c.http.content-type",
+   "type": "depends"
+  },
+  {
+   "s": "c.annotation.requestbody",
+   "t": "c.jackson",
+   "type": "depends"
+  },
+  {
+   "s": "c.annotation.requestbody",
+   "t": "c.json",
+   "type": "depends"
+  },
+  {
+   "s": "c.tomcat",
+   "t": "c.servlet.request",
+   "type": "depends"
+  },
+  {
+   "s": "c.nginx.proxy",
+   "t": "c.tomcat",
+   "type": "depends"
+  },
+  {
+   "s": "c.springmvc.dispatcher",
+   "t": "c.springmvc.mapping",
+   "type": "depends"
+  },
+  {
+   "s": "c.springmvc.mapping",
+   "t": "c.annotation.method-mapping",
+   "type": "depends"
+  },
+  {
+   "s": "c.annotation.restcontroller",
+   "t": "c.jackson",
+   "type": "depends"
+  },
+  {
+   "s": "c.spring.di",
+   "t": "c.spring.ioc",
+   "type": "depends"
+  },
+  {
+   "s": "c.annotation.autowired",
+   "t": "c.spring.di",
+   "type": "depends"
+  },
+  {
+   "s": "c.annotation.component",
+   "t": "c.spring.ioc",
+   "type": "depends"
+  },
+  {
+   "s": "c.arch.controller",
+   "t": "c.arch.three-layer",
+   "type": "depends"
+  },
+  {
+   "s": "c.arch.service",
+   "t": "c.arch.mapper",
+   "type": "depends"
+  },
+  {
+   "s": "c.arch.service",
+   "t": "c.biz.validation",
+   "type": "depends"
+  },
+  {
+   "s": "c.arch.service",
+   "t": "c.biz.transaction",
+   "type": "depends"
+  },
+  {
+   "s": "c.result.wrapper",
+   "t": "c.jackson",
+   "type": "depends"
+  },
+  {
+   "s": "c.exception.handler",
+   "t": "c.result.wrapper",
+   "type": "depends"
+  },
+  {
+   "s": "c.mybatis.mapper",
+   "t": "c.mybatis.proxy",
+   "type": "depends"
+  },
+  {
+   "s": "c.mybatis.mapper",
+   "t": "c.mybatis.mapping",
+   "type": "depends"
+  },
+  {
+   "s": "c.mybatis.mapping",
+   "t": "c.mybatis.hash",
+   "type": "depends"
+  },
+  {
+   "s": "c.mybatis.hash",
+   "t": "c.mybatis.dollar",
+   "type": "contrast"
+  },
+  {
+   "s": "c.mybatis.resultmap",
+   "t": "c.mybatis.camel-case",
+   "type": "depends"
+  },
+  {
+   "s": "c.pool.hikari",
+   "t": "c.jdbc",
+   "type": "depends"
+  },
+  {
+   "s": "c.jdbc",
+   "t": "c.sql",
+   "type": "depends"
+  },
+  {
+   "s": "c.jdbc",
+   "t": "c.jdbc.driver",
+   "type": "depends"
+  },
+  {
+   "s": "c.sql.dml",
+   "t": "c.sql",
+   "type": "depends"
+  },
+  {
+   "s": "c.sql.ddl",
+   "t": "c.mysql",
+   "type": "depends"
+  },
+  {
+   "s": "c.log.logback",
+   "t": "c.log.slf4j",
+   "type": "depends"
+  },
+  {
+   "s": "c.log.level",
+   "t": "c.log.logback",
+   "type": "depends"
+  },
+  {
+   "s": "c.log.logback",
+   "t": "c.log.println",
+   "type": "replaces"
+  },
+  {
+   "s": "c.restful",
+   "t": "c.spec.api-doc",
+   "type": "depends"
+  },
+  {
+   "s": "c.restful",
+   "t": "c.http.method",
+   "type": "depends"
+  },
+  {
+   "s": "c.tool.apifox",
+   "t": "c.spec.api-doc",
+   "type": "depends"
+  },
+  {
+   "s": "c.springboot.app",
+   "t": "c.springboot.scan",
+   "type": "depends"
+  },
+  {
+   "s": "c.springboot.app",
+   "t": "c.tomcat",
+   "type": "depends"
+  },
+  {
+   "s": "c.springmvc.mapping-class",
+   "t": "c.springmvc.mapping",
+   "type": "depends"
+  },
+  {
+   "s": "c.param.simple",
+   "t": "c.annotation.requestparam",
+   "type": "depends"
+  },
+  {
+   "s": "c.annotation.pathvariable",
+   "t": "c.url",
+   "type": "depends"
+  },
+  {
+   "s": "c.config.yml",
+   "t": "c.springboot.app",
+   "type": "depends"
+  },
+  {
+   "s": "c.frontend.xss",
+   "t": "c.mybatis.dollar",
+   "type": "contrast"
+  }
+ ],
+ "uses": [
+  {
+   "s": "s.register",
+   "t": "c.html-form",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.vue.model",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.validate.client",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.vue.event",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.js.object",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.axios.post",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.http.content-type",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.json",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.js.async",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.tcp",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.http.request",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.http.method",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.url",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.cors",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.springboot.app",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.springboot.scan",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.tomcat",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.servlet.request",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.springmvc.dispatcher",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.springmvc.mapping",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.springmvc.mapping-class",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.annotation.restcontroller",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.jackson",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.annotation.method-mapping",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.annotation.requestbody",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.arch.controller",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.arch.three-layer",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.spring.ioc",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.annotation.component",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.spring.di",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.annotation.autowired",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.arch.service",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.biz.validation",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.biz.transaction",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.arch.mapper",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.mybatis.mapper",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.mybatis.proxy",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.java.interface",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.mybatis.mapping",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.mybatis.hash",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.mybatis.dollar",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.pool.hikari",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.sql.dml",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.sql",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.mybatis.resultmap",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.mybatis.camel-case",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.result.wrapper",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.http.response",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.http.status",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.exception.handler",
+   "type": "uses"
+  },
+  {
+   "s": "s.register",
+   "t": "c.dom.render",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.arch.separation",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.spec.api-doc",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.restful",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.http.method",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.url",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.tool.apifox",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.tool.maven",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.springboot.app",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.sql.ddl",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.sql",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.mysql",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.config.yml",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.arch.package",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.result.wrapper",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.mybatis.camel-case",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.arch.three-layer",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.arch.controller",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.arch.service",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.arch.mapper",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.mybatis.mapper",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.mybatis.resultmap",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.annotation.method-mapping",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.springmvc.mapping",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.nginx.proxy",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.http.request",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.cors",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.tomcat",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.param.simple",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.annotation.requestparam",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.sql.dml",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.mybatis.hash",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.biz.validation",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.annotation.requestbody",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.json",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.http.content-type",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.annotation.pathvariable",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.springmvc.mapping-class",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.log.println",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.log.slf4j",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.log.logback",
+   "type": "uses"
+  },
+  {
+   "s": "s.dept",
+   "t": "c.log.level",
+   "type": "uses"
+  },
+  {
+   "s": "s.emp",
+   "t": "c.db.relation",
+   "type": "uses"
+  },
+  {
+   "s": "s.emp",
+   "t": "c.db.fk",
+   "type": "uses"
+  },
+  {
+   "s": "s.emp",
+   "t": "c.db.fk-physical",
+   "type": "uses"
+  },
+  {
+   "s": "s.emp",
+   "t": "c.sql.join",
+   "type": "uses"
+  },
+  {
+   "s": "s.emp",
+   "t": "c.sql.cartesian",
+   "type": "uses"
+  },
+  {
+   "s": "s.emp",
+   "t": "c.sql.subquery",
+   "type": "uses"
+  },
+  {
+   "s": "s.emp",
+   "t": "c.sql.aggregate",
+   "type": "uses"
+  },
+  {
+   "s": "s.emp",
+   "t": "c.mybatis.mapper",
+   "type": "uses"
+  },
+  {
+   "s": "s.emp",
+   "t": "c.mybatis.camel-case",
+   "type": "uses"
+  },
+  {
+   "s": "s.emp",
+   "t": "c.mybatis.resultmap",
+   "type": "uses"
+  },
+  {
+   "s": "s.emp",
+   "t": "c.page.limit",
+   "type": "uses"
+  },
+  {
+   "s": "s.emp",
+   "t": "c.sql",
+   "type": "uses"
+  },
+  {
+   "s": "s.emp",
+   "t": "c.query.param-object",
+   "type": "uses"
+  },
+  {
+   "s": "s.emp",
+   "t": "c.annotation.requestparam",
+   "type": "uses"
+  },
+  {
+   "s": "s.emp",
+   "t": "c.annotation.method-mapping",
+   "type": "uses"
+  },
+  {
+   "s": "s.emp",
+   "t": "c.mybatis.dynamic-sql",
+   "type": "uses"
+  },
+  {
+   "s": "s.emp",
+   "t": "c.mybatis.mapping",
+   "type": "uses"
+  },
+  {
+   "s": "s.emp",
+   "t": "c.annotation.requestbody",
+   "type": "uses"
+  },
+  {
+   "s": "s.emp",
+   "t": "c.json",
+   "type": "uses"
+  },
+  {
+   "s": "s.emp",
+   "t": "c.mybatis.batch",
+   "type": "uses"
+  },
+  {
+   "s": "s.emp",
+   "t": "c.mybatis.generated-keys",
+   "type": "uses"
+  },
+  {
+   "s": "s.emp",
+   "t": "c.arch.service",
+   "type": "uses"
+  },
+  {
+   "s": "s.emp",
+   "t": "c.tx.atomic",
+   "type": "uses"
+  },
+  {
+   "s": "s.emp",
+   "t": "c.biz.transaction",
+   "type": "uses"
+  },
+  {
+   "s": "s.emp",
+   "t": "c.annotation.component",
+   "type": "uses"
+  },
+  {
+   "s": "s.emp",
+   "t": "c.tx.rollbackfor",
+   "type": "uses"
+  },
+  {
+   "s": "s.emp",
+   "t": "c.tx.propagation",
+   "type": "uses"
+  },
+  {
+   "s": "s.emp",
+   "t": "c.tx.acid",
+   "type": "uses"
+  },
+  {
+   "s": "s.emp",
+   "t": "c.file.multipart",
+   "type": "uses"
+  },
+  {
+   "s": "s.emp",
+   "t": "c.file.local",
+   "type": "uses"
+  },
+  {
+   "s": "s.emp",
+   "t": "c.file.config",
+   "type": "uses"
+  },
+  {
+   "s": "s.emp",
+   "t": "c.file.oss",
+   "type": "uses"
+  },
+  {
+   "s": "s.emp",
+   "t": "c.springboot.props",
+   "type": "uses"
+  },
+  {
+   "s": "s.emp",
+   "t": "c.config.yml",
+   "type": "uses"
+  },
+  {
+   "s": "s.ref",
+   "t": "c.tomcat",
+   "type": "uses"
+  },
+  {
+   "s": "s.ref",
+   "t": "c.mysql",
+   "type": "uses"
+  },
+  {
+   "s": "s.ref",
+   "t": "c.springmvc.dispatcher",
+   "type": "uses"
+  },
+  {
+   "s": "s.ref",
+   "t": "c.arch.three-layer",
+   "type": "uses"
+  },
+  {
+   "s": "s.ref",
+   "t": "c.url",
+   "type": "uses"
+  },
+  {
+   "s": "s.ref",
+   "t": "c.annotation.method-mapping",
+   "type": "uses"
+  },
+  {
+   "s": "s.ref",
+   "t": "c.http.content-type",
+   "type": "uses"
+  },
+  {
+   "s": "s.ref",
+   "t": "c.js.async",
+   "type": "uses"
+  },
+  {
+   "s": "s.ref",
+   "t": "c.mybatis.mapping",
+   "type": "uses"
+  },
+  {
+   "s": "s.ref",
+   "t": "c.mybatis.camel-case",
+   "type": "uses"
+  },
+  {
+   "s": "s.ref",
+   "t": "c.spring.di",
+   "type": "uses"
+  },
+  {
+   "s": "s.ref",
+   "t": "c.sql",
+   "type": "uses"
+  },
+  {
+   "s": "s.ref",
+   "t": "c.mybatis.hash",
+   "type": "uses"
+  },
+  {
+   "s": "s.ref",
+   "t": "c.mybatis.dollar",
+   "type": "uses"
+  },
+  {
+   "s": "s.ref",
+   "t": "c.jdbc",
+   "type": "uses"
+  },
+  {
+   "s": "s.ref",
+   "t": "c.mybatis.mapper",
+   "type": "uses"
+  },
+  {
+   "s": "s.ref",
+   "t": "c.pool.hikari",
+   "type": "uses"
+  }
+ ],
+ "themes": [
+  {
+   "id": "t.std-impl",
+   "label": "标准 vs 实现",
+   "color": "#111827",
+   "note": "上层只依赖标准接口，底层可换实现；你笔记里记了四次。",
+   "members": [
+    "c.sql",
+    "c.mysql",
+    "c.jdbc",
+    "c.jdbc.driver",
+    "c.java.interface",
+    "c.log.slf4j",
+    "c.log.logback"
+   ]
+  },
+  {
+   "id": "t.data-as-code",
+   "label": "把数据当代码执行",
+   "color": "#DC2626",
+   "note": "XSS 与 SQL 注入是同一个病；解法都是让数据和代码分开。",
+   "members": [
+    "c.frontend.xss",
+    "c.mybatis.dollar",
+    "c.mybatis.hash"
+   ]
+  },
+  {
+   "id": "t.convention",
+   "label": "约定优于手写",
+   "color": "#047857",
+   "note": "能推导出来的，就不该让人再写一遍。",
+   "members": [
+    "c.mybatis.camel-case",
+    "c.mybatis.hash",
+    "c.result.wrapper",
+    "c.spec.api-doc",
+    "c.arch.package",
+    "c.springmvc.mapping-class"
+   ]
+  },
+  {
+   "id": "t.config-out",
+   "label": "把变化挪出代码",
+   "color": "#B45309",
+   "note": "yml、logback.xml、开关，都是同一件事。",
+   "members": [
+    "c.config.yml",
+    "c.log.logback",
+    "c.log.level",
+    "c.mybatis.camel-case"
+   ]
+  }
+ ]
+}

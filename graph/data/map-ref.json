@@ -1,0 +1,43 @@
+{
+ "0-2": [
+  "c.tomcat",
+  "c.mysql",
+  "c.springmvc.dispatcher",
+  "c.arch.three-layer"
+ ],
+ "7-0": [],
+ "8-0": [
+  "c.url",
+  "c.annotation.method-mapping",
+  "c.http.content-type",
+  "c.js.async"
+ ],
+ "8-1": [
+  "c.mybatis.mapping",
+  "c.mybatis.camel-case",
+  "c.spring.di",
+  "c.sql"
+ ],
+ "9-0": [
+  "c.arch.three-layer"
+ ],
+ "9-1": [
+  "c.spring.di"
+ ],
+ "9-2": [
+  "c.mybatis.hash",
+  "c.mybatis.dollar"
+ ],
+ "9-3": [
+  "c.jdbc",
+  "c.mybatis.mapper"
+ ],
+ "9-4": [
+  "c.pool.hikari"
+ ],
+ "9-5": [
+  "c.tomcat",
+  "c.springmvc.dispatcher",
+  "c.arch.three-layer"
+ ]
+}

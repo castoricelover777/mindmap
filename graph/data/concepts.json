@@ -1,0 +1,869 @@
+{
+ "layers": [
+  {
+   "id": "frontend",
+   "label": "前端",
+   "color": "#2563EB"
+  },
+  {
+   "id": "protocol",
+   "label": "网络协议",
+   "color": "#0E7490"
+  },
+  {
+   "id": "server",
+   "label": "容器部署",
+   "color": "#7C3AED"
+  },
+  {
+   "id": "framework",
+   "label": "框架架构",
+   "color": "#047857"
+  },
+  {
+   "id": "persistence",
+   "label": "持久层",
+   "color": "#C2410C"
+  },
+  {
+   "id": "database",
+   "label": "数据库",
+   "color": "#BE123C"
+  },
+  {
+   "id": "tooling",
+   "label": "工程工具",
+   "color": "#B45309"
+  }
+ ],
+ "concepts": [
+  {
+   "id": "c.html-form",
+   "label": "HTML 表单",
+   "aka": "form / input",
+   "layer": "frontend",
+   "gloss": "form 把一组输入框聚合成一次提交，input 采集单个字段",
+   "learned": "2026-10-11",
+   "ep": "第1~10集"
+  },
+  {
+   "id": "c.vue.model",
+   "label": "v-model 双向绑定",
+   "aka": "v-model",
+   "layer": "frontend",
+   "gloss": "data 与输入框互相同步，是 :value + @input 的语法糖",
+   "learned": "2026-10-13",
+   "ep": "第19~26集"
+  },
+  {
+   "id": "c.vue.event",
+   "label": "@click 事件绑定",
+   "aka": "v-on:click",
+   "layer": "frontend",
+   "gloss": "把 DOM 点击事件绑到 methods 里的方法上",
+   "learned": "2026-10-13",
+   "ep": "第19~26集"
+  },
+  {
+   "id": "c.js.object",
+   "label": "JS 对象字面量",
+   "aka": "{}",
+   "layer": "frontend",
+   "gloss": "花括号直接构成对象，是前端这一层的通用货币",
+   "learned": "2026-10-12",
+   "ep": "第18集"
+  },
+  {
+   "id": "c.js.async",
+   "label": "async/await 异步等待",
+   "aka": "async / await",
+   "layer": "frontend",
+   "gloss": "await 只挂起当前函数，页面不冻结",
+   "learned": "2026-10-14",
+   "ep": "第27~32集"
+  },
+  {
+   "id": "c.axios.post",
+   "label": "axios.post",
+   "aka": "axios",
+   "layer": "frontend",
+   "gloss": "自动 JSON.stringify + 自动设 Content-Type",
+   "learned": "2026-10-14",
+   "ep": "第27~32集"
+  },
+  {
+   "id": "c.json",
+   "label": "JSON 格式",
+   "aka": "JSON",
+   "layer": "frontend",
+   "gloss": "前后端唯一都认的数据格式，键必须双引号",
+   "learned": "2026-10-12",
+   "ep": "第18集"
+  },
+  {
+   "id": "c.validate.client",
+   "label": "前端校验",
+   "aka": "",
+   "layer": "frontend",
+   "gloss": "提升体验但挡不住绕过，后端必须再校验",
+   "learned": "2026-10-14",
+   "ep": "第30集"
+  },
+  {
+   "id": "c.dom.render",
+   "label": "数据驱动渲染",
+   "aka": "v-for / v-html",
+   "layer": "frontend",
+   "gloss": "数据一变视图自动更新，不用手动操作 DOM",
+   "learned": "2026-10-13",
+   "ep": "第26集"
+  },
+  {
+   "id": "c.frontend.xss",
+   "label": "innerHTML 与 XSS",
+   "aka": "",
+   "layer": "frontend",
+   "gloss": "把用户输入当 HTML 解析执行，本质是「把数据当代码」",
+   "learned": "2026-10-12",
+   "ep": "第18集"
+  },
+  {
+   "id": "c.tcp",
+   "label": "TCP 连接",
+   "aka": "三次握手",
+   "layer": "protocol",
+   "gloss": "HTTP 建立在 TCP 之上，先建连再发报文",
+   "learned": "2026-10-16",
+   "ep": "第39~47集"
+  },
+  {
+   "id": "c.http.request",
+   "label": "HTTP 请求报文",
+   "aka": "请求行/头/空行/体",
+   "layer": "protocol",
+   "gloss": "四部分：请求行 + 请求头 + 空行 + 请求体",
+   "learned": "2026-10-16",
+   "ep": "第40集"
+  },
+  {
+   "id": "c.http.response",
+   "label": "HTTP 响应报文",
+   "aka": "状态行/头/体",
+   "layer": "protocol",
+   "gloss": "三部分：状态行 + 响应头 + 响应体",
+   "learned": "2026-10-16",
+   "ep": "第41集"
+  },
+  {
+   "id": "c.http.method",
+   "label": "HTTP 请求方法",
+   "aka": "GET / POST / PUT / DELETE",
+   "layer": "protocol",
+   "gloss": "GET 查、POST 增、PUT 改、DELETE 删",
+   "learned": "2026-10-16",
+   "ep": "第41集"
+  },
+  {
+   "id": "c.http.status",
+   "label": "HTTP 状态码",
+   "aka": "200 / 404 / 405 / 415 / 500",
+   "layer": "protocol",
+   "gloss": "4xx 是你的请求有问题，5xx 是服务器有问题",
+   "learned": "2026-10-16",
+   "ep": "第41集"
+  },
+  {
+   "id": "c.http.content-type",
+   "label": "Content-Type",
+   "aka": "application/json",
+   "layer": "protocol",
+   "gloss": "决定后端用哪个 HttpMessageConverter 解析请求体",
+   "learned": "2026-10-16",
+   "ep": "第40集"
+  },
+  {
+   "id": "c.url",
+   "label": "URL 结构",
+   "aka": "协议://主机:端口/路径?查询#锚点",
+   "layer": "protocol",
+   "gloss": "路径交给路由查表，查询串交给参数绑定",
+   "learned": "2026-10-16",
+   "ep": "第42集"
+  },
+  {
+   "id": "c.cors",
+   "label": "跨域与预检",
+   "aka": "CORS / OPTIONS",
+   "layer": "protocol",
+   "gloss": "同源策略是浏览器限制，服务端要靠响应头放行",
+   "learned": "2026-10-16",
+   "ep": "第46集"
+  },
+  {
+   "id": "c.restful",
+   "label": "RESTful 风格",
+   "aka": "REST",
+   "layer": "protocol",
+   "gloss": "URL 定位资源，HTTP 动词描述操作；复数表资源",
+   "learned": "2026-10-20",
+   "ep": "第75集"
+  },
+  {
+   "id": "c.tomcat",
+   "label": "内嵌 Tomcat",
+   "aka": "",
+   "layer": "server",
+   "gloss": "SpringBoot 把容器打成依赖，一个 jar 就能跑",
+   "learned": "2026-10-16",
+   "ep": "第44集"
+  },
+  {
+   "id": "c.servlet.request",
+   "label": "HttpServletRequest",
+   "aka": "",
+   "layer": "server",
+   "gloss": "Tomcat 把字节流解析成 Request/Response 对象",
+   "learned": "2026-10-16",
+   "ep": "第44集"
+  },
+  {
+   "id": "c.nginx.proxy",
+   "label": "Nginx 反向代理",
+   "aka": "proxy_pass",
+   "layer": "server",
+   "gloss": "浏览器 → Nginx(:90) → Tomcat，多一层转发/安全/负载均衡",
+   "learned": "2026-10-21",
+   "ep": "第79集"
+  },
+  {
+   "id": "c.springboot.app",
+   "label": "SpringBoot 启动类",
+   "aka": "@SpringBootApplication",
+   "layer": "framework",
+   "gloss": "三个注解的合体：配置类 + 自动配置 + 组件扫描",
+   "learned": "2026-10-16",
+   "ep": "第44集"
+  },
+  {
+   "id": "c.springboot.scan",
+   "label": "组件扫描范围",
+   "aka": "@ComponentScan",
+   "layer": "framework",
+   "gloss": "启动类必须放在所有业务类的父包下，否则扫不到",
+   "learned": "2026-10-16",
+   "ep": "第44集"
+  },
+  {
+   "id": "c.spring.ioc",
+   "label": "IoC 控制反转",
+   "aka": "",
+   "layer": "framework",
+   "gloss": "对象创建权从程序员手里交给容器",
+   "learned": "2026-10-17",
+   "ep": "第48集"
+  },
+  {
+   "id": "c.spring.di",
+   "label": "DI 依赖注入",
+   "aka": "",
+   "layer": "framework",
+   "gloss": "要什么让容器给，注入的是接口而不是实现类",
+   "learned": "2026-10-17",
+   "ep": "第49集"
+  },
+  {
+   "id": "c.annotation.autowired",
+   "label": "@Autowired",
+   "aka": "",
+   "layer": "framework",
+   "gloss": "按类型注入；同类型多个要用 @Qualifier / @Primary",
+   "learned": "2026-10-17",
+   "ep": "第49集"
+  },
+  {
+   "id": "c.annotation.component",
+   "label": "@Service / @Repository",
+   "aka": "@Component",
+   "layer": "framework",
+   "gloss": "标记为组件交给容器管理，默认单例",
+   "learned": "2026-10-17",
+   "ep": "第50集"
+  },
+  {
+   "id": "c.springmvc.dispatcher",
+   "label": "DispatcherServlet",
+   "aka": "",
+   "layer": "framework",
+   "gloss": "前端控制器：问 HandlerMapping 这个路径该谁处理",
+   "learned": "2026-10-16",
+   "ep": "第45集"
+  },
+  {
+   "id": "c.springmvc.mapping",
+   "label": "@RequestMapping 路由",
+   "aka": "@GetMapping …",
+   "layer": "framework",
+   "gloss": "路径 + 方法 → 处理函数；衍生注解把方法定死",
+   "learned": "2026-10-16",
+   "ep": "第45集"
+  },
+  {
+   "id": "c.springmvc.mapping-class",
+   "label": "类级路径抽取",
+   "aka": "@RequestMapping(\"/depts\")",
+   "layer": "framework",
+   "gloss": "完整路径 = 类上 + 方法上；消除重复前缀",
+   "learned": "2026-10-22",
+   "ep": "第83集"
+  },
+  {
+   "id": "c.annotation.method-mapping",
+   "label": "请求方式映射",
+   "aka": "@GetMapping/@PostMapping/@PutMapping/@DeleteMapping",
+   "layer": "framework",
+   "gloss": "@RequestMapping 按 method 定死的衍生注解",
+   "learned": "2026-10-21",
+   "ep": "第77集"
+  },
+  {
+   "id": "c.annotation.restcontroller",
+   "label": "@RestController",
+   "aka": "= @Controller + @ResponseBody",
+   "layer": "framework",
+   "gloss": "返回值直接写进响应体，不当视图名解析",
+   "learned": "2026-10-16",
+   "ep": "第45集"
+  },
+  {
+   "id": "c.annotation.requestbody",
+   "label": "@RequestBody",
+   "aka": "",
+   "layer": "framework",
+   "gloss": "读整个请求体，交给 Jackson 反序列化成对象",
+   "learned": "2026-10-16",
+   "ep": "第45集"
+  },
+  {
+   "id": "c.annotation.requestparam",
+   "label": "@RequestParam",
+   "aka": "",
+   "layer": "framework",
+   "gloss": "取 query 参数或表单字段；名字对上可省略",
+   "learned": "2026-10-22",
+   "ep": "第80集"
+  },
+  {
+   "id": "c.annotation.pathvariable",
+   "label": "@PathVariable",
+   "aka": "",
+   "layer": "framework",
+   "gloss": "取路径占位 /depts/{id} 里的参数",
+   "learned": "2026-10-22",
+   "ep": "第82集"
+  },
+  {
+   "id": "c.param.simple",
+   "label": "简单参数接收三方案",
+   "aka": "request.getParameter / @RequestParam / 同名形参",
+   "layer": "framework",
+   "gloss": "本质是「参数在 HTTP 的哪个位置」",
+   "learned": "2026-10-22",
+   "ep": "第80集"
+  },
+  {
+   "id": "c.arch.three-layer",
+   "label": "三层架构",
+   "aka": "Controller / Service / Mapper",
+   "layer": "framework",
+   "gloss": "每层只做自己的事，靠约定串起来",
+   "learned": "2026-10-16",
+   "ep": "第47集"
+  },
+  {
+   "id": "c.arch.controller",
+   "label": "Controller 职责",
+   "aka": "",
+   "layer": "framework",
+   "gloss": "接参、调 Service、包返回；不写 SQL、不写事务",
+   "learned": "2026-10-16",
+   "ep": "第47集"
+  },
+  {
+   "id": "c.arch.service",
+   "label": "Service 职责",
+   "aka": "",
+   "layer": "framework",
+   "gloss": "业务规则、校验、事务边界、补全公共字段",
+   "learned": "2026-10-16",
+   "ep": "第47集"
+  },
+  {
+   "id": "c.arch.mapper",
+   "label": "Mapper 职责",
+   "aka": "",
+   "layer": "framework",
+   "gloss": "只管 SQL，不关心业务",
+   "learned": "2026-10-16",
+   "ep": "第47集"
+  },
+  {
+   "id": "c.result.wrapper",
+   "label": "Result 统一响应",
+   "aka": "{code,msg,data}",
+   "layer": "framework",
+   "gloss": "前端只写一套解析逻辑；契约落在代码结构上",
+   "learned": "2026-10-21",
+   "ep": "第78集"
+  },
+  {
+   "id": "c.jackson",
+   "label": "Jackson 序列化",
+   "aka": "",
+   "layer": "framework",
+   "gloss": "Java 对象 ⇄ JSON，@RestController 自动调用",
+   "learned": "2026-10-16",
+   "ep": "第45集"
+  },
+  {
+   "id": "c.exception.handler",
+   "label": "全局异常处理",
+   "aka": "@RestControllerAdvice",
+   "layer": "framework",
+   "gloss": "别把 500 和堆栈直接甩给前端",
+   "learned": "2026-10-22",
+   "ep": "第84集"
+  },
+  {
+   "id": "c.biz.validation",
+   "label": "业务校验",
+   "aka": "",
+   "layer": "framework",
+   "gloss": "后端才是安全边界，前端校验可被绕过",
+   "learned": "2026-10-21",
+   "ep": "第81集"
+  },
+  {
+   "id": "c.biz.transaction",
+   "label": "事务 @Transactional",
+   "aka": "",
+   "layer": "framework",
+   "gloss": "多表操作要么全成功要么全回滚",
+   "learned": "2026-10-21",
+   "ep": "第64集"
+  },
+  {
+   "id": "c.arch.separation",
+   "label": "前后端分离",
+   "aka": "",
+   "layer": "framework",
+   "gloss": "拆成两个工程，靠接口文档对齐",
+   "learned": "2026-10-20",
+   "ep": "第74集"
+  },
+  {
+   "id": "c.spec.api-doc",
+   "label": "接口文档",
+   "aka": "",
+   "layer": "framework",
+   "gloss": "前后端的合同：地址、参数、响应类型",
+   "learned": "2026-10-20",
+   "ep": "第74集"
+  },
+  {
+   "id": "c.java.interface",
+   "label": "接口与实现类",
+   "aka": "",
+   "layer": "framework",
+   "gloss": "面向接口编程，换实现不改调用方",
+   "learned": "2026-10-05",
+   "ep": "Java day4"
+  },
+  {
+   "id": "c.mybatis.mapper",
+   "label": "@Mapper 接口",
+   "aka": "",
+   "layer": "persistence",
+   "gloss": "只有签名没有实现，启动时由 MyBatis 生成",
+   "learned": "2026-10-18",
+   "ep": "第60集"
+  },
+  {
+   "id": "c.mybatis.proxy",
+   "label": "动态代理",
+   "aka": "JDK Proxy",
+   "layer": "persistence",
+   "gloss": "接口名/方法名/namespace/id 必须严丝合缝对上",
+   "learned": "2026-10-18",
+   "ep": "第60集"
+  },
+  {
+   "id": "c.mybatis.mapping",
+   "label": "注解 vs XML 写 SQL",
+   "aka": "@Select / <select>",
+   "layer": "persistence",
+   "gloss": "简单用注解，动态 SQL 用 XML",
+   "learned": "2026-10-19",
+   "ep": "第70集"
+  },
+  {
+   "id": "c.mybatis.hash",
+   "label": "#{} 预编译占位符",
+   "aka": "？",
+   "layer": "persistence",
+   "gloss": "编译成 ? 走 PreparedStatement，值永远是值",
+   "learned": "2026-10-19",
+   "ep": "第70集"
+  },
+  {
+   "id": "c.mybatis.dollar",
+   "label": "${} 字符串拼接",
+   "aka": "",
+   "layer": "persistence",
+   "gloss": "直接拼进 SQL，有注入风险；只能用于表名/字段名",
+   "learned": "2026-10-19",
+   "ep": "第70集"
+  },
+  {
+   "id": "c.mybatis.resultmap",
+   "label": "结果映射",
+   "aka": "resultType / RowMapper",
+   "layer": "persistence",
+   "gloss": "数据库的行变成 Java 对象，靠列名匹配属性名",
+   "learned": "2026-10-18",
+   "ep": "第62集"
+  },
+  {
+   "id": "c.mybatis.camel-case",
+   "label": "驼峰映射开关",
+   "aka": "map-underscore-to-camel-case",
+   "layer": "persistence",
+   "gloss": "create_time → createTime；不开就静悄悄留 null",
+   "learned": "2026-10-21",
+   "ep": "第78集"
+  },
+  {
+   "id": "c.mybatis.generated-keys",
+   "label": "主键回填",
+   "aka": "@Options(useGeneratedKeys,keyProperty)",
+   "layer": "persistence",
+   "gloss": "插入后自增 id 回填到对象上",
+   "learned": "2026-10-18",
+   "ep": "第63集"
+  },
+  {
+   "id": "c.jdbc",
+   "label": "JDBC",
+   "aka": "",
+   "layer": "persistence",
+   "gloss": "一套访问数据库的标准接口，六步模板代码",
+   "learned": "2026-10-18",
+   "ep": "第56集"
+  },
+  {
+   "id": "c.jdbc.driver",
+   "label": "JDBC 驱动",
+   "aka": "mysql-connector-j",
+   "layer": "persistence",
+   "gloss": "标准接口的具体实现，换数据库只换驱动",
+   "learned": "2026-10-18",
+   "ep": "第56集"
+  },
+  {
+   "id": "c.pool.hikari",
+   "label": "HikariCP 连接池",
+   "aka": "",
+   "layer": "persistence",
+   "gloss": "借还代替建销，把连接成本摊到启动时",
+   "learned": "2026-10-19",
+   "ep": "第68集"
+  },
+  {
+   "id": "c.sql",
+   "label": "SQL 语言",
+   "aka": "",
+   "layer": "database",
+   "gloss": "标准；MySQL/Oracle 是各自的实现",
+   "learned": "2026-10-17",
+   "ep": "第48集"
+  },
+  {
+   "id": "c.sql.dml",
+   "label": "DML 增删改",
+   "aka": "insert/update/delete",
+   "layer": "database",
+   "gloss": "影响的是数据行，返回受影响行数",
+   "learned": "2026-10-18",
+   "ep": "第57集"
+  },
+  {
+   "id": "c.sql.ddl",
+   "label": "建库建表",
+   "aka": "create table",
+   "layer": "database",
+   "gloss": "dept 表：id/name/create_time/update_time",
+   "learned": "2026-10-21",
+   "ep": "第76集"
+  },
+  {
+   "id": "c.mysql",
+   "label": "MySQL",
+   "aka": "",
+   "layer": "database",
+   "gloss": "只懂 SQL，不关心是谁在问",
+   "learned": "2026-10-17",
+   "ep": "第52集"
+  },
+  {
+   "id": "c.tool.maven",
+   "label": "Maven",
+   "aka": "pom.xml",
+   "layer": "tooling",
+   "gloss": "依赖管理与标准构建，版本要锁死",
+   "learned": "2026-10-14",
+   "ep": "第31~32集"
+  },
+  {
+   "id": "c.tool.apifox",
+   "label": "Apifox",
+   "aka": "",
+   "layer": "tooling",
+   "gloss": "接口文档 + 调试 + Mock；浏览器只能发 GET 所以要它",
+   "learned": "2026-10-20",
+   "ep": "第75集"
+  },
+  {
+   "id": "c.config.yml",
+   "label": "application.yml",
+   "aka": "",
+   "layer": "tooling",
+   "gloss": "缩进即层级，不能 Tab；把变化挪出代码",
+   "learned": "2026-10-20",
+   "ep": "第73集"
+  },
+  {
+   "id": "c.log.slf4j",
+   "label": "Slf4j 日志门面",
+   "aka": "",
+   "layer": "tooling",
+   "gloss": "一套标准接口，底下可以换任意日志实现",
+   "learned": "2026-10-22",
+   "ep": "第84集"
+  },
+  {
+   "id": "c.log.logback",
+   "label": "Logback",
+   "aka": "logback.xml",
+   "layer": "tooling",
+   "gloss": "Slf4j 的实现，按配置输出到控制台/文件",
+   "learned": "2026-10-22",
+   "ep": "第84集"
+  },
+  {
+   "id": "c.log.println",
+   "label": "System.out.println",
+   "aka": "",
+   "layer": "tooling",
+   "gloss": "硬编码、只到控制台、不分级 —— 日志要替代它",
+   "learned": "2026-10-22",
+   "ep": "第84集"
+  },
+  {
+   "id": "c.log.level",
+   "label": "日志级别",
+   "aka": "ALL/DEBUG/INFO/WARN/ERROR",
+   "layer": "tooling",
+   "gloss": "优先级由低到高，配置文件里控制输出到哪一级",
+   "learned": "2026-10-22",
+   "ep": "第85集"
+  },
+  {
+   "id": "c.arch.package",
+   "label": "包结构约定",
+   "aka": "controller/service/mapper/pojo",
+   "layer": "tooling",
+   "gloss": "约定优于配置，扫包靠它",
+   "learned": "2026-10-21",
+   "ep": "第76集"
+  },
+  {
+   "id": "c.db.fk",
+   "label": "外键约束",
+   "aka": "foreign key",
+   "layer": "database",
+   "gloss": "为多的一方加外键指向一的一方主键，保证数据一致与完整",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.db.fk-physical",
+   "label": "物理外键 vs 逻辑外键",
+   "aka": "",
+   "layer": "database",
+   "gloss": "物理外键影响增删改效率、只适合单节点；项目里多用逻辑外键",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.db.relation",
+   "label": "多表关系",
+   "aka": "一对一/一对多/多对多",
+   "layer": "database",
+   "gloss": "一对多靠外键，多对多靠中间表，一对一多用于单表拆分",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.sql.cartesian",
+   "label": "笛卡尔积",
+   "aka": "",
+   "layer": "database",
+   "gloss": "两表直接相连得到所有组合（30×6=180），必须用连接条件消除",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.sql.join",
+   "label": "多表连接查询",
+   "aka": "inner / left / right join",
+   "layer": "database",
+   "gloss": "内连接取交集，外连接保留一侧全部；员工列表用左外连接",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.sql.subquery",
+   "label": "子查询四类",
+   "aka": "标量/列/行/表",
+   "layer": "database",
+   "gloss": "SQL 里嵌 select，按结果形状分标量、列、行、表四种",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.sql.aggregate",
+   "label": "聚合与分组",
+   "aka": "count / avg / group by",
+   "layer": "database",
+   "gloss": "按维度聚合统计；「低于本部门平均工资」是相关子查询的经典题",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.page.limit",
+   "label": "LIMIT 分页",
+   "aka": "limit 开始索引, 条数",
+   "layer": "persistence",
+   "gloss": "开始索引 = (页码-1) × 每页条数；接口还要返回总记录数",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.query.param-object",
+   "label": "查询参数对象封装",
+   "aka": "EmpQueryParam",
+   "layer": "framework",
+   "gloss": "6 个散参改成 1 个对象，前端参数名与属性名对齐即可自动绑定",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.mybatis.dynamic-sql",
+   "label": "动态 SQL",
+   "aka": "<where> / <if>",
+   "layer": "persistence",
+   "gloss": "SQL 随条件变化；<where> 自动处理多余 and，无条���时不输出 where",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.mybatis.batch",
+   "label": "批量保存",
+   "aka": "<foreach>",
+   "layer": "persistence",
+   "gloss": "工作经历多条一次写入；需要员工自增 id 先回填",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.tx.atomic",
+   "label": "要么全成功要么全失败",
+   "aka": "",
+   "layer": "framework",
+   "gloss": "多条写操作必须作为一个整体，否则出现「部分成功」的数据不一致",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.tx.rollbackfor",
+   "label": "rollbackFor 回滚属性",
+   "aka": "rollbackFor",
+   "layer": "framework",
+   "gloss": "@Transactional 默认只回滚 RuntimeException，受检异常要显式指定",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.tx.propagation",
+   "label": "事务传播行为",
+   "aka": "propagation",
+   "layer": "framework",
+   "gloss": "解决事务方法与事务方法互相调用时的边界问题（REQUIRED / REQUIRES_NEW）",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.tx.acid",
+   "label": "事务四大特性",
+   "aka": "ACID",
+   "layer": "framework",
+   "gloss": "原子性、一致性、隔离性、持久性；分别靠 undo log、约束、锁、redo log",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.file.multipart",
+   "label": "MultipartFile",
+   "aka": "MultipartFile",
+   "layer": "framework",
+   "gloss": "Spring 接收上传文件的类型，能拿文件名、大小、字节流",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.file.local",
+   "label": "本地磁盘存储",
+   "aka": "",
+   "layer": "server",
+   "gloss": "写到服务器目录再返回 URL；扩容或迁移后文件就丢了",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.file.oss",
+   "label": "阿里云 OSS",
+   "aka": "OSS / Bucket",
+   "layer": "tooling",
+   "gloss": "对象存储：开通建 Bucket → 拿 AccessKey → SDK 上传，只存 URL 到库",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.file.config",
+   "label": "上传大小限制",
+   "aka": "max-file-size",
+   "layer": "tooling",
+   "gloss": "默认单文件 1MB、单请求 10MB，要在配置里统一放开",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.springboot.props",
+   "label": "配置绑定 @ConfigurationProperties",
+   "aka": "",
+   "layer": "tooling",
+   "gloss": "把 OSS 的 endpoint/bucket 等写进 yml 再绑定到实体，不写死在代码里",
+   "learned": null,
+   "ep": null
+  }
+ ]
+}

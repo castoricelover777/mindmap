@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>前后端数据沟通全链路 · 长链图</title>
+<meta name="robots" content="noindex">
+<script>
+/* 长链图已并入 index.html 的「全链路图」，这里只负责跳转，让旧链接继续可用 */
+(function(){
+  var q = location.search.replace(/^\?/, "");
+  var keep = [];
+  q.split("&").forEach(function(kv){
+    if (!kv) return;
+    var k = kv.split("=")[0];
+    if (k !== "mode") keep.push(kv);          /* 保留 detail / clean 等参数 */
+  });
+  var url = "index.html?mode=chain" + (keep.length ? "&" + keep.join("&") : "");
+  location.replace(url);
+})();
+</script>
+</head>
+<body style="margin:0;font-family:-apple-system,'Microsoft YaHei',system-ui,sans-serif;background:#faf9f6;color:#6b7280">
+  <p style="padding:28px 24px;font-size:14px;line-height:1.7">
+    长链图已经并入「全链路图」，正在跳转…
+    <br>如果没有自动跳转，请点
+    <a href="index.html?mode=chain" style="color:#111827;font-weight:700">这里打开长链图</a>。
+  </p>
+</body>
+</html>
