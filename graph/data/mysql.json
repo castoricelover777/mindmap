@@ -112,11 +112,13 @@
        "code": [
         {
          "note": "查询所有数据库",
-         "sql": "show databases;"
+         "sql": "show databases;",
+         "html": "<span class=\"k\">show</span> databases;"
         },
         {
          "note": "查询当前数据库",
-         "sql": "select database();"
+         "sql": "select database();",
+         "html": "<span class=\"k\">select</span> <span class=\"k\">database</span>();"
         }
        ],
        "tips": []
@@ -133,15 +135,18 @@
        "code": [
         {
          "note": "",
-         "sql": "create database [ if not exists ] 数据库名  [default charset utf8mb4];"
+         "sql": "create database [ if not exists ] 数据库名  [default charset utf8mb4];",
+         "html": "<span class=\"k\">create</span> <span class=\"k\">database</span> [ <span class=\"k\">if</span> <span class=\"k\">not</span> <span class=\"k\">exists</span> ] 数据库名  [<span class=\"k\">default</span> <span class=\"k\">charset</span> utf8mb4];"
         },
         {
          "note": "案例： 创建一个itcast数据库。",
-         "sql": "create database itcast;"
+         "sql": "create database itcast;",
+         "html": "<span class=\"k\">create</span> <span class=\"k\">database</span> itcast;"
         },
         {
          "note": "",
-         "sql": "-- 数据库不存在,则创建该数据库；如果存在则不创建\ncreate database if not exists itcast;"
+         "sql": "-- 数据库不存在,则创建该数据库；如果存在则不创建\ncreate database if not exists itcast;",
+         "html": "<span class=\"c\">-- 数据库不存在,则创建该数据库；如果存在则不创建</span>\n<span class=\"k\">create</span> <span class=\"k\">database</span> <span class=\"k\">if</span> <span class=\"k\">not</span> <span class=\"k\">exists</span> itcast;"
         }
        ],
        "tips": [
@@ -158,11 +163,13 @@
        "code": [
         {
          "note": "",
-         "sql": "use 数据库名 ;"
+         "sql": "use 数据库名 ;",
+         "html": "<span class=\"k\">use</span> 数据库名 ;"
         },
         {
          "note": "案例：切换到itcast数据",
-         "sql": "use itcast;"
+         "sql": "use itcast;",
+         "html": "<span class=\"k\">use</span> itcast;"
         }
        ],
        "tips": []
@@ -178,11 +185,13 @@
        "code": [
         {
          "note": "",
-         "sql": "drop database [ if exists ] 数据库名 ;"
+         "sql": "drop database [ if exists ] 数据库名 ;",
+         "html": "<span class=\"k\">drop</span> <span class=\"k\">database</span> [ <span class=\"k\">if</span> <span class=\"k\">exists</span> ] 数据库名 ;"
         },
         {
          "note": "案例：删除itcast数据库",
-         "sql": "drop database if exists itcast; -- itcast数据库存在时删除"
+         "sql": "drop database if exists itcast; -- itcast数据库存在时删除",
+         "html": "<span class=\"k\">drop</span> <span class=\"k\">database</span> <span class=\"k\">if</span> <span class=\"k\">exists</span> itcast; <span class=\"c\">-- itcast数据库存在时删除</span>"
         }
        ],
        "tips": [
@@ -258,11 +267,13 @@
        "code": [
         {
          "note": "",
-         "sql": "create table  表名(\n字段1  字段1类型 [约束]  [comment  字段1注释 ],\n字段2  字段2类型 [约束]  [comment  字段2注释 ],\n......\n字段n  字段n类型 [约束]  [comment  字段n注释 ]\n) [ comment  表注释 ] ;"
+         "sql": "create table  表名(\n字段1  字段1类型 [约束]  [comment  字段1注释 ],\n字段2  字段2类型 [约束]  [comment  字段2注释 ],\n......\n字段n  字段n类型 [约束]  [comment  字段n注释 ]\n) [ comment  表注释 ] ;",
+         "html": "<span class=\"k\">create</span> <span class=\"k\">table</span>  表名(\n字段1  字段1类型 [约束]  [<span class=\"k\">comment</span>  字段1注释 ],\n字段2  字段2类型 [约束]  [<span class=\"k\">comment</span>  字段2注释 ],\n......\n字段n  字段n类型 [约束]  [<span class=\"k\">comment</span>  字段n注释 ]\n) [ <span class=\"k\">comment</span>  表注释 ] ;"
         },
         {
          "note": "",
-         "sql": "create table tb_user (\nid int comment 'ID,唯一标识',   # id是一行数据的唯一标识（不能重复）\nusername varchar(20) comment '用户名',\nname varchar(10) comment '姓名',\nage int comment '年龄',\ngender char(1) comment '性别'\n) comment '用户表';"
+         "sql": "create table tb_user (\nid int comment 'ID,唯一标识',   # id是一行数据的唯一标识（不能重复）\nusername varchar(20) comment '用户名',\nname varchar(10) comment '姓名',\nage int comment '年龄',\ngender char(1) comment '性别'\n) comment '用户表';",
+         "html": "<span class=\"k\">create</span> <span class=\"k\">table</span> tb_user (\nid <span class=\"k\">int</span> <span class=\"k\">comment</span> <span class=\"s\">&#x27;ID,唯一标识&#x27;</span>,   <span class=\"c\"># id是一行数据的唯一标识（不能重复）</span>\nusername <span class=\"k\">varchar</span>(<span class=\"n\">20</span>) <span class=\"k\">comment</span> <span class=\"s\">&#x27;用户名&#x27;</span>,\nname <span class=\"k\">varchar</span>(<span class=\"n\">10</span>) <span class=\"k\">comment</span> <span class=\"s\">&#x27;姓名&#x27;</span>,\nage <span class=\"k\">int</span> <span class=\"k\">comment</span> <span class=\"s\">&#x27;年龄&#x27;</span>,\ngender <span class=\"k\">char</span>(<span class=\"n\">1</span>) <span class=\"k\">comment</span> <span class=\"s\">&#x27;性别&#x27;</span>\n) <span class=\"k\">comment</span> <span class=\"s\">&#x27;用户表&#x27;</span>;"
         }
        ],
        "tips": [
@@ -289,11 +300,13 @@
        "code": [
         {
          "note": "",
-         "sql": "create table tb_user (\nid int primary key comment 'ID,唯一标识',\nusername varchar(20) not null unique comment '用户名',\nname varchar(10) not null comment '姓名',\nage int comment '年龄',\ngender char(1) default '男' comment '性别'\n) comment '用户表';"
+         "sql": "create table tb_user (\nid int primary key comment 'ID,唯一标识',\nusername varchar(20) not null unique comment '用户名',\nname varchar(10) not null comment '姓名',\nage int comment '年龄',\ngender char(1) default '男' comment '性别'\n) comment '用户表';",
+         "html": "<span class=\"k\">create</span> <span class=\"k\">table</span> tb_user (\nid <span class=\"k\">int</span> <span class=\"k\">primary</span> <span class=\"k\">key</span> <span class=\"k\">comment</span> <span class=\"s\">&#x27;ID,唯一标识&#x27;</span>,\nusername <span class=\"k\">varchar</span>(<span class=\"n\">20</span>) <span class=\"k\">not</span> <span class=\"k\">null</span> <span class=\"k\">unique</span> <span class=\"k\">comment</span> <span class=\"s\">&#x27;用户名&#x27;</span>,\nname <span class=\"k\">varchar</span>(<span class=\"n\">10</span>) <span class=\"k\">not</span> <span class=\"k\">null</span> <span class=\"k\">comment</span> <span class=\"s\">&#x27;姓名&#x27;</span>,\nage <span class=\"k\">int</span> <span class=\"k\">comment</span> <span class=\"s\">&#x27;年龄&#x27;</span>,\ngender <span class=\"k\">char</span>(<span class=\"n\">1</span>) <span class=\"k\">default</span> <span class=\"s\">&#x27;男&#x27;</span> <span class=\"k\">comment</span> <span class=\"s\">&#x27;性别&#x27;</span>\n) <span class=\"k\">comment</span> <span class=\"s\">&#x27;用户表&#x27;</span>;"
         },
         {
          "note": "",
-         "sql": "create table tb_user (\nid int primary key auto_increment comment 'ID,唯一标识', #主键自动增长\nusername varchar(20) not null unique comment '用户名',\nname varchar(10) not null comment '姓名',\nage int comment '年龄',\ngender char(1) default '男' comment '性别'\n) comment '用户表';"
+         "sql": "create table tb_user (\nid int primary key auto_increment comment 'ID,唯一标识', #主键自动增长\nusername varchar(20) not null unique comment '用户名',\nname varchar(10) not null comment '姓名',\nage int comment '年龄',\ngender char(1) default '男' comment '性别'\n) comment '用户表';",
+         "html": "<span class=\"k\">create</span> <span class=\"k\">table</span> tb_user (\nid <span class=\"k\">int</span> <span class=\"k\">primary</span> <span class=\"k\">key</span> <span class=\"k\">auto_increment</span> <span class=\"k\">comment</span> <span class=\"s\">&#x27;ID,唯一标识&#x27;</span>, <span class=\"c\">#主键自动增长</span>\nusername <span class=\"k\">varchar</span>(<span class=\"n\">20</span>) <span class=\"k\">not</span> <span class=\"k\">null</span> <span class=\"k\">unique</span> <span class=\"k\">comment</span> <span class=\"s\">&#x27;用户名&#x27;</span>,\nname <span class=\"k\">varchar</span>(<span class=\"n\">10</span>) <span class=\"k\">not</span> <span class=\"k\">null</span> <span class=\"k\">comment</span> <span class=\"s\">&#x27;姓名&#x27;</span>,\nage <span class=\"k\">int</span> <span class=\"k\">comment</span> <span class=\"s\">&#x27;年龄&#x27;</span>,\ngender <span class=\"k\">char</span>(<span class=\"n\">1</span>) <span class=\"k\">default</span> <span class=\"s\">&#x27;男&#x27;</span> <span class=\"k\">comment</span> <span class=\"s\">&#x27;性别&#x27;</span>\n) <span class=\"k\">comment</span> <span class=\"s\">&#x27;用户表&#x27;</span>;"
         }
        ],
        "tips": [
@@ -316,15 +329,18 @@
        "code": [
         {
          "note": "",
-         "sql": "-- 年龄字段 ---不会出现负数, 而且人的年龄不会太大\nage tinyint unsigned\n-- 分数 ---总分100分, 最多出现一位小数\nscore double(4,1)"
+         "sql": "-- 年龄字段 ---不会出现负数, 而且人的年龄不会太大\nage tinyint unsigned\n-- 分数 ---总分100分, 最多出现一位小数\nscore double(4,1)",
+         "html": "<span class=\"c\">-- 年龄字段 ---不会出现负数, 而且人的年龄不会太大</span>\nage tinyint unsigned\n<span class=\"c\">-- 分数 ---总分100分, 最多出现一位小数</span>\nscore double(<span class=\"n\">4</span>,<span class=\"n\">1</span>)"
         },
         {
          "note": "",
-         "sql": "示例：\n用户名 username ---长度不定, 最长不会超过50\nusername varchar(50)\n手机号 phone ---固定长度为11\nphone char(11)"
+         "sql": "示例：\n用户名 username ---长度不定, 最长不会超过50\nusername varchar(50)\n手机号 phone ---固定长度为11\nphone char(11)",
+         "html": "示例：\n用户名 username <span class=\"c\">---长度不定, 最长不会超过50</span>\nusername <span class=\"k\">varchar</span>(<span class=\"n\">50</span>)\n手机号 phone <span class=\"c\">---固定长度为11</span>\nphone <span class=\"k\">char</span>(<span class=\"n\">11</span>)"
         },
         {
          "note": "",
-         "sql": "示例:\n生日字段  birthday ---生日只需要年月日\nbirthday date\n创建时间 createtime --- 需要精确到时分秒\ncreatetime  datetime"
+         "sql": "示例:\n生日字段  birthday ---生日只需要年月日\nbirthday date\n创建时间 createtime --- 需要精确到时分秒\ncreatetime  datetime",
+         "html": "示例:\n生日字段  birthday <span class=\"c\">---生日只需要年月日</span>\nbirthday date\n创建时间 createtime <span class=\"c\">--- 需要精确到时分秒</span>\ncreatetime  <span class=\"k\">datetime</span>"
         }
        ],
        "tips": []
@@ -349,7 +365,8 @@
        "code": [
         {
          "note": "",
-         "sql": "create table emp(\nid int unsigned primary key auto_increment comment 'ID,主键',\nusername varchar(20) not null unique comment '用户名',\npassword varchar(32) not null comment '密码',\nname varchar(10) not null comment '姓名',\ngender tinyint unsigned not null comment '性别, 1:男, 2:女',\nphone char(11) not null unique comment '手机号',\njob tinyint unsigned comment '职位, 1:班主任,2:讲师,3:学工主管,4:教研主管,5:咨询师',\nsalary int unsigned comment '薪资',\nimage varchar(255) comment '头像',\nentry_date date comment '入职日期',\ncreate_time datetime comment '创建时间',\nupdate_time datetime comment '修改时间'\n) comment '员工表';"
+         "sql": "create table emp(\nid int unsigned primary key auto_increment comment 'ID,主键',\nusername varchar(20) not null unique comment '用户名',\npassword varchar(32) not null comment '密码',\nname varchar(10) not null comment '姓名',\ngender tinyint unsigned not null comment '性别, 1:男, 2:女',\nphone char(11) not null unique comment '手机号',\njob tinyint unsigned comment '职位, 1:班主任,2:讲师,3:学工主管,4:教研主管,5:咨询师',\nsalary int unsigned comment '薪资',\nimage varchar(255) comment '头像',\nentry_date date comment '入职日期',\ncreate_time datetime comment '创建时间',\nupdate_time datetime comment '修改时间'\n) comment '员工表';",
+         "html": "<span class=\"k\">create</span> <span class=\"k\">table</span> emp(\nid <span class=\"k\">int</span> unsigned <span class=\"k\">primary</span> <span class=\"k\">key</span> <span class=\"k\">auto_increment</span> <span class=\"k\">comment</span> <span class=\"s\">&#x27;ID,主键&#x27;</span>,\nusername <span class=\"k\">varchar</span>(<span class=\"n\">20</span>) <span class=\"k\">not</span> <span class=\"k\">null</span> <span class=\"k\">unique</span> <span class=\"k\">comment</span> <span class=\"s\">&#x27;用户名&#x27;</span>,\npassword <span class=\"k\">varchar</span>(<span class=\"n\">32</span>) <span class=\"k\">not</span> <span class=\"k\">null</span> <span class=\"k\">comment</span> <span class=\"s\">&#x27;密码&#x27;</span>,\nname <span class=\"k\">varchar</span>(<span class=\"n\">10</span>) <span class=\"k\">not</span> <span class=\"k\">null</span> <span class=\"k\">comment</span> <span class=\"s\">&#x27;姓名&#x27;</span>,\ngender tinyint unsigned <span class=\"k\">not</span> <span class=\"k\">null</span> <span class=\"k\">comment</span> <span class=\"s\">&#x27;性别, 1:男, 2:女&#x27;</span>,\nphone <span class=\"k\">char</span>(<span class=\"n\">11</span>) <span class=\"k\">not</span> <span class=\"k\">null</span> <span class=\"k\">unique</span> <span class=\"k\">comment</span> <span class=\"s\">&#x27;手机号&#x27;</span>,\njob tinyint unsigned <span class=\"k\">comment</span> <span class=\"s\">&#x27;职位, 1:班主任,2:讲师,3:学工主管,4:教研主管,5:咨询师&#x27;</span>,\nsalary <span class=\"k\">int</span> unsigned <span class=\"k\">comment</span> <span class=\"s\">&#x27;薪资&#x27;</span>,\nimage <span class=\"k\">varchar</span>(<span class=\"n\">255</span>) <span class=\"k\">comment</span> <span class=\"s\">&#x27;头像&#x27;</span>,\nentry_date date <span class=\"k\">comment</span> <span class=\"s\">&#x27;入职日期&#x27;</span>,\ncreate_time <span class=\"k\">datetime</span> <span class=\"k\">comment</span> <span class=\"s\">&#x27;创建时间&#x27;</span>,\nupdate_time <span class=\"k\">datetime</span> <span class=\"k\">comment</span> <span class=\"s\">&#x27;修改时间&#x27;</span>\n) <span class=\"k\">comment</span> <span class=\"s\">&#x27;员工表&#x27;</span>;"
         }
        ],
        "tips": []
@@ -366,31 +383,38 @@
        "code": [
         {
          "note": "查询数据库表的具体的语法：",
-         "sql": "-- 查询当前数据库的所有表\nshow tables;\n-- 查看指定的表结构\ndesc 表名 ;   -- 可以查看指定表的字段、字段的类型、是否可以为NULL、是否存在默认值等信息\n-- 查询指定表的建表语句\nshow create table 表名 ;"
+         "sql": "-- 查询当前数据库的所有表\nshow tables;\n-- 查看指定的表结构\ndesc 表名 ;   -- 可以查看指定表的字段、字段的类型、是否可以为NULL、是否存在默认值等信息\n-- 查询指定表的建表语句\nshow create table 表名 ;",
+         "html": "<span class=\"c\">-- 查询当前数据库的所有表</span>\n<span class=\"k\">show</span> tables;\n<span class=\"c\">-- 查看指定的表结构</span>\n<span class=\"k\">desc</span> 表名 ;   <span class=\"c\">-- 可以查看指定表的字段、字段的类型、是否可以为NULL、是否存在默认值等信息</span>\n<span class=\"c\">-- 查询指定表的建表语句</span>\n<span class=\"k\">show</span> <span class=\"k\">create</span> <span class=\"k\">table</span> 表名 ;"
         },
         {
          "note": "",
-         "sql": "-- 添加字段\nalter table 表名 add  字段名  类型(长度)  [comment 注释]  [约束];\n-- 比如： 为tb_emp表添加字段qq，字段类型为 varchar(11)\nalter table tb_emp add  qq  varchar(11) comment 'QQ号码';"
+         "sql": "-- 添加字段\nalter table 表名 add  字段名  类型(长度)  [comment 注释]  [约束];\n-- 比如： 为tb_emp表添加字段qq，字段类型为 varchar(11)\nalter table tb_emp add  qq  varchar(11) comment 'QQ号码';",
+         "html": "<span class=\"c\">-- 添加字段</span>\n<span class=\"k\">alter</span> <span class=\"k\">table</span> 表名 add  字段名  类型(长度)  [<span class=\"k\">comment</span> 注释]  [约束];\n<span class=\"c\">-- 比如： 为tb_emp表添加字段qq，字段类型为 varchar(11)</span>\n<span class=\"k\">alter</span> <span class=\"k\">table</span> tb_emp add  qq  <span class=\"k\">varchar</span>(<span class=\"n\">11</span>) <span class=\"k\">comment</span> <span class=\"s\">&#x27;QQ号码&#x27;</span>;"
         },
         {
          "note": "修改字段",
-         "sql": "-- 修改字段类型\nalter table 表名 modify  字段名  新数据类型(长度);\n-- 比如： 修改qq字段的字段类型，将其长度由11修改为13\nalter table tb_emp modify qq varchar(13) comment 'QQ号码';"
+         "sql": "-- 修改字段类型\nalter table 表名 modify  字段名  新数据类型(长度);\n-- 比如： 修改qq字段的字段类型，将其长度由11修改为13\nalter table tb_emp modify qq varchar(13) comment 'QQ号码';",
+         "html": "<span class=\"c\">-- 修改字段类型</span>\n<span class=\"k\">alter</span> <span class=\"k\">table</span> 表名 modify  字段名  新数据类型(长度);\n<span class=\"c\">-- 比如： 修改qq字段的字段类型，将其长度由11修改为13</span>\n<span class=\"k\">alter</span> <span class=\"k\">table</span> tb_emp modify qq <span class=\"k\">varchar</span>(<span class=\"n\">13</span>) <span class=\"k\">comment</span> <span class=\"s\">&#x27;QQ号码&#x27;</span>;"
         },
         {
          "note": "",
-         "sql": "-- 修改字段名，字段类型\nalter table 表名 change  旧字段名  新字段名  类型(长度)  [comment 注释]  [约束];\n-- 比如： 修改qq字段名为 qq_num，字段类型varchar(13)\nalter table tb_emp change qq qq_num varchar(13) comment 'QQ号码';"
+         "sql": "-- 修改字段名，字段类型\nalter table 表名 change  旧字段名  新字段名  类型(长度)  [comment 注释]  [约束];\n-- 比如： 修改qq字段名为 qq_num，字段类型varchar(13)\nalter table tb_emp change qq qq_num varchar(13) comment 'QQ号码';",
+         "html": "<span class=\"c\">-- 修改字段名，字段类型</span>\n<span class=\"k\">alter</span> <span class=\"k\">table</span> 表名 change  旧字段名  新字段名  类型(长度)  [<span class=\"k\">comment</span> 注释]  [约束];\n<span class=\"c\">-- 比如： 修改qq字段名为 qq_num，字段类型varchar(13)</span>\n<span class=\"k\">alter</span> <span class=\"k\">table</span> tb_emp change qq qq_num <span class=\"k\">varchar</span>(<span class=\"n\">13</span>) <span class=\"k\">comment</span> <span class=\"s\">&#x27;QQ号码&#x27;</span>;"
         },
         {
          "note": "删除字段",
-         "sql": "-- 删除字段\nalter table 表名 drop 字段名;\n-- 比如： 删除tb_emp表中的qq_num字段\nalter table tb_emp drop qq_num;"
+         "sql": "-- 删除字段\nalter table 表名 drop 字段名;\n-- 比如： 删除tb_emp表中的qq_num字段\nalter table tb_emp drop qq_num;",
+         "html": "<span class=\"c\">-- 删除字段</span>\n<span class=\"k\">alter</span> <span class=\"k\">table</span> 表名 <span class=\"k\">drop</span> 字段名;\n<span class=\"c\">-- 比如： 删除tb_emp表中的qq_num字段</span>\n<span class=\"k\">alter</span> <span class=\"k\">table</span> tb_emp <span class=\"k\">drop</span> qq_num;"
         },
         {
          "note": "修改表名",
-         "sql": "-- 修改表名\nrename table 表名 to  新表名;\n-- 比如: 将当前的emp表的表名修改为tb_emp\nrename table emp to tb_emp;"
+         "sql": "-- 修改表名\nrename table 表名 to  新表名;\n-- 比如: 将当前的emp表的表名修改为tb_emp\nrename table emp to tb_emp;",
+         "html": "<span class=\"c\">-- 修改表名</span>\nrename <span class=\"k\">table</span> 表名 to  新表名;\n<span class=\"c\">-- 比如: 将当前的emp表的表名修改为tb_emp</span>\nrename <span class=\"k\">table</span> emp to tb_emp;"
         },
         {
          "note": "删除表结构",
-         "sql": "-- 删除表\ndrop  table [ if exists ]  表名;\n-- 比如：如果tb_emp表存在，则删除tb_emp表\ndrop table if exists tb_emp;  -- 在删除表时，表中的全部数据也会被删除。"
+         "sql": "-- 删除表\ndrop  table [ if exists ]  表名;\n-- 比如：如果tb_emp表存在，则删除tb_emp表\ndrop table if exists tb_emp;  -- 在删除表时，表中的全部数据也会被删除。",
+         "html": "<span class=\"c\">-- 删除表</span>\n<span class=\"k\">drop</span>  <span class=\"k\">table</span> [ <span class=\"k\">if</span> <span class=\"k\">exists</span> ]  表名;\n<span class=\"c\">-- 比如：如果tb_emp表存在，则删除tb_emp表</span>\n<span class=\"k\">drop</span> <span class=\"k\">table</span> <span class=\"k\">if</span> <span class=\"k\">exists</span> tb_emp;  <span class=\"c\">-- 在删除表时，表中的全部数据也会被删除。</span>"
         }
        ],
        "tips": []
@@ -413,19 +437,23 @@
        "code": [
         {
          "note": "",
-         "sql": "insert into 表名 (字段名1, 字段名2) values (值1, 值2);"
+         "sql": "insert into 表名 (字段名1, 字段名2) values (值1, 值2);",
+         "html": "<span class=\"k\">insert</span> <span class=\"k\">into</span> 表名 (字段名1, 字段名2) <span class=\"k\">values</span> (值1, 值2);"
         },
         {
          "note": "",
-         "sql": "insert into 表名 values (值1, 值2, ...);"
+         "sql": "insert into 表名 values (值1, 值2, ...);",
+         "html": "<span class=\"k\">insert</span> <span class=\"k\">into</span> 表名 <span class=\"k\">values</span> (值1, 值2, ...);"
         },
         {
          "note": "",
-         "sql": "insert into 表名 (字段名1, 字段名2) values (值1, 值2), (值1, 值2);"
+         "sql": "insert into 表名 (字段名1, 字段名2) values (值1, 值2), (值1, 值2);",
+         "html": "<span class=\"k\">insert</span> <span class=\"k\">into</span> 表名 (字段名1, 字段名2) <span class=\"k\">values</span> (值1, 值2), (值1, 值2);"
         },
         {
          "note": "",
-         "sql": "insert into 表名 values (值1, 值2, ...), (值1, 值2, ...);"
+         "sql": "insert into 表名 values (值1, 值2, ...), (值1, 值2, ...);",
+         "html": "<span class=\"k\">insert</span> <span class=\"k\">into</span> 表名 <span class=\"k\">values</span> (值1, 值2, ...), (值1, 值2, ...);"
         }
        ],
        "tips": []
@@ -439,15 +467,18 @@
        "code": [
         {
          "note": "案例1：向emp表的username, name, gender, phone, create_time, update_time字段插入数据",
-         "sql": "-- 因为设计表时create_time, update_time两个字段不能为NULL，所以也做为要插入的字段\ninsert into emp(username, name, gender, phone, create_time, update_time)\nvalues ('wuji', '张无忌', 1, '13309091231', now(), now());"
+         "sql": "-- 因为设计表时create_time, update_time两个字段不能为NULL，所以也做为要插入的字段\ninsert into emp(username, name, gender, phone, create_time, update_time)\nvalues ('wuji', '张无忌', 1, '13309091231', now(), now());",
+         "html": "<span class=\"c\">-- 因为设计表时create_time, update_time两个字段不能为NULL，所以也做为要插入的字段</span>\n<span class=\"k\">insert</span> <span class=\"k\">into</span> emp(username, name, gender, phone, create_time, update_time)\n<span class=\"k\">values</span> (<span class=\"s\">&#x27;wuji&#x27;</span>, <span class=\"s\">&#x27;张无忌&#x27;</span>, <span class=\"n\">1</span>, <span class=\"s\">&#x27;13309091231&#x27;</span>, <span class=\"f\">now</span>(), <span class=\"f\">now</span>());"
         },
         {
          "note": "案例2：向temp表的所有字段插入数据",
-         "sql": "insert into emp2(id, username, password, name, gender, phone, job, salary, image, entry_date, create_time, update_time)\nvalues (1,'shinaian','123456','施耐庵',1,'13309090001',4,15000,'1.jpg','2000-01-01',now(),now()),"
+         "sql": "insert into emp2(id, username, password, name, gender, phone, job, salary, image, entry_date, create_time, update_time)\nvalues (1,'shinaian','123456','施耐庵',1,'13309090001',4,15000,'1.jpg','2000-01-01',now(),now()),",
+         "html": "<span class=\"k\">insert</span> <span class=\"k\">into</span> emp2(id, username, password, name, gender, phone, job, salary, image, entry_date, create_time, update_time)\n<span class=\"k\">values</span> (<span class=\"n\">1</span>,<span class=\"s\">&#x27;shinaian&#x27;</span>,<span class=\"s\">&#x27;123456&#x27;</span>,<span class=\"s\">&#x27;施耐庵&#x27;</span>,<span class=\"n\">1</span>,<span class=\"s\">&#x27;13309090001&#x27;</span>,<span class=\"n\">4</span>,<span class=\"n\">15000</span>,<span class=\"s\">&#x27;1.jpg&#x27;</span>,<span class=\"s\">&#x27;2000-01-01&#x27;</span>,<span class=\"f\">now</span>(),<span class=\"f\">now</span>()),"
         },
         {
          "note": "案例3：批量向emp表的username、name、gender字段插入数据",
-         "sql": "insert into emp(username, name, gender, phone, create_time, update_time)\nvalues ('Tom1', '汤姆1', 1, '13309091231', now(), now()),\n('Tom2', '汤姆2', 1, '13309091232', now(), now());"
+         "sql": "insert into emp(username, name, gender, phone, create_time, update_time)\nvalues ('Tom1', '汤姆1', 1, '13309091231', now(), now()),\n('Tom2', '汤姆2', 1, '13309091232', now(), now());",
+         "html": "<span class=\"k\">insert</span> <span class=\"k\">into</span> emp(username, name, gender, phone, create_time, update_time)\n<span class=\"k\">values</span> (<span class=\"s\">&#x27;Tom1&#x27;</span>, <span class=\"s\">&#x27;汤姆1&#x27;</span>, <span class=\"n\">1</span>, <span class=\"s\">&#x27;13309091231&#x27;</span>, <span class=\"f\">now</span>(), <span class=\"f\">now</span>()),\n(<span class=\"s\">&#x27;Tom2&#x27;</span>, <span class=\"s\">&#x27;汤姆2&#x27;</span>, <span class=\"n\">1</span>, <span class=\"s\">&#x27;13309091232&#x27;</span>, <span class=\"f\">now</span>(), <span class=\"f\">now</span>());"
         }
        ],
        "tips": []
@@ -459,7 +490,8 @@
        "code": [
         {
          "note": "",
-         "sql": "update 表名 set 字段名1 = 值1 , 字段名2 = 值2 , .... [where 条件] ;"
+         "sql": "update 表名 set 字段名1 = 值1 , 字段名2 = 值2 , .... [where 条件] ;",
+         "html": "<span class=\"k\">update</span> 表名 <span class=\"k\">set</span> 字段名1 = 值1 , 字段名2 = 值2 , .... [<span class=\"k\">where</span> 条件] ;"
         }
        ],
        "tips": []
@@ -471,11 +503,13 @@
        "code": [
         {
          "note": "案例1：将emp表中id为1的员工，姓名name字段更新为'张三'",
-         "sql": "update emp set name='张三', update_time=now() where id=1;"
+         "sql": "update emp set name='张三', update_time=now() where id=1;",
+         "html": "<span class=\"k\">update</span> emp <span class=\"k\">set</span> name=<span class=\"s\">&#x27;张三&#x27;</span>, update_time=<span class=\"f\">now</span>() <span class=\"k\">where</span> id=<span class=\"n\">1</span>;"
         },
         {
          "note": "案例2：将emp表的所有员工入职日期更新为'2010-01-01'",
-         "sql": "update emp set entry_date='2010-01-01', update_time=now();"
+         "sql": "update emp set entry_date='2010-01-01', update_time=now();",
+         "html": "<span class=\"k\">update</span> emp <span class=\"k\">set</span> entry_date=<span class=\"s\">&#x27;2010-01-01&#x27;</span>, update_time=<span class=\"f\">now</span>();"
         }
        ],
        "tips": [
@@ -489,7 +523,8 @@
        "code": [
         {
          "note": "",
-         "sql": "delete from 表名  [where  条件] ;"
+         "sql": "delete from 表名  [where  条件] ;",
+         "html": "<span class=\"k\">delete</span> <span class=\"k\">from</span> 表名  [<span class=\"k\">where</span>  条件] ;"
         }
        ],
        "tips": []
@@ -501,11 +536,13 @@
        "code": [
         {
          "note": "案例1：删除emp表中id为1的员工",
-         "sql": "delete from emp where id = 1;"
+         "sql": "delete from emp where id = 1;",
+         "html": "<span class=\"k\">delete</span> <span class=\"k\">from</span> emp <span class=\"k\">where</span> id = <span class=\"n\">1</span>;"
         },
         {
          "note": "案例2：删除emp表中所有员工",
-         "sql": "delete from tb_emp;"
+         "sql": "delete from tb_emp;",
+         "html": "<span class=\"k\">delete</span> <span class=\"k\">from</span> tb_emp;"
         }
        ],
        "tips": [
@@ -545,11 +582,13 @@
        "code": [
         {
          "note": "",
-         "sql": "SELECT\n字段列表\nFROM\n表名列表\nWHERE\n条件列表\nGROUP  BY\n分组字段列表\nHAVING\n分组后条件列表\nORDER BY\n排序字段列表\nLIMIT\n分页参数"
+         "sql": "SELECT\n字段列表\nFROM\n表名列表\nWHERE\n条件列表\nGROUP  BY\n分组字段列表\nHAVING\n分组后条件列表\nORDER BY\n排序字段列表\nLIMIT\n分页参数",
+         "html": "<span class=\"k\">SELECT</span>\n字段列表\n<span class=\"k\">FROM</span>\n表名列表\n<span class=\"k\">WHERE</span>\n条件列表\n<span class=\"k\">GROUP</span>  <span class=\"k\">BY</span>\n分组字段列表\n<span class=\"k\">HAVING</span>\n分组后条件列表\n<span class=\"k\">ORDER</span> <span class=\"k\">BY</span>\n排序字段列表\n<span class=\"k\">LIMIT</span>\n分页参数"
         },
         {
          "note": "",
-         "sql": "create table emp(\nid int unsigned primary key auto_increment comment 'ID,主键',\nusername varchar(20) not null unique comment '用户名',\npassword varchar(32) not null comment '密码',\nname varchar(10) not null comment '姓名',\ngender tinyint unsigned not null comment '性别, 1:男, 2:女',\nphone char(11) not null unique comment '手机号',\njob tinyint unsigned comment '职位, 1:班主任,2:讲师,3:学工主管,4:教研主管,5:咨询师',\nsalary int unsigned comment '薪资',\nimage varchar(300) comment '头像',\nentry_date date comment '入职日期',\ncreate_time datetime comment '创建时间',\nupdate_time datetime comment '修改时间'\n) comment '员工表';\n-- 准备测试数据\nINSERT INTO emp(id, username, password, name, gender, phone, job, salary, image, entry_date, create_time, update_time)\nVALUES (1,'shinaian','123456','施耐庵',1,'13309090001',4,15000,'1.jpg','2000-01-01','2024-04-11 16:35:33','2024-04-11 16:35:35'),\n(2,'songjiang','123456','宋江',1,'13309090002',2,8600,'2.jpg','2015-01-01','2024-04-11 16:35:33','2024-04-11 16:35:37'),\n(3,'lujunyi','123456','卢俊义',1,'13309090003',2,8900,'3.jpg','2008-05-01','2024-04-11 16:35:33','2024-04-11 16:35:39'),\n(4,'wuyong','123456','吴用',1,'13309090004',2,9200,'4.jpg','2007-01-01','2024-04-11 16:35:33','2024-04-11 16:35:41'),\n(5,'gongsunsheng','123456','公孙胜',1,'13309090005',2,9500,'5.jpg','2012-12-05','2024-04-11 16:35:33','2024-04-11 16:35:43'),\n(6,'huosanniang','123456','扈三娘',2,'13309090006',3,6500,'6.jpg','2013-09-05','2024-04-11 16:35:33','2024-04-11 16:35:45'),\n(7,'chaijin','123456','柴进',1,'13309090007',1,4700,'7.jpg','2005-08-01','2024-04-11 16:35:33','2024-04-11 16:35:47'),\n(8,'likui','123456','李逵',1,'13309090008',1,4800,'8.jpg','2014-11-09','2024-04-11 16:35:33','2024-04-11 16:35:49'),\n(9,'wusong','123456','武松',1,'13309090009',1,4900,'9.jpg','2011-03-11','2024-04-11 16:35:33','2024-04-11 16:35:51'),\n(10,'lichong','123456','林冲',1,'13309090010',1,5000,'10.jpg','2013-09-05','2024-04-11 16:35:33','2024-04-11 16:35:53'),\n(11,'huyanzhuo','123456','呼延灼',1,'13309090011',2,9700,'11.jpg','2007-02-01','2024-04-11 16:35:33','2024-04-11 16:35:55'),\n(12,'xiaoliguang','123456','小李广',1,'13309090012',2,10000,'12.jpg','2008-08-18','2024-04-11 16:35:33','2024-04-11 16:35:57'),\n(13,'yangzhi','123456','杨志',1,'13309090013',1,5300,'13.jpg','2012-11-01','2024-04-11 16:35:33','2024-04-11 16:35:59'),\n(14,'shijin','123456','史进',1,'13309090014',2,10600,'14.jpg','2002-08-01','2024-04-11 16:35:33','2024-04-11 16:36:01'),\n(15,'sunerniang','123456','孙二娘',2,'13309090015',2,10900,'15.jpg','2011-05-01','2024-04-11 16:35:33','2024-04-11 16:36:03'),\n(16,'luzhishen','123456','鲁智深',1,'13309090016',2,9600,'16.jpg','2010-01-01','2024-04-11 16:35:33','2024-04-11 16:36:05'),\n(17,'liying','12345678','李应',1,'13309090017',1,5800,'17.jpg','2015-03-21','2024-04-11 16:35:33','2024-04-11 16:36:07'),\n(18,'shiqian','123456','时迁',1,'13309090018',2,10200,'18.jpg','2015-01-01','2024-04-11 16:35:33','2024-04-11 16:36:09'),\n(19,'gudasao','123456','顾大嫂',2,'13309090019',2,10500,'19.jpg','2008-01-01','2024-04-11 16:35:33','2024-04-11 16:36:11'),\n(20,'ruanxiaoer','123456','阮小二',1,'13309090020',2,10800,'20.jpg','2018-01-01','2024-04-11 16:35:33','2024-04-11 16:36:13'),\n(21,'ruanxiaowu','123456','阮小五',1,'13309090021',5,5200,'21.jpg','2015-01-01','2024-04-11 16:35:33','2024-04-11 16:36:15'),\n(22,'ruanxiaoqi','123456','阮小七',1,'13309090022',5,5500,'22.jpg','2016-01-01','2024-04-11 16:35:33','2024-04-11 16:36:17'),\n(23,'ruanji','123456','阮籍',1,'13309090023',5,5800,'23.jpg','2012-01-01','2024-04-11 16:35:33','2024-04-11 16:36:19'),\n(24,'tongwei','123456','童威',1,'13309090024',5,5000,'24.jpg','2006-01-01','2024-04-11 16:35:33','2024-04-11 16:36:21'),\n(25,'tongmeng','123456','童猛',1,'13309090025',5,4800,'25.jpg','2002-01-01','2024-04-11 16:35:33','2024-04-11 16:36:23'),\n(26,'yanshun','123456','燕顺',1,'13309090026',5,5400,'26.jpg','2011-01-01','2024-04-11 16:35:33','2024-04-11 16:36:25'),\n(27,'lijun','123456','李俊',1,'13309090027',5,6600,'27.jpg','2004-01-01','2024-04-11 16:35:33','2024-04-11 16:36:27'),\n(28,'lizhong','123456','李忠',1,'13309090028',5,5000,'28.jpg','2007-01-01','2024-04-11 16:35:33','2024-04-11 16:36:29'),\n(29,'songqing','123456','宋清',1,'13309090029',5,5100,'29.jpg','2020-01-01','2024-04-11 16:35:33','2024-04-11 16:36:31'),\n(30,'liyun','123456','李云',1,'13309090030',NULL,NULL,'30.jpg','2020-03-01','2024-04-11 16:35:33','2024-04-11 16:36:31');"
+         "sql": "create table emp(\nid int unsigned primary key auto_increment comment 'ID,主键',\nusername varchar(20) not null unique comment '用户名',\npassword varchar(32) not null comment '密码',\nname varchar(10) not null comment '姓名',\ngender tinyint unsigned not null comment '性别, 1:男, 2:女',\nphone char(11) not null unique comment '手机号',\njob tinyint unsigned comment '职位, 1:班主任,2:讲师,3:学工主管,4:教研主管,5:咨询师',\nsalary int unsigned comment '薪资',\nimage varchar(300) comment '头像',\nentry_date date comment '入职日期',\ncreate_time datetime comment '创建时间',\nupdate_time datetime comment '修改时间'\n) comment '员工表';\n-- 准备测试数据\nINSERT INTO emp(id, username, password, name, gender, phone, job, salary, image, entry_date, create_time, update_time)\nVALUES (1,'shinaian','123456','施耐庵',1,'13309090001',4,15000,'1.jpg','2000-01-01','2024-04-11 16:35:33','2024-04-11 16:35:35'),\n(2,'songjiang','123456','宋江',1,'13309090002',2,8600,'2.jpg','2015-01-01','2024-04-11 16:35:33','2024-04-11 16:35:37'),\n(3,'lujunyi','123456','卢俊义',1,'13309090003',2,8900,'3.jpg','2008-05-01','2024-04-11 16:35:33','2024-04-11 16:35:39'),\n(4,'wuyong','123456','吴用',1,'13309090004',2,9200,'4.jpg','2007-01-01','2024-04-11 16:35:33','2024-04-11 16:35:41'),\n(5,'gongsunsheng','123456','公孙胜',1,'13309090005',2,9500,'5.jpg','2012-12-05','2024-04-11 16:35:33','2024-04-11 16:35:43'),\n(6,'huosanniang','123456','扈三娘',2,'13309090006',3,6500,'6.jpg','2013-09-05','2024-04-11 16:35:33','2024-04-11 16:35:45'),\n(7,'chaijin','123456','柴进',1,'13309090007',1,4700,'7.jpg','2005-08-01','2024-04-11 16:35:33','2024-04-11 16:35:47'),\n(8,'likui','123456','李逵',1,'13309090008',1,4800,'8.jpg','2014-11-09','2024-04-11 16:35:33','2024-04-11 16:35:49'),\n(9,'wusong','123456','武松',1,'13309090009',1,4900,'9.jpg','2011-03-11','2024-04-11 16:35:33','2024-04-11 16:35:51'),\n(10,'lichong','123456','林冲',1,'13309090010',1,5000,'10.jpg','2013-09-05','2024-04-11 16:35:33','2024-04-11 16:35:53'),\n(11,'huyanzhuo','123456','呼延灼',1,'13309090011',2,9700,'11.jpg','2007-02-01','2024-04-11 16:35:33','2024-04-11 16:35:55'),\n(12,'xiaoliguang','123456','小李广',1,'13309090012',2,10000,'12.jpg','2008-08-18','2024-04-11 16:35:33','2024-04-11 16:35:57'),\n(13,'yangzhi','123456','杨志',1,'13309090013',1,5300,'13.jpg','2012-11-01','2024-04-11 16:35:33','2024-04-11 16:35:59'),\n(14,'shijin','123456','史进',1,'13309090014',2,10600,'14.jpg','2002-08-01','2024-04-11 16:35:33','2024-04-11 16:36:01'),\n(15,'sunerniang','123456','孙二娘',2,'13309090015',2,10900,'15.jpg','2011-05-01','2024-04-11 16:35:33','2024-04-11 16:36:03'),\n(16,'luzhishen','123456','鲁智深',1,'13309090016',2,9600,'16.jpg','2010-01-01','2024-04-11 16:35:33','2024-04-11 16:36:05'),\n(17,'liying','12345678','李应',1,'13309090017',1,5800,'17.jpg','2015-03-21','2024-04-11 16:35:33','2024-04-11 16:36:07'),\n(18,'shiqian','123456','时迁',1,'13309090018',2,10200,'18.jpg','2015-01-01','2024-04-11 16:35:33','2024-04-11 16:36:09'),\n(19,'gudasao','123456','顾大嫂',2,'13309090019',2,10500,'19.jpg','2008-01-01','2024-04-11 16:35:33','2024-04-11 16:36:11'),\n(20,'ruanxiaoer','123456','阮小二',1,'13309090020',2,10800,'20.jpg','2018-01-01','2024-04-11 16:35:33','2024-04-11 16:36:13'),\n(21,'ruanxiaowu','123456','阮小五',1,'13309090021',5,5200,'21.jpg','2015-01-01','2024-04-11 16:35:33','2024-04-11 16:36:15'),\n(22,'ruanxiaoqi','123456','阮小七',1,'13309090022',5,5500,'22.jpg','2016-01-01','2024-04-11 16:35:33','2024-04-11 16:36:17'),\n(23,'ruanji','123456','阮籍',1,'13309090023',5,5800,'23.jpg','2012-01-01','2024-04-11 16:35:33','2024-04-11 16:36:19'),\n(24,'tongwei','123456','童威',1,'13309090024',5,5000,'24.jpg','2006-01-01','2024-04-11 16:35:33','2024-04-11 16:36:21'),\n(25,'tongmeng','123456','童猛',1,'13309090025',5,4800,'25.jpg','2002-01-01','2024-04-11 16:35:33','2024-04-11 16:36:23'),\n(26,'yanshun','123456','燕顺',1,'13309090026',5,5400,'26.jpg','2011-01-01','2024-04-11 16:35:33','2024-04-11 16:36:25'),\n(27,'lijun','123456','李俊',1,'13309090027',5,6600,'27.jpg','2004-01-01','2024-04-11 16:35:33','2024-04-11 16:36:27'),\n(28,'lizhong','123456','李忠',1,'13309090028',5,5000,'28.jpg','2007-01-01','2024-04-11 16:35:33','2024-04-11 16:36:29'),\n(29,'songqing','123456','宋清',1,'13309090029',5,5100,'29.jpg','2020-01-01','2024-04-11 16:35:33','2024-04-11 16:36:31'),\n(30,'liyun','123456','李云',1,'13309090030',NULL,NULL,'30.jpg','2020-03-01','2024-04-11 16:35:33','2024-04-11 16:36:31');",
+         "html": "<span class=\"k\">create</span> <span class=\"k\">table</span> emp(\nid <span class=\"k\">int</span> unsigned <span class=\"k\">primary</span> <span class=\"k\">key</span> <span class=\"k\">auto_increment</span> <span class=\"k\">comment</span> <span class=\"s\">&#x27;ID,主键&#x27;</span>,\nusername <span class=\"k\">varchar</span>(<span class=\"n\">20</span>) <span class=\"k\">not</span> <span class=\"k\">null</span> <span class=\"k\">unique</span> <span class=\"k\">comment</span> <span class=\"s\">&#x27;用户名&#x27;</span>,\npassword <span class=\"k\">varchar</span>(<span class=\"n\">32</span>) <span class=\"k\">not</span> <span class=\"k\">null</span> <span class=\"k\">comment</span> <span class=\"s\">&#x27;密码&#x27;</span>,\nname <span class=\"k\">varchar</span>(<span class=\"n\">10</span>) <span class=\"k\">not</span> <span class=\"k\">null</span> <span class=\"k\">comment</span> <span class=\"s\">&#x27;姓名&#x27;</span>,\ngender tinyint unsigned <span class=\"k\">not</span> <span class=\"k\">null</span> <span class=\"k\">comment</span> <span class=\"s\">&#x27;性别, 1:男, 2:女&#x27;</span>,\nphone <span class=\"k\">char</span>(<span class=\"n\">11</span>) <span class=\"k\">not</span> <span class=\"k\">null</span> <span class=\"k\">unique</span> <span class=\"k\">comment</span> <span class=\"s\">&#x27;手机号&#x27;</span>,\njob tinyint unsigned <span class=\"k\">comment</span> <span class=\"s\">&#x27;职位, 1:班主任,2:讲师,3:学工主管,4:教研主管,5:咨询师&#x27;</span>,\nsalary <span class=\"k\">int</span> unsigned <span class=\"k\">comment</span> <span class=\"s\">&#x27;薪资&#x27;</span>,\nimage <span class=\"k\">varchar</span>(<span class=\"n\">300</span>) <span class=\"k\">comment</span> <span class=\"s\">&#x27;头像&#x27;</span>,\nentry_date date <span class=\"k\">comment</span> <span class=\"s\">&#x27;入职日期&#x27;</span>,\ncreate_time <span class=\"k\">datetime</span> <span class=\"k\">comment</span> <span class=\"s\">&#x27;创建时间&#x27;</span>,\nupdate_time <span class=\"k\">datetime</span> <span class=\"k\">comment</span> <span class=\"s\">&#x27;修改时间&#x27;</span>\n) <span class=\"k\">comment</span> <span class=\"s\">&#x27;员工表&#x27;</span>;\n<span class=\"c\">-- 准备测试数据</span>\n<span class=\"k\">INSERT</span> <span class=\"k\">INTO</span> emp(id, username, password, name, gender, phone, job, salary, image, entry_date, create_time, update_time)\n<span class=\"k\">VALUES</span> (<span class=\"n\">1</span>,<span class=\"s\">&#x27;shinaian&#x27;</span>,<span class=\"s\">&#x27;123456&#x27;</span>,<span class=\"s\">&#x27;施耐庵&#x27;</span>,<span class=\"n\">1</span>,<span class=\"s\">&#x27;13309090001&#x27;</span>,<span class=\"n\">4</span>,<span class=\"n\">15000</span>,<span class=\"s\">&#x27;1.jpg&#x27;</span>,<span class=\"s\">&#x27;2000-01-01&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:33&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:35&#x27;</span>),\n(<span class=\"n\">2</span>,<span class=\"s\">&#x27;songjiang&#x27;</span>,<span class=\"s\">&#x27;123456&#x27;</span>,<span class=\"s\">&#x27;宋江&#x27;</span>,<span class=\"n\">1</span>,<span class=\"s\">&#x27;13309090002&#x27;</span>,<span class=\"n\">2</span>,<span class=\"n\">8600</span>,<span class=\"s\">&#x27;2.jpg&#x27;</span>,<span class=\"s\">&#x27;2015-01-01&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:33&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:37&#x27;</span>),\n(<span class=\"n\">3</span>,<span class=\"s\">&#x27;lujunyi&#x27;</span>,<span class=\"s\">&#x27;123456&#x27;</span>,<span class=\"s\">&#x27;卢俊义&#x27;</span>,<span class=\"n\">1</span>,<span class=\"s\">&#x27;13309090003&#x27;</span>,<span class=\"n\">2</span>,<span class=\"n\">8900</span>,<span class=\"s\">&#x27;3.jpg&#x27;</span>,<span class=\"s\">&#x27;2008-05-01&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:33&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:39&#x27;</span>),\n(<span class=\"n\">4</span>,<span class=\"s\">&#x27;wuyong&#x27;</span>,<span class=\"s\">&#x27;123456&#x27;</span>,<span class=\"s\">&#x27;吴用&#x27;</span>,<span class=\"n\">1</span>,<span class=\"s\">&#x27;13309090004&#x27;</span>,<span class=\"n\">2</span>,<span class=\"n\">9200</span>,<span class=\"s\">&#x27;4.jpg&#x27;</span>,<span class=\"s\">&#x27;2007-01-01&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:33&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:41&#x27;</span>),\n(<span class=\"n\">5</span>,<span class=\"s\">&#x27;gongsunsheng&#x27;</span>,<span class=\"s\">&#x27;123456&#x27;</span>,<span class=\"s\">&#x27;公孙胜&#x27;</span>,<span class=\"n\">1</span>,<span class=\"s\">&#x27;13309090005&#x27;</span>,<span class=\"n\">2</span>,<span class=\"n\">9500</span>,<span class=\"s\">&#x27;5.jpg&#x27;</span>,<span class=\"s\">&#x27;2012-12-05&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:33&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:43&#x27;</span>),\n(<span class=\"n\">6</span>,<span class=\"s\">&#x27;huosanniang&#x27;</span>,<span class=\"s\">&#x27;123456&#x27;</span>,<span class=\"s\">&#x27;扈三娘&#x27;</span>,<span class=\"n\">2</span>,<span class=\"s\">&#x27;13309090006&#x27;</span>,<span class=\"n\">3</span>,<span class=\"n\">6500</span>,<span class=\"s\">&#x27;6.jpg&#x27;</span>,<span class=\"s\">&#x27;2013-09-05&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:33&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:45&#x27;</span>),\n(<span class=\"n\">7</span>,<span class=\"s\">&#x27;chaijin&#x27;</span>,<span class=\"s\">&#x27;123456&#x27;</span>,<span class=\"s\">&#x27;柴进&#x27;</span>,<span class=\"n\">1</span>,<span class=\"s\">&#x27;13309090007&#x27;</span>,<span class=\"n\">1</span>,<span class=\"n\">4700</span>,<span class=\"s\">&#x27;7.jpg&#x27;</span>,<span class=\"s\">&#x27;2005-08-01&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:33&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:47&#x27;</span>),\n(<span class=\"n\">8</span>,<span class=\"s\">&#x27;likui&#x27;</span>,<span class=\"s\">&#x27;123456&#x27;</span>,<span class=\"s\">&#x27;李逵&#x27;</span>,<span class=\"n\">1</span>,<span class=\"s\">&#x27;13309090008&#x27;</span>,<span class=\"n\">1</span>,<span class=\"n\">4800</span>,<span class=\"s\">&#x27;8.jpg&#x27;</span>,<span class=\"s\">&#x27;2014-11-09&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:33&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:49&#x27;</span>),\n(<span class=\"n\">9</span>,<span class=\"s\">&#x27;wusong&#x27;</span>,<span class=\"s\">&#x27;123456&#x27;</span>,<span class=\"s\">&#x27;武松&#x27;</span>,<span class=\"n\">1</span>,<span class=\"s\">&#x27;13309090009&#x27;</span>,<span class=\"n\">1</span>,<span class=\"n\">4900</span>,<span class=\"s\">&#x27;9.jpg&#x27;</span>,<span class=\"s\">&#x27;2011-03-11&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:33&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:51&#x27;</span>),\n(<span class=\"n\">10</span>,<span class=\"s\">&#x27;lichong&#x27;</span>,<span class=\"s\">&#x27;123456&#x27;</span>,<span class=\"s\">&#x27;林冲&#x27;</span>,<span class=\"n\">1</span>,<span class=\"s\">&#x27;13309090010&#x27;</span>,<span class=\"n\">1</span>,<span class=\"n\">5000</span>,<span class=\"s\">&#x27;10.jpg&#x27;</span>,<span class=\"s\">&#x27;2013-09-05&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:33&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:53&#x27;</span>),\n(<span class=\"n\">11</span>,<span class=\"s\">&#x27;huyanzhuo&#x27;</span>,<span class=\"s\">&#x27;123456&#x27;</span>,<span class=\"s\">&#x27;呼延灼&#x27;</span>,<span class=\"n\">1</span>,<span class=\"s\">&#x27;13309090011&#x27;</span>,<span class=\"n\">2</span>,<span class=\"n\">9700</span>,<span class=\"s\">&#x27;11.jpg&#x27;</span>,<span class=\"s\">&#x27;2007-02-01&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:33&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:55&#x27;</span>),\n(<span class=\"n\">12</span>,<span class=\"s\">&#x27;xiaoliguang&#x27;</span>,<span class=\"s\">&#x27;123456&#x27;</span>,<span class=\"s\">&#x27;小李广&#x27;</span>,<span class=\"n\">1</span>,<span class=\"s\">&#x27;13309090012&#x27;</span>,<span class=\"n\">2</span>,<span class=\"n\">10000</span>,<span class=\"s\">&#x27;12.jpg&#x27;</span>,<span class=\"s\">&#x27;2008-08-18&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:33&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:57&#x27;</span>),\n(<span class=\"n\">13</span>,<span class=\"s\">&#x27;yangzhi&#x27;</span>,<span class=\"s\">&#x27;123456&#x27;</span>,<span class=\"s\">&#x27;杨志&#x27;</span>,<span class=\"n\">1</span>,<span class=\"s\">&#x27;13309090013&#x27;</span>,<span class=\"n\">1</span>,<span class=\"n\">5300</span>,<span class=\"s\">&#x27;13.jpg&#x27;</span>,<span class=\"s\">&#x27;2012-11-01&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:33&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:59&#x27;</span>),\n(<span class=\"n\">14</span>,<span class=\"s\">&#x27;shijin&#x27;</span>,<span class=\"s\">&#x27;123456&#x27;</span>,<span class=\"s\">&#x27;史进&#x27;</span>,<span class=\"n\">1</span>,<span class=\"s\">&#x27;13309090014&#x27;</span>,<span class=\"n\">2</span>,<span class=\"n\">10600</span>,<span class=\"s\">&#x27;14.jpg&#x27;</span>,<span class=\"s\">&#x27;2002-08-01&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:33&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:36:01&#x27;</span>),\n(<span class=\"n\">15</span>,<span class=\"s\">&#x27;sunerniang&#x27;</span>,<span class=\"s\">&#x27;123456&#x27;</span>,<span class=\"s\">&#x27;孙二娘&#x27;</span>,<span class=\"n\">2</span>,<span class=\"s\">&#x27;13309090015&#x27;</span>,<span class=\"n\">2</span>,<span class=\"n\">10900</span>,<span class=\"s\">&#x27;15.jpg&#x27;</span>,<span class=\"s\">&#x27;2011-05-01&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:33&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:36:03&#x27;</span>),\n(<span class=\"n\">16</span>,<span class=\"s\">&#x27;luzhishen&#x27;</span>,<span class=\"s\">&#x27;123456&#x27;</span>,<span class=\"s\">&#x27;鲁智深&#x27;</span>,<span class=\"n\">1</span>,<span class=\"s\">&#x27;13309090016&#x27;</span>,<span class=\"n\">2</span>,<span class=\"n\">9600</span>,<span class=\"s\">&#x27;16.jpg&#x27;</span>,<span class=\"s\">&#x27;2010-01-01&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:33&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:36:05&#x27;</span>),\n(<span class=\"n\">17</span>,<span class=\"s\">&#x27;liying&#x27;</span>,<span class=\"s\">&#x27;12345678&#x27;</span>,<span class=\"s\">&#x27;李应&#x27;</span>,<span class=\"n\">1</span>,<span class=\"s\">&#x27;13309090017&#x27;</span>,<span class=\"n\">1</span>,<span class=\"n\">5800</span>,<span class=\"s\">&#x27;17.jpg&#x27;</span>,<span class=\"s\">&#x27;2015-03-21&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:33&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:36:07&#x27;</span>),\n(<span class=\"n\">18</span>,<span class=\"s\">&#x27;shiqian&#x27;</span>,<span class=\"s\">&#x27;123456&#x27;</span>,<span class=\"s\">&#x27;时迁&#x27;</span>,<span class=\"n\">1</span>,<span class=\"s\">&#x27;13309090018&#x27;</span>,<span class=\"n\">2</span>,<span class=\"n\">10200</span>,<span class=\"s\">&#x27;18.jpg&#x27;</span>,<span class=\"s\">&#x27;2015-01-01&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:33&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:36:09&#x27;</span>),\n(<span class=\"n\">19</span>,<span class=\"s\">&#x27;gudasao&#x27;</span>,<span class=\"s\">&#x27;123456&#x27;</span>,<span class=\"s\">&#x27;顾大嫂&#x27;</span>,<span class=\"n\">2</span>,<span class=\"s\">&#x27;13309090019&#x27;</span>,<span class=\"n\">2</span>,<span class=\"n\">10500</span>,<span class=\"s\">&#x27;19.jpg&#x27;</span>,<span class=\"s\">&#x27;2008-01-01&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:33&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:36:11&#x27;</span>),\n(<span class=\"n\">20</span>,<span class=\"s\">&#x27;ruanxiaoer&#x27;</span>,<span class=\"s\">&#x27;123456&#x27;</span>,<span class=\"s\">&#x27;阮小二&#x27;</span>,<span class=\"n\">1</span>,<span class=\"s\">&#x27;13309090020&#x27;</span>,<span class=\"n\">2</span>,<span class=\"n\">10800</span>,<span class=\"s\">&#x27;20.jpg&#x27;</span>,<span class=\"s\">&#x27;2018-01-01&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:33&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:36:13&#x27;</span>),\n(<span class=\"n\">21</span>,<span class=\"s\">&#x27;ruanxiaowu&#x27;</span>,<span class=\"s\">&#x27;123456&#x27;</span>,<span class=\"s\">&#x27;阮小五&#x27;</span>,<span class=\"n\">1</span>,<span class=\"s\">&#x27;13309090021&#x27;</span>,<span class=\"n\">5</span>,<span class=\"n\">5200</span>,<span class=\"s\">&#x27;21.jpg&#x27;</span>,<span class=\"s\">&#x27;2015-01-01&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:33&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:36:15&#x27;</span>),\n(<span class=\"n\">22</span>,<span class=\"s\">&#x27;ruanxiaoqi&#x27;</span>,<span class=\"s\">&#x27;123456&#x27;</span>,<span class=\"s\">&#x27;阮小七&#x27;</span>,<span class=\"n\">1</span>,<span class=\"s\">&#x27;13309090022&#x27;</span>,<span class=\"n\">5</span>,<span class=\"n\">5500</span>,<span class=\"s\">&#x27;22.jpg&#x27;</span>,<span class=\"s\">&#x27;2016-01-01&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:33&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:36:17&#x27;</span>),\n(<span class=\"n\">23</span>,<span class=\"s\">&#x27;ruanji&#x27;</span>,<span class=\"s\">&#x27;123456&#x27;</span>,<span class=\"s\">&#x27;阮籍&#x27;</span>,<span class=\"n\">1</span>,<span class=\"s\">&#x27;13309090023&#x27;</span>,<span class=\"n\">5</span>,<span class=\"n\">5800</span>,<span class=\"s\">&#x27;23.jpg&#x27;</span>,<span class=\"s\">&#x27;2012-01-01&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:33&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:36:19&#x27;</span>),\n(<span class=\"n\">24</span>,<span class=\"s\">&#x27;tongwei&#x27;</span>,<span class=\"s\">&#x27;123456&#x27;</span>,<span class=\"s\">&#x27;童威&#x27;</span>,<span class=\"n\">1</span>,<span class=\"s\">&#x27;13309090024&#x27;</span>,<span class=\"n\">5</span>,<span class=\"n\">5000</span>,<span class=\"s\">&#x27;24.jpg&#x27;</span>,<span class=\"s\">&#x27;2006-01-01&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:33&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:36:21&#x27;</span>),\n(<span class=\"n\">25</span>,<span class=\"s\">&#x27;tongmeng&#x27;</span>,<span class=\"s\">&#x27;123456&#x27;</span>,<span class=\"s\">&#x27;童猛&#x27;</span>,<span class=\"n\">1</span>,<span class=\"s\">&#x27;13309090025&#x27;</span>,<span class=\"n\">5</span>,<span class=\"n\">4800</span>,<span class=\"s\">&#x27;25.jpg&#x27;</span>,<span class=\"s\">&#x27;2002-01-01&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:33&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:36:23&#x27;</span>),\n(<span class=\"n\">26</span>,<span class=\"s\">&#x27;yanshun&#x27;</span>,<span class=\"s\">&#x27;123456&#x27;</span>,<span class=\"s\">&#x27;燕顺&#x27;</span>,<span class=\"n\">1</span>,<span class=\"s\">&#x27;13309090026&#x27;</span>,<span class=\"n\">5</span>,<span class=\"n\">5400</span>,<span class=\"s\">&#x27;26.jpg&#x27;</span>,<span class=\"s\">&#x27;2011-01-01&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:33&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:36:25&#x27;</span>),\n(<span class=\"n\">27</span>,<span class=\"s\">&#x27;lijun&#x27;</span>,<span class=\"s\">&#x27;123456&#x27;</span>,<span class=\"s\">&#x27;李俊&#x27;</span>,<span class=\"n\">1</span>,<span class=\"s\">&#x27;13309090027&#x27;</span>,<span class=\"n\">5</span>,<span class=\"n\">6600</span>,<span class=\"s\">&#x27;27.jpg&#x27;</span>,<span class=\"s\">&#x27;2004-01-01&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:33&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:36:27&#x27;</span>),\n(<span class=\"n\">28</span>,<span class=\"s\">&#x27;lizhong&#x27;</span>,<span class=\"s\">&#x27;123456&#x27;</span>,<span class=\"s\">&#x27;李忠&#x27;</span>,<span class=\"n\">1</span>,<span class=\"s\">&#x27;13309090028&#x27;</span>,<span class=\"n\">5</span>,<span class=\"n\">5000</span>,<span class=\"s\">&#x27;28.jpg&#x27;</span>,<span class=\"s\">&#x27;2007-01-01&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:33&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:36:29&#x27;</span>),\n(<span class=\"n\">29</span>,<span class=\"s\">&#x27;songqing&#x27;</span>,<span class=\"s\">&#x27;123456&#x27;</span>,<span class=\"s\">&#x27;宋清&#x27;</span>,<span class=\"n\">1</span>,<span class=\"s\">&#x27;13309090029&#x27;</span>,<span class=\"n\">5</span>,<span class=\"n\">5100</span>,<span class=\"s\">&#x27;29.jpg&#x27;</span>,<span class=\"s\">&#x27;2020-01-01&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:33&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:36:31&#x27;</span>),\n(<span class=\"n\">30</span>,<span class=\"s\">&#x27;liyun&#x27;</span>,<span class=\"s\">&#x27;123456&#x27;</span>,<span class=\"s\">&#x27;李云&#x27;</span>,<span class=\"n\">1</span>,<span class=\"s\">&#x27;13309090030&#x27;</span>,<span class=\"k\">NULL</span>,<span class=\"k\">NULL</span>,<span class=\"s\">&#x27;30.jpg&#x27;</span>,<span class=\"s\">&#x27;2020-03-01&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:35:33&#x27;</span>,<span class=\"s\">&#x27;2024-04-11 16:36:31&#x27;</span>);"
         }
        ],
        "tips": []
@@ -568,35 +607,43 @@
        "code": [
         {
          "note": "查询多个字段",
-         "sql": "select 字段1, 字段2, 字段3 from  表名;"
+         "sql": "select 字段1, 字段2, 字段3 from  表名;",
+         "html": "<span class=\"k\">select</span> 字段1, 字段2, 字段3 <span class=\"k\">from</span>  表名;"
         },
         {
          "note": "查询所有字段（通配符）",
-         "sql": "select *  from  表名;"
+         "sql": "select *  from  表名;",
+         "html": "<span class=\"k\">select</span> *  <span class=\"k\">from</span>  表名;"
         },
         {
          "note": "",
-         "sql": "select 字段1 [ as 别名1 ] , 字段2 [ as 别名2 ]  from  表名;"
+         "sql": "select 字段1 [ as 别名1 ] , 字段2 [ as 别名2 ]  from  表名;",
+         "html": "<span class=\"k\">select</span> 字段1 [ <span class=\"k\">as</span> 别名1 ] , 字段2 [ <span class=\"k\">as</span> 别名2 ]  <span class=\"k\">from</span>  表名;"
         },
         {
          "note": "",
-         "sql": "select distinct 字段列表 from  表名;"
+         "sql": "select distinct 字段列表 from  表名;",
+         "html": "<span class=\"k\">select</span> <span class=\"k\">distinct</span> 字段列表 <span class=\"k\">from</span>  表名;"
         },
         {
          "note": "案例1：查询指定字段 name，entry_date并返回",
-         "sql": "select name,entry_date from emp;"
+         "sql": "select name,entry_date from emp;",
+         "html": "<span class=\"k\">select</span> name,entry_date <span class=\"k\">from</span> emp;"
         },
         {
          "note": "案例2：查询返回所有字段",
-         "sql": "select * from emp;"
+         "sql": "select * from emp;",
+         "html": "<span class=\"k\">select</span> * <span class=\"k\">from</span> emp;"
         },
         {
          "note": "案例3：查询所有员工的 name, entry_date，并起别名(姓名、入职日期)",
-         "sql": "-- 方式1：\nselect name AS 姓名, entry_date AS 入职日期 from emp;\n-- 方式2： 别名中有特殊字符时，使用''或\"\"包含\nselect name AS '姓 名', entry_date AS '入职日期' from emp;\n-- 方式3：\nselect name AS \"姓名\", entry_date AS \"入职日期\" from emp;"
+         "sql": "-- 方式1：\nselect name AS 姓名, entry_date AS 入职日期 from emp;\n-- 方式2： 别名中有特殊字符时，使用''或\"\"包含\nselect name AS '姓 名', entry_date AS '入职日期' from emp;\n-- 方式3：\nselect name AS \"姓名\", entry_date AS \"入职日期\" from emp;",
+         "html": "<span class=\"c\">-- 方式1：</span>\n<span class=\"k\">select</span> name <span class=\"k\">AS</span> 姓名, entry_date <span class=\"k\">AS</span> 入职日期 <span class=\"k\">from</span> emp;\n<span class=\"c\">-- 方式2： 别名中有特殊字符时，使用&#x27;&#x27;或&quot;&quot;包含</span>\n<span class=\"k\">select</span> name <span class=\"k\">AS</span> <span class=\"s\">&#x27;姓 名&#x27;</span>, entry_date <span class=\"k\">AS</span> <span class=\"s\">&#x27;入职日期&#x27;</span> <span class=\"k\">from</span> emp;\n<span class=\"c\">-- 方式3：</span>\n<span class=\"k\">select</span> name <span class=\"k\">AS</span> <span class=\"s\">&quot;姓名&quot;</span>, entry_date <span class=\"k\">AS</span> <span class=\"s\">&quot;入职日期&quot;</span> <span class=\"k\">from</span> emp;"
         },
         {
          "note": "案例4：查询已有的员工关联了哪几种职位(不要重复)",
-         "sql": "select distinct job from emp;"
+         "sql": "select distinct job from emp;",
+         "html": "<span class=\"k\">select</span> <span class=\"k\">distinct</span> job <span class=\"k\">from</span> emp;"
         }
        ],
        "tips": []
@@ -614,55 +661,68 @@
        "code": [
         {
          "note": "",
-         "sql": "select  字段列表  from   表名   where   条件列表 ; -- 条件列表：意味着可以有多个条件"
+         "sql": "select  字段列表  from   表名   where   条件列表 ; -- 条件列表：意味着可以有多个条件",
+         "html": "<span class=\"k\">select</span>  字段列表  <span class=\"k\">from</span>   表名   <span class=\"k\">where</span>   条件列表 ; <span class=\"c\">-- 条件列表：意味着可以有多个条件</span>"
         },
         {
          "note": "案例1：查询 姓名 为 '杨逍' 的员工",
-         "sql": "select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere name = '杨逍'; -- 字符串使用''或\"\"包含"
+         "sql": "select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere name = '杨逍'; -- 字符串使用''或\"\"包含",
+         "html": "<span class=\"k\">select</span> id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\n<span class=\"k\">from</span> emp\n<span class=\"k\">where</span> name = <span class=\"s\">&#x27;杨逍&#x27;</span>; <span class=\"c\">-- 字符串使用&#x27;&#x27;或&quot;&quot;包含</span>"
         },
         {
          "note": "案例2：查询 薪资小于等于 5000 的员工信息",
-         "sql": "select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere salary <=5000;"
+         "sql": "select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere salary <=5000;",
+         "html": "<span class=\"k\">select</span> id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\n<span class=\"k\">from</span> emp\n<span class=\"k\">where</span> salary &lt;=<span class=\"n\">5000</span>;"
         },
         {
          "note": "案例3：查询 没有分配职位 的员工信息",
-         "sql": "select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere job is null ;"
+         "sql": "select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere job is null ;",
+         "html": "<span class=\"k\">select</span> id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\n<span class=\"k\">from</span> emp\n<span class=\"k\">where</span> job <span class=\"k\">is</span> <span class=\"k\">null</span> ;"
         },
         {
          "note": "案例4：查询 有职位 的员工信息",
-         "sql": "select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere job is not null ;"
+         "sql": "select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere job is not null ;",
+         "html": "<span class=\"k\">select</span> id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\n<span class=\"k\">from</span> emp\n<span class=\"k\">where</span> job <span class=\"k\">is</span> <span class=\"k\">not</span> <span class=\"k\">null</span> ;"
         },
         {
          "note": "案例5：查询 密码不等于 '123456' 的员工信息",
-         "sql": "-- 方式1：\nselect id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere password <> '123456';"
+         "sql": "-- 方式1：\nselect id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere password <> '123456';",
+         "html": "<span class=\"c\">-- 方式1：</span>\n<span class=\"k\">select</span> id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\n<span class=\"k\">from</span> emp\n<span class=\"k\">where</span> password &lt;&gt; <span class=\"s\">&#x27;123456&#x27;</span>;"
         },
         {
          "note": "",
-         "sql": "-- 方式2：\nselect id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere password != '123456';"
+         "sql": "-- 方式2：\nselect id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere password != '123456';",
+         "html": "<span class=\"c\">-- 方式2：</span>\n<span class=\"k\">select</span> id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\n<span class=\"k\">from</span> emp\n<span class=\"k\">where</span> password != <span class=\"s\">&#x27;123456&#x27;</span>;"
         },
         {
          "note": "案例6：查询 入职日期 在  '2000-01-01' (包含)  到  '2010-01-01'(包含) 之间的员工信息",
-         "sql": "-- 方式1：\nselect id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere entry_date >= '2000-01-01' and entry_date <= '2010-01-01';\n-- 方式2： between...and\nselect id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere entry_date between '2000-01-01' and '2010-01-01';"
+         "sql": "-- 方式1：\nselect id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere entry_date >= '2000-01-01' and entry_date <= '2010-01-01';\n-- 方式2： between...and\nselect id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere entry_date between '2000-01-01' and '2010-01-01';",
+         "html": "<span class=\"c\">-- 方式1：</span>\n<span class=\"k\">select</span> id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\n<span class=\"k\">from</span> emp\n<span class=\"k\">where</span> entry_date &gt;= <span class=\"s\">&#x27;2000-01-01&#x27;</span> <span class=\"k\">and</span> entry_date &lt;= <span class=\"s\">&#x27;2010-01-01&#x27;</span>;\n<span class=\"c\">-- 方式2： between...and</span>\n<span class=\"k\">select</span> id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\n<span class=\"k\">from</span> emp\n<span class=\"k\">where</span> entry_date <span class=\"k\">between</span> <span class=\"s\">&#x27;2000-01-01&#x27;</span> <span class=\"k\">and</span> <span class=\"s\">&#x27;2010-01-01&#x27;</span>;"
         },
         {
          "note": "案例7：查询 入职时间 在 '2000-01-01' (包含) 到 '2010-01-01'(包含) 之间 且 性别为女 的员工信息",
-         "sql": "select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere entry_date between '2000-01-01' and '2010-01-01';\nand gender = 2;"
+         "sql": "select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere entry_date between '2000-01-01' and '2010-01-01';\nand gender = 2;",
+         "html": "<span class=\"k\">select</span> id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\n<span class=\"k\">from</span> emp\n<span class=\"k\">where</span> entry_date <span class=\"k\">between</span> <span class=\"s\">&#x27;2000-01-01&#x27;</span> <span class=\"k\">and</span> <span class=\"s\">&#x27;2010-01-01&#x27;</span>;\n<span class=\"k\">and</span> gender = <span class=\"n\">2</span>;"
         },
         {
          "note": "案例8：查询 职位是 2 (讲师), 3 (学工主管), 4 (教研主管) 的员工信息",
-         "sql": "-- 方式1：使用or连接多个条件\nselect id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere job=2 or job=3 or job=4;\n-- 方式2：in关键字\nselect id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere job in (2,3,4);"
+         "sql": "-- 方式1：使用or连接多个条件\nselect id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere job=2 or job=3 or job=4;\n-- 方式2：in关键字\nselect id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere job in (2,3,4);",
+         "html": "<span class=\"c\">-- 方式1：使用or连接多个条件</span>\n<span class=\"k\">select</span> id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\n<span class=\"k\">from</span> emp\n<span class=\"k\">where</span> job=<span class=\"n\">2</span> <span class=\"k\">or</span> job=<span class=\"n\">3</span> <span class=\"k\">or</span> job=<span class=\"n\">4</span>;\n<span class=\"c\">-- 方式2：in关键字</span>\n<span class=\"k\">select</span> id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\n<span class=\"k\">from</span> emp\n<span class=\"k\">where</span> job <span class=\"k\">in</span> (<span class=\"n\">2</span>,<span class=\"n\">3</span>,<span class=\"n\">4</span>);"
         },
         {
          "note": "案例9：查询 姓名 为两个字的员工信息",
-         "sql": "select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere name like '__';  # 通配符 \"_\" 代表任意1个字符"
+         "sql": "select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere name like '__';  # 通配符 \"_\" 代表任意1个字符",
+         "html": "<span class=\"k\">select</span> id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\n<span class=\"k\">from</span> emp\n<span class=\"k\">where</span> name <span class=\"k\">like</span> <span class=\"s\">&#x27;__&#x27;</span>;  <span class=\"c\"># 通配符 &quot;_&quot; 代表任意1个字符</span>"
         },
         {
          "note": "案例10：查询 姓 '张' 的员工信息",
-         "sql": "select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere name like '张%'; # 通配符 \"%\" 代表任意个字符（0个 ~ 多个）"
+         "sql": "select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere name like '张%'; # 通配符 \"%\" 代表任意个字符（0个 ~ 多个）",
+         "html": "<span class=\"k\">select</span> id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\n<span class=\"k\">from</span> emp\n<span class=\"k\">where</span> name <span class=\"k\">like</span> <span class=\"s\">&#x27;张%&#x27;</span>; <span class=\"c\"># 通配符 &quot;%&quot; 代表任意个字符（0个 ~ 多个）</span>"
         },
         {
          "note": "案例11：查询 姓名中包含 '二'  的员工信息",
-         "sql": "select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere name like '%二%'; # 通配符 \"%\" 代表任意个字符（0个 ~ 多个）"
+         "sql": "select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nwhere name like '%二%'; # 通配符 \"%\" 代表任意个字符（0个 ~ 多个）",
+         "html": "<span class=\"k\">select</span> id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\n<span class=\"k\">from</span> emp\n<span class=\"k\">where</span> name <span class=\"k\">like</span> <span class=\"s\">&#x27;%二%&#x27;</span>; <span class=\"c\"># 通配符 &quot;%&quot; 代表任意个字符（0个 ~ 多个）</span>"
         }
        ],
        "tips": [
@@ -686,23 +746,28 @@
        "code": [
         {
          "note": "案例1：统计该企业员工数量",
-         "sql": "-- count(字段)\nselect count(id) from emp;-- 结果：30\nselect count(job) from emp;-- 结果：29 （聚合函数对NULL值不做计算）\n-- count(常量)\nselect count(0) from emp;\nselect count('A') from emp;\n-- count(*)  推荐此写法（MySQL底层进行了优化）\nselect count(*) from emp;"
+         "sql": "-- count(字段)\nselect count(id) from emp;-- 结果：30\nselect count(job) from emp;-- 结果：29 （聚合函数对NULL值不做计算）\n-- count(常量)\nselect count(0) from emp;\nselect count('A') from emp;\n-- count(*)  推荐此写法（MySQL底层进行了优化）\nselect count(*) from emp;",
+         "html": "<span class=\"c\">-- count(字段)</span>\n<span class=\"k\">select</span> <span class=\"f\">count</span>(id) <span class=\"k\">from</span> emp;<span class=\"c\">-- 结果：30</span>\n<span class=\"k\">select</span> <span class=\"f\">count</span>(job) <span class=\"k\">from</span> emp;<span class=\"c\">-- 结果：29 （聚合函数对NULL值不做计算）</span>\n<span class=\"c\">-- count(常量)</span>\n<span class=\"k\">select</span> <span class=\"f\">count</span>(<span class=\"n\">0</span>) <span class=\"k\">from</span> emp;\n<span class=\"k\">select</span> <span class=\"f\">count</span>(<span class=\"s\">&#x27;A&#x27;</span>) <span class=\"k\">from</span> emp;\n<span class=\"c\">-- count(*)  推荐此写法（MySQL底层进行了优化）</span>\n<span class=\"k\">select</span> <span class=\"f\">count</span>(*) <span class=\"k\">from</span> emp;"
         },
         {
          "note": "案例2：统计该企业员工的平均薪资",
-         "sql": "select avg(salary) from  emp;"
+         "sql": "select avg(salary) from  emp;",
+         "html": "<span class=\"k\">select</span> <span class=\"f\">avg</span>(salary) <span class=\"k\">from</span>  emp;"
         },
         {
          "note": "案例3：统计该企业员工的最低薪资",
-         "sql": "select min(salary) from emp;"
+         "sql": "select min(salary) from emp;",
+         "html": "<span class=\"k\">select</span> <span class=\"f\">min</span>(salary) <span class=\"k\">from</span> emp;"
         },
         {
          "note": "案例4：统计该企业员工的最高薪资",
-         "sql": "select max(salary) from emp;"
+         "sql": "select max(salary) from emp;",
+         "html": "<span class=\"k\">select</span> <span class=\"f\">max</span>(salary) <span class=\"k\">from</span> emp;"
         },
         {
          "note": "案例5：统计该企业每月要给员工发放的薪资总额(薪资之和)",
-         "sql": "select sum(salary) from emp;"
+         "sql": "select sum(salary) from emp;",
+         "html": "<span class=\"k\">select</span> <span class=\"f\">sum</span>(salary) <span class=\"k\">from</span> emp;"
         }
        ],
        "tips": [
@@ -722,15 +787,18 @@
        "code": [
         {
          "note": "",
-         "sql": "select  字段列表  from  表名  [where 条件]  group by 分组字段名  [having 分组后过滤条件];"
+         "sql": "select  字段列表  from  表名  [where 条件]  group by 分组字段名  [having 分组后过滤条件];",
+         "html": "<span class=\"k\">select</span>  字段列表  <span class=\"k\">from</span>  表名  [<span class=\"k\">where</span> 条件]  <span class=\"k\">group</span> <span class=\"k\">by</span> 分组字段名  [<span class=\"k\">having</span> 分组后过滤条件];"
         },
         {
          "note": "案例1：根据性别分组 , 统计男性和女性员工的数量",
-         "sql": "select gender, count(*)\nfrom emp\ngroup by gender; -- 按照gender字段进行分组（gender字段下相同的数据归为一组）"
+         "sql": "select gender, count(*)\nfrom emp\ngroup by gender; -- 按照gender字段进行分组（gender字段下相同的数据归为一组）",
+         "html": "<span class=\"k\">select</span> gender, <span class=\"f\">count</span>(*)\n<span class=\"k\">from</span> emp\n<span class=\"k\">group</span> <span class=\"k\">by</span> gender; <span class=\"c\">-- 按照gender字段进行分组（gender字段下相同的数据归为一组）</span>"
         },
         {
          "note": "案例2：查询入职时间在 '2015-01-01' (包含) 以前的员工 , 并对结果根据职位分组 , 获取员工数量大于等于2的职位",
-         "sql": "select job, count(*)\nfrom emp\nwhere entry_date <= '2015-01-01'   -- 分组前条件\ngroup by job                      -- 按照job字段分组\nhaving count(*) >= 2;             -- 分组后条件"
+         "sql": "select job, count(*)\nfrom emp\nwhere entry_date <= '2015-01-01'   -- 分组前条件\ngroup by job                      -- 按照job字段分组\nhaving count(*) >= 2;             -- 分组后条件",
+         "html": "<span class=\"k\">select</span> job, <span class=\"f\">count</span>(*)\n<span class=\"k\">from</span> emp\n<span class=\"k\">where</span> entry_date &lt;= <span class=\"s\">&#x27;2015-01-01&#x27;</span>   <span class=\"c\">-- 分组前条件</span>\n<span class=\"k\">group</span> <span class=\"k\">by</span> job                      <span class=\"c\">-- 按照job字段分组</span>\n<span class=\"k\">having</span> <span class=\"f\">count</span>(*) &gt;= <span class=\"n\">2</span>;             <span class=\"c\">-- 分组后条件</span>"
         }
        ],
        "tips": [
@@ -750,19 +818,23 @@
        "code": [
         {
          "note": "",
-         "sql": "select  字段列表\nfrom   表名\n[where  条件列表]\n[group by  分组字段 ]\norder  by  字段1  排序方式1 , 字段2  排序方式2 … ;"
+         "sql": "select  字段列表\nfrom   表名\n[where  条件列表]\n[group by  分组字段 ]\norder  by  字段1  排序方式1 , 字段2  排序方式2 … ;",
+         "html": "<span class=\"k\">select</span>  字段列表\n<span class=\"k\">from</span>   表名\n[<span class=\"k\">where</span>  条件列表]\n[<span class=\"k\">group</span> <span class=\"k\">by</span>  分组字段 ]\n<span class=\"k\">order</span>  <span class=\"k\">by</span>  字段1  排序方式1 , 字段2  排序方式2 … ;"
         },
         {
          "note": "案例1：根据入职时间, 对员工进行升序排序",
-         "sql": "select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\norder by entry_date ASC; -- 按照entrydate字段下的数据进行升序排序\nselect id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\norder by  entry_date; -- 默认就是ASC（升序）"
+         "sql": "select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\norder by entry_date ASC; -- 按照entrydate字段下的数据进行升序排序\nselect id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\norder by  entry_date; -- 默认就是ASC（升序）",
+         "html": "<span class=\"k\">select</span> id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\n<span class=\"k\">from</span> emp\n<span class=\"k\">order</span> <span class=\"k\">by</span> entry_date <span class=\"k\">ASC</span>; <span class=\"c\">-- 按照entrydate字段下的数据进行升序排序</span>\n<span class=\"k\">select</span> id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\n<span class=\"k\">from</span> emp\n<span class=\"k\">order</span> <span class=\"k\">by</span>  entry_date; <span class=\"c\">-- 默认就是ASC（升序）</span>"
         },
         {
          "note": "案例2：根据入职时间，对员工进行降序排序",
-         "sql": "select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\norder by entry_date DESC; -- 按照entrydate字段下的数据进行降序排序"
+         "sql": "select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\norder by entry_date DESC; -- 按照entrydate字段下的数据进行降序排序",
+         "html": "<span class=\"k\">select</span> id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\n<span class=\"k\">from</span> emp\n<span class=\"k\">order</span> <span class=\"k\">by</span> entry_date <span class=\"k\">DESC</span>; <span class=\"c\">-- 按照entrydate字段下的数据进行降序排序</span>"
         },
         {
          "note": "案例3：根据入职时间对公司的员工进行升序排序，入职时间相同，再按照更新时间进行降序排序",
-         "sql": "select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\norder by entry_date ASC , update_time DESC;"
+         "sql": "select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\norder by entry_date ASC , update_time DESC;",
+         "html": "<span class=\"k\">select</span> id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\n<span class=\"k\">from</span> emp\n<span class=\"k\">order</span> <span class=\"k\">by</span> entry_date <span class=\"k\">ASC</span> , update_time <span class=\"k\">DESC</span>;"
         }
        ],
        "tips": [
@@ -780,23 +852,28 @@
        "code": [
         {
          "note": "",
-         "sql": "select  字段列表  from  表名  limit  起始索引, 查询记录数 ;"
+         "sql": "select  字段列表  from  表名  limit  起始索引, 查询记录数 ;",
+         "html": "<span class=\"k\">select</span>  字段列表  <span class=\"k\">from</span>  表名  <span class=\"k\">limit</span>  起始索引, 查询记录数 ;"
         },
         {
          "note": "案例1：从起始索引0开始查询员工数据, 每页展示5条记录",
-         "sql": "select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nlimit 0 , 5; -- 从索引0开始，向后取5条记录"
+         "sql": "select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nlimit 0 , 5; -- 从索引0开始，向后取5条记录",
+         "html": "<span class=\"k\">select</span> id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\n<span class=\"k\">from</span> emp\n<span class=\"k\">limit</span> <span class=\"n\">0</span> , <span class=\"n\">5</span>; <span class=\"c\">-- 从索引0开始，向后取5条记录</span>"
         },
         {
          "note": "案例2：查询 第1页 员工数据, 每页展示5条记录",
-         "sql": "select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nlimit 5; -- 如果查询的是第1页数据，起始索引可以省略，直接简写为：limit 条数"
+         "sql": "select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nlimit 5; -- 如果查询的是第1页数据，起始索引可以省略，直接简写为：limit 条数",
+         "html": "<span class=\"k\">select</span> id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\n<span class=\"k\">from</span> emp\n<span class=\"k\">limit</span> <span class=\"n\">5</span>; <span class=\"c\">-- 如果查询的是第1页数据，起始索引可以省略，直接简写为：limit 条数</span>"
         },
         {
          "note": "案例3：查询 第2页 员工数据, 每页展示5条记录",
-         "sql": "select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nlimit 5 , 5; -- 从索引5开始，向后取5条记录"
+         "sql": "select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nlimit 5 , 5; -- 从索引5开始，向后取5条记录",
+         "html": "<span class=\"k\">select</span> id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\n<span class=\"k\">from</span> emp\n<span class=\"k\">limit</span> <span class=\"n\">5</span> , <span class=\"n\">5</span>; <span class=\"c\">-- 从索引5开始，向后取5条记录</span>"
         },
         {
          "note": "案例4：查询 第3页 员工数据, 每页展示5条记录",
-         "sql": "select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nlimit 10 , 5; -- 从索引10开始，向后取5条记录"
+         "sql": "select id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\nfrom emp\nlimit 10 , 5; -- 从索引10开始，向后取5条记录",
+         "html": "<span class=\"k\">select</span> id, username, password, name, gender, phone, salary, job, image, entry_date, create_time, update_time\n<span class=\"k\">from</span> emp\n<span class=\"k\">limit</span> <span class=\"n\">10</span> , <span class=\"n\">5</span>; <span class=\"c\">-- 从索引10开始，向后取5条记录</span>"
         }
        ],
        "tips": [
@@ -825,7 +902,8 @@
        "code": [
         {
          "note": "",
-         "sql": "select * from user where username = 'linchong' and password = '123456';"
+         "sql": "select * from user where username = 'linchong' and password = '123456';",
+         "html": "<span class=\"k\">select</span> * <span class=\"k\">from</span> user <span class=\"k\">where</span> username = <span class=\"s\">&#x27;linchong&#x27;</span> <span class=\"k\">and</span> password = <span class=\"s\">&#x27;123456&#x27;</span>;"
         }
        ],
        "tips": []
@@ -840,7 +918,8 @@
        "code": [
         {
          "note": "",
-         "sql": "create table user(\nid int unsigned primary key auto_increment comment 'ID,主键',\nusername varchar(20) comment '用户名',\npassword varchar(32) comment '密码',\nname varchar(10) comment '姓名',\nage tinyint unsigned comment '年龄'\n) comment '用户表';\ninsert into user(id, username, password, name, age) values (1, 'daqiao', '123456', '大乔', 22),\n(2, 'xiaoqiao', '123456', '小乔', 18),\n(3, 'diaochan', '123456', '貂蝉', 24),\n(4, 'lvbu', '123456', '吕布', 28),\n(5, 'zhaoyun', '12345678', '赵云', 27);"
+         "sql": "create table user(\nid int unsigned primary key auto_increment comment 'ID,主键',\nusername varchar(20) comment '用户名',\npassword varchar(32) comment '密码',\nname varchar(10) comment '姓名',\nage tinyint unsigned comment '年龄'\n) comment '用户表';\ninsert into user(id, username, password, name, age) values (1, 'daqiao', '123456', '大乔', 22),\n(2, 'xiaoqiao', '123456', '小乔', 18),\n(3, 'diaochan', '123456', '貂蝉', 24),\n(4, 'lvbu', '123456', '吕布', 28),\n(5, 'zhaoyun', '12345678', '赵云', 27);",
+         "html": "<span class=\"k\">create</span> <span class=\"k\">table</span> user(\nid <span class=\"k\">int</span> unsigned <span class=\"k\">primary</span> <span class=\"k\">key</span> <span class=\"k\">auto_increment</span> <span class=\"k\">comment</span> <span class=\"s\">&#x27;ID,主键&#x27;</span>,\nusername <span class=\"k\">varchar</span>(<span class=\"n\">20</span>) <span class=\"k\">comment</span> <span class=\"s\">&#x27;用户名&#x27;</span>,\npassword <span class=\"k\">varchar</span>(<span class=\"n\">32</span>) <span class=\"k\">comment</span> <span class=\"s\">&#x27;密码&#x27;</span>,\nname <span class=\"k\">varchar</span>(<span class=\"n\">10</span>) <span class=\"k\">comment</span> <span class=\"s\">&#x27;姓名&#x27;</span>,\nage tinyint unsigned <span class=\"k\">comment</span> <span class=\"s\">&#x27;年龄&#x27;</span>\n) <span class=\"k\">comment</span> <span class=\"s\">&#x27;用户表&#x27;</span>;\n<span class=\"k\">insert</span> <span class=\"k\">into</span> user(id, username, password, name, age) <span class=\"k\">values</span> (<span class=\"n\">1</span>, <span class=\"s\">&#x27;daqiao&#x27;</span>, <span class=\"s\">&#x27;123456&#x27;</span>, <span class=\"s\">&#x27;大乔&#x27;</span>, <span class=\"n\">22</span>),\n(<span class=\"n\">2</span>, <span class=\"s\">&#x27;xiaoqiao&#x27;</span>, <span class=\"s\">&#x27;123456&#x27;</span>, <span class=\"s\">&#x27;小乔&#x27;</span>, <span class=\"n\">18</span>),\n(<span class=\"n\">3</span>, <span class=\"s\">&#x27;diaochan&#x27;</span>, <span class=\"s\">&#x27;123456&#x27;</span>, <span class=\"s\">&#x27;貂蝉&#x27;</span>, <span class=\"n\">24</span>),\n(<span class=\"n\">4</span>, <span class=\"s\">&#x27;lvbu&#x27;</span>, <span class=\"s\">&#x27;123456&#x27;</span>, <span class=\"s\">&#x27;吕布&#x27;</span>, <span class=\"n\">28</span>),\n(<span class=\"n\">5</span>, <span class=\"s\">&#x27;zhaoyun&#x27;</span>, <span class=\"s\">&#x27;12345678&#x27;</span>, <span class=\"s\">&#x27;赵云&#x27;</span>, <span class=\"n\">27</span>);"
         }
        ],
        "tips": []
@@ -1261,7 +1340,11 @@
         "非叶子节点只存键值、一页能放几百个键，所以树很矮（千万级数据 3~4 层）；叶子节点用双向链表串起来，范围查询和排序不用回表遍历。"
        ],
        "code": [
-        "-- 一次 B+ 树查找大致是 3~4 次磁盘 IO\nexplain select * from emp where id = 100;"
+        {
+         "note": "",
+         "sql": "-- 一次 B+ 树查找大致是 3~4 次磁盘 IO\nexplain select * from emp where id = 100;",
+         "html": "<span class=\"c\">-- 一次 B+ 树查找大致是 3~4 次磁盘 IO</span>\n<span class=\"k\">explain</span> <span class=\"k\">select</span> * <span class=\"k\">from</span> emp <span class=\"k\">where</span> id = <span class=\"n\">100</span>;"
+        }
        ],
        "tips": [
         "注意：索引不是越多越好，每个索引都要占空间、拖慢写入"
@@ -1275,7 +1358,11 @@
         "一张表只能有一个聚簇索引，没主键时用第一个非空唯一索引，都没有就隐式生成 row_id。"
        ],
        "code": [
-        "-- 主键查询：一次 B+ 树\nselect * from emp where id = 1;\n-- 二级索引查询：先查 name 索引拿到 id，再回表\nselect * from emp where name = '张三';"
+        {
+         "note": "",
+         "sql": "-- 主键查询：一次 B+ 树\nselect * from emp where id = 1;\n-- 二级索引查询：先查 name 索引拿到 id，再回表\nselect * from emp where name = '张三';",
+         "html": "<span class=\"c\">-- 主键查询：一次 B+ 树</span>\n<span class=\"k\">select</span> * <span class=\"k\">from</span> emp <span class=\"k\">where</span> id = <span class=\"n\">1</span>;\n<span class=\"c\">-- 二级索引查询：先查 name 索引拿到 id，再回表</span>\n<span class=\"k\">select</span> * <span class=\"k\">from</span> emp <span class=\"k\">where</span> name = <span class=\"s\">&#x27;张三&#x27;</span>;"
+        }
        ],
        "tips": []
       },
@@ -1286,7 +1373,11 @@
         "要查的列全在索引里就不用回表，执行计划里会显示 Using index。把常用查询列放进联合索引，是性价比最高的一招。"
        ],
        "code": [
-        "create index idx_dept_hire on emp(dept_id, hire_date);\n-- 覆盖索引：Extra 显示 Using index\nexplain select dept_id, hire_date from emp where dept_id = 1;"
+        {
+         "note": "",
+         "sql": "create index idx_dept_hire on emp(dept_id, hire_date);\n-- 覆盖索引：Extra 显示 Using index\nexplain select dept_id, hire_date from emp where dept_id = 1;",
+         "html": "<span class=\"k\">create</span> <span class=\"k\">index</span> idx_dept_hire <span class=\"k\">on</span> emp(dept_id, hire_date);\n<span class=\"c\">-- 覆盖索引：Extra 显示 Using index</span>\n<span class=\"k\">explain</span> <span class=\"k\">select</span> dept_id, hire_date <span class=\"k\">from</span> emp <span class=\"k\">where</span> dept_id = <span class=\"n\">1</span>;"
+        }
        ],
        "tips": [
         "注意：select * 几乎一定会回表"
@@ -1299,7 +1390,11 @@
         "索引 (a,b,c) 能命中 a、a,b、a,b,c；跳过 a 直接用 b 用不上索引。范围查询（>、<、between、like）会让后面的列失效。"
        ],
        "code": [
-        "-- 能用到索引\nselect * from emp where dept_id = 1 and hire_date > '2020-01-01';\n-- 用不到（跳过了最左列）\nselect * from emp where hire_date > '2020-01-01';"
+        {
+         "note": "",
+         "sql": "-- 能用到索引\nselect * from emp where dept_id = 1 and hire_date > '2020-01-01';\n-- 用不到（跳过了最左列）\nselect * from emp where hire_date > '2020-01-01';",
+         "html": "<span class=\"c\">-- 能用到索引</span>\n<span class=\"k\">select</span> * <span class=\"k\">from</span> emp <span class=\"k\">where</span> dept_id = <span class=\"n\">1</span> <span class=\"k\">and</span> hire_date &gt; <span class=\"s\">&#x27;2020-01-01&#x27;</span>;\n<span class=\"c\">-- 用不到（跳过了最左列）</span>\n<span class=\"k\">select</span> * <span class=\"k\">from</span> emp <span class=\"k\">where</span> hire_date &gt; <span class=\"s\">&#x27;2020-01-01&#x27;</span>;"
+        }
        ],
        "tips": []
       },
@@ -1310,7 +1405,11 @@
         "字段上做函数或运算、隐式类型转换（字符串列传数字）、前导模糊 like '%张'、or 连接非索引列、!= 或 is not null 大范围、范围条件之后的列。"
        ],
        "code": [
-        "-- 失效：字段上用了函数\nselect * from emp where year(hire_date) = 2020;\n-- 改写：范围条件\nselect * from emp where hire_date >= '2020-01-01' and hire_date < '2021-01-01';"
+        {
+         "note": "",
+         "sql": "-- 失效：字段上用了函数\nselect * from emp where year(hire_date) = 2020;\n-- 改写：范围条件\nselect * from emp where hire_date >= '2020-01-01' and hire_date < '2021-01-01';",
+         "html": "<span class=\"c\">-- 失效：字段上用了函数</span>\n<span class=\"k\">select</span> * <span class=\"k\">from</span> emp <span class=\"k\">where</span> year(hire_date) = <span class=\"n\">2020</span>;\n<span class=\"c\">-- 改写：范围条件</span>\n<span class=\"k\">select</span> * <span class=\"k\">from</span> emp <span class=\"k\">where</span> hire_date &gt;= <span class=\"s\">&#x27;2020-01-01&#x27;</span> <span class=\"k\">and</span> hire_date &lt; <span class=\"s\">&#x27;2021-01-01&#x27;</span>;"
+        }
        ],
        "tips": []
       },
@@ -1321,7 +1420,11 @@
         "重点看四列：type（性能 all<index<range<ref<eq_ref<const）、key（实际用到的索引）、rows（预估扫描行数）、Extra（Using index 好，Using filesort / Using temporary 要警惕）。"
        ],
        "code": [
-        "explain select * from emp where dept_id = 1 order by hire_date desc;"
+        {
+         "note": "",
+         "sql": "explain select * from emp where dept_id = 1 order by hire_date desc;",
+         "html": "<span class=\"k\">explain</span> <span class=\"k\">select</span> * <span class=\"k\">from</span> emp <span class=\"k\">where</span> dept_id = <span class=\"n\">1</span> <span class=\"k\">order</span> <span class=\"k\">by</span> hire_date <span class=\"k\">desc</span>;"
+        }
        ],
        "tips": []
       },
@@ -1332,7 +1435,11 @@
         "长字符串（如 url、邮箱）可以只索引前 N 个字符，省空间；代价是不能做覆盖索引，也无法用于 order by。"
        ],
        "code": [
-        "alter table emp add index idx_email(email(10));"
+        {
+         "note": "",
+         "sql": "alter table emp add index idx_email(email(10));",
+         "html": "<span class=\"k\">alter</span> <span class=\"k\">table</span> emp add <span class=\"k\">index</span> idx_email(email(<span class=\"n\">10</span>));"
+        }
        ],
        "tips": []
       },
@@ -1343,7 +1450,11 @@
         "MySQL 5.6+ 把 where 里能用索引判断的条件下推到存储引擎层，减少回表次数，Extra 里显示 Using index condition。"
        ],
        "code": [
-        "explain select * from emp where name like '张%' and age = 20;"
+        {
+         "note": "",
+         "sql": "explain select * from emp where name like '张%' and age = 20;",
+         "html": "<span class=\"k\">explain</span> <span class=\"k\">select</span> * <span class=\"k\">from</span> emp <span class=\"k\">where</span> name <span class=\"k\">like</span> <span class=\"s\">&#x27;张%&#x27;</span> <span class=\"k\">and</span> age = <span class=\"n\">20</span>;"
+        }
        ],
        "tips": []
       }
@@ -1369,7 +1480,11 @@
         "读未提交 / 读已提交 / 可重复读（InnoDB 默认）/ 串行化。级别越高越安全，并发越低。"
        ],
        "code": [
-        "select @@transaction_isolation;\nset session transaction isolation level read committed;"
+        {
+         "note": "",
+         "sql": "select @@transaction_isolation;\nset session transaction isolation level read committed;",
+         "html": "<span class=\"k\">select</span> @@transaction_isolation;\n<span class=\"k\">set</span> session <span class=\"k\">transaction</span> isolation level read committed;"
+        }
        ],
        "tips": [
         "注意：多数互联网业务用「读已提交」，可减少间隙锁与死锁"
@@ -1394,7 +1509,11 @@
         "每行有隐藏列 trx_id 和 roll_pointer，配合 undo log 组成版本链；事务开始时生成 ReadView，沿着版本链找到自己可见的那个版本。"
        ],
        "code": [
-        "-- 快照读：不加锁，走 MVCC\nselect * from emp where id = 1;"
+        {
+         "note": "",
+         "sql": "-- 快照读：不加锁，走 MVCC\nselect * from emp where id = 1;",
+         "html": "<span class=\"c\">-- 快照读：不加锁，走 MVCC</span>\n<span class=\"k\">select</span> * <span class=\"k\">from</span> emp <span class=\"k\">where</span> id = <span class=\"n\">1</span>;"
+        }
        ],
        "tips": []
       },
@@ -1427,7 +1546,11 @@
         "undo log 不能及时清理导致版本链过长、占用大量空间；锁持有时间长；主从延迟变大。"
        ],
        "code": [
-        "select * from information_schema.innodb_trx where time_to_sec(timediff(now(), trx_started)) > 60;"
+        {
+         "note": "",
+         "sql": "select * from information_schema.innodb_trx where time_to_sec(timediff(now(), trx_started)) > 60;",
+         "html": "<span class=\"k\">select</span> * <span class=\"k\">from</span> information_schema.innodb_trx <span class=\"k\">where</span> time_to_sec(timediff(<span class=\"f\">now</span>(), trx_started)) &gt; <span class=\"n\">60</span>;"
+        }
        ],
        "tips": []
       }
@@ -1455,7 +1578,11 @@
         "S 锁（读锁）之间兼容，X 锁（写锁）与任何锁都不兼容。普通 select 不加锁，for update 加 X 锁，lock in share mode 加 S 锁。"
        ],
        "code": [
-        "-- 排他锁\nselect * from emp where id = 1 for update;\n-- 共享锁\nselect * from emp where id = 1 lock in share mode;"
+        {
+         "note": "",
+         "sql": "-- 排他锁\nselect * from emp where id = 1 for update;\n-- 共享锁\nselect * from emp where id = 1 lock in share mode;",
+         "html": "<span class=\"c\">-- 排他锁</span>\n<span class=\"k\">select</span> * <span class=\"k\">from</span> emp <span class=\"k\">where</span> id = <span class=\"n\">1</span> <span class=\"k\">for</span> <span class=\"k\">update</span>;\n<span class=\"c\">-- 共享锁</span>\n<span class=\"k\">select</span> * <span class=\"k\">from</span> emp <span class=\"k\">where</span> id = <span class=\"n\">1</span> <span class=\"k\">lock</span> <span class=\"k\">in</span> <span class=\"k\">share</span> <span class=\"k\">mode</span>;"
+        }
        ],
        "tips": []
       },
@@ -1466,7 +1593,11 @@
         "可重复读下，范围更新会对区间加临键锁（记录锁 + 前面的间隙），用来防幻读；代价是并发写入容易互相阻塞。"
        ],
        "code": [
-        "-- 会锁住 (5, 10) 这个区间\nupdate emp set salary = 1 where id between 6 and 9;"
+        {
+         "note": "",
+         "sql": "-- 会锁住 (5, 10) 这个区间\nupdate emp set salary = 1 where id between 6 and 9;",
+         "html": "<span class=\"c\">-- 会锁住 (5, 10) 这个区间</span>\n<span class=\"k\">update</span> emp <span class=\"k\">set</span> salary = <span class=\"n\">1</span> <span class=\"k\">where</span> id <span class=\"k\">between</span> <span class=\"n\">6</span> <span class=\"k\">and</span> <span class=\"n\">9</span>;"
+        }
        ],
        "tips": []
       },
@@ -1477,7 +1608,11 @@
         "两个事务互相等对方持有的锁。用 SHOW ENGINE INNODB STATUS 看 LATEST DETECTED DEADLOCK 段；预防手段：小事务、固定加锁顺序、命中索引缩小锁范围。"
        ],
        "code": [
-        "show engine innodb status;"
+        {
+         "note": "",
+         "sql": "show engine innodb status;",
+         "html": "<span class=\"k\">show</span> <span class=\"k\">engine</span> innodb status;"
+        }
        ],
        "tips": []
       },
@@ -1488,7 +1623,11 @@
         "乐观锁用版本号字段在 update 时校验，失败重试；悲观锁直接 select ... for update 锁住再改。冲突少用乐观，冲突多用悲观。"
        ],
        "code": [
-        "-- 乐观锁：带上 version 条件\nupdate emp set salary = salary + 100, version = version + 1\nwhere id = 1 and version = 3;"
+        {
+         "note": "",
+         "sql": "-- 乐观锁：带上 version 条件\nupdate emp set salary = salary + 100, version = version + 1\nwhere id = 1 and version = 3;",
+         "html": "<span class=\"c\">-- 乐观锁：带上 version 条件</span>\n<span class=\"k\">update</span> emp <span class=\"k\">set</span> salary = salary + <span class=\"n\">100</span>, version = version + <span class=\"n\">1</span>\n<span class=\"k\">where</span> id = <span class=\"n\">1</span> <span class=\"k\">and</span> version = <span class=\"n\">3</span>;"
+        }
        ],
        "tips": []
       }
@@ -1516,7 +1655,11 @@
         "自增保证顺序写入，不会造成页分裂；UUID 随机插入会频繁分裂、产生碎片。bigint 是给未来留余量。"
        ],
        "code": [
-        "create table emp (\n  id bigint primary key auto_increment,\n  name varchar(20) not null\n) engine = InnoDB default charset = utf8mb4;"
+        {
+         "note": "",
+         "sql": "create table emp (\n  id bigint primary key auto_increment,\n  name varchar(20) not null\n) engine = InnoDB default charset = utf8mb4;",
+         "html": "<span class=\"k\">create</span> <span class=\"k\">table</span> emp (\n  id <span class=\"k\">bigint</span> <span class=\"k\">primary</span> <span class=\"k\">key</span> <span class=\"k\">auto_increment</span>,\n  name <span class=\"k\">varchar</span>(<span class=\"n\">20</span>) <span class=\"k\">not</span> <span class=\"k\">null</span>\n) <span class=\"k\">engine</span> = InnoDB <span class=\"k\">default</span> <span class=\"k\">charset</span> = utf8mb4;"
+        }
        ],
        "tips": []
       },
@@ -1527,7 +1670,11 @@
         "MySQL 的 utf8 实际是 utf8mb3（最多 3 字节），存不了 emoji；一律用 utf8mb4。"
        ],
        "code": [
-        "create database demo default charset = utf8mb4;"
+        {
+         "note": "",
+         "sql": "create database demo default charset = utf8mb4;",
+         "html": "<span class=\"k\">create</span> <span class=\"k\">database</span> demo <span class=\"k\">default</span> <span class=\"k\">charset</span> = utf8mb4;"
+        }
        ],
        "tips": []
       },
@@ -1538,7 +1685,11 @@
         "打开 slow_query_log 并设置 long_query_time，用 mysqldumpslow 或 pt-query-digest 找最耗时的 SQL。"
        ],
        "code": [
-        "set global slow_query_log = on;\nset global long_query_time = 1;\n-- 查看当前慢查询条数\nshow global status like 'Slow_queries';"
+        {
+         "note": "",
+         "sql": "set global slow_query_log = on;\nset global long_query_time = 1;\n-- 查看当前慢查询条数\nshow global status like 'Slow_queries';",
+         "html": "<span class=\"k\">set</span> global slow_query_log = <span class=\"k\">on</span>;\n<span class=\"k\">set</span> global long_query_time = <span class=\"n\">1</span>;\n<span class=\"c\">-- 查看当前慢查询条数</span>\n<span class=\"k\">show</span> global status <span class=\"k\">like</span> <span class=\"s\">&#x27;Slow_queries&#x27;</span>;"
+        }
        ],
        "tips": []
       },
@@ -1549,7 +1700,11 @@
         "limit 100000, 10 会先扫 10 万行再丢弃。两种解法：延迟关联（先用覆盖索引取 id 再 join）或游标分页（where id > 上次最大 id）。"
        ],
        "code": [
-        "-- 延迟关联\nselect e.* from emp e join (select id from emp order by id limit 100000, 10) t on e.id = t.id;\n-- 游标分页（推荐）\nselect * from emp where id > 100000 order by id limit 10;"
+        {
+         "note": "",
+         "sql": "-- 延迟关联\nselect e.* from emp e join (select id from emp order by id limit 100000, 10) t on e.id = t.id;\n-- 游标分页（推荐）\nselect * from emp where id > 100000 order by id limit 10;",
+         "html": "<span class=\"c\">-- 延迟关联</span>\n<span class=\"k\">select</span> e.* <span class=\"k\">from</span> emp e <span class=\"k\">join</span> (<span class=\"k\">select</span> id <span class=\"k\">from</span> emp <span class=\"k\">order</span> <span class=\"k\">by</span> id <span class=\"k\">limit</span> <span class=\"n\">100000</span>, <span class=\"n\">10</span>) t <span class=\"k\">on</span> e.id = t.id;\n<span class=\"c\">-- 游标分页（推荐）</span>\n<span class=\"k\">select</span> * <span class=\"k\">from</span> emp <span class=\"k\">where</span> id &gt; <span class=\"n\">100000</span> <span class=\"k\">order</span> <span class=\"k\">by</span> id <span class=\"k\">limit</span> <span class=\"n\">10</span>;"
+        }
        ],
        "tips": []
       },
@@ -1560,7 +1715,11 @@
         "一次 insert 多个 values、用事务包住、关闭自动提交、大批量用 load data，都比逐条插入快一个量级。"
        ],
        "code": [
-        "insert into emp(name, dept_id) values ('a',1), ('b',2), ('c',3);\n-- 文件导入\nload data local infile '/tmp/emp.csv' into table emp fields terminated by ',';"
+        {
+         "note": "",
+         "sql": "insert into emp(name, dept_id) values ('a',1), ('b',2), ('c',3);\n-- 文件导入\nload data local infile '/tmp/emp.csv' into table emp fields terminated by ',';",
+         "html": "<span class=\"k\">insert</span> <span class=\"k\">into</span> emp(name, dept_id) <span class=\"k\">values</span> (<span class=\"s\">&#x27;a&#x27;</span>,<span class=\"n\">1</span>), (<span class=\"s\">&#x27;b&#x27;</span>,<span class=\"n\">2</span>), (<span class=\"s\">&#x27;c&#x27;</span>,<span class=\"n\">3</span>);\n<span class=\"c\">-- 文件导入</span>\nload data local infile <span class=\"s\">&#x27;/tmp/emp.csv&#x27;</span> <span class=\"k\">into</span> <span class=\"k\">table</span> emp fields terminated <span class=\"k\">by</span> <span class=\"s\">&#x27;,&#x27;</span>;"
+        }
        ],
        "tips": []
       }
@@ -1577,7 +1736,11 @@
         "STATEMENT 记录 SQL、ROW 记录行变化、MIXED 混合。生产一般用 ROW，最安全、可精确还原。"
        ],
        "code": [
-        "show variables like 'binlog_format';"
+        {
+         "note": "",
+         "sql": "show variables like 'binlog_format';",
+         "html": "<span class=\"k\">show</span> variables <span class=\"k\">like</span> <span class=\"s\">&#x27;binlog_format&#x27;</span>;"
+        }
        ],
        "tips": []
       },
@@ -1588,7 +1751,11 @@
         "主库写 binlog → dump 线程推给从库 → 从库 IO 线程写 relay log → SQL 线程重放。从库默认是延迟的。"
        ],
        "code": [
-        "-- 8.0 之前\nshow master status;\nchange master to master_host='192.168.1.10', master_user='repl', master_password='xxx', master_log_file='mysql-bin.000001', master_log_pos=154;\nstart slave; show slave status\\G"
+        {
+         "note": "",
+         "sql": "-- 8.0 之前\nshow master status;\nchange master to master_host='192.168.1.10', master_user='repl', master_password='xxx', master_log_file='mysql-bin.000001', master_log_pos=154;\nstart slave; show slave status\\G",
+         "html": "<span class=\"c\">-- 8.0 之前</span>\n<span class=\"k\">show</span> master status;\nchange master to master_host=<span class=\"s\">&#x27;192.168.1.10&#x27;</span>, master_user=<span class=\"s\">&#x27;repl&#x27;</span>, master_password=<span class=\"s\">&#x27;xxx&#x27;</span>, master_log_file=<span class=\"s\">&#x27;mysql-bin.000001&#x27;</span>, master_log_pos=<span class=\"n\">154</span>;\n<span class=\"k\">start</span> slave; <span class=\"k\">show</span> slave status\\G"
+        }
        ],
        "tips": []
       },

@@ -224,6 +224,11 @@ CSS = r"""
   .mvpop .ccap{font-size:10.5px;font-weight:700;color:#0E7490;margin:11px 0 -2px;
     padding-left:7px;border-left:2px solid #0E7490}
   .mvpop .ccap-mute{color:#9ca3af;border-left-color:#d6d3cb;font-weight:600}
+  .mvpop pre .k{color:#c792ea;font-weight:600}
+  .mvpop pre .s{color:#a5d6a7}
+  .mvpop pre .n{color:#f78c6c}
+  .mvpop pre .c{color:#7f8c98;font-style:italic}
+  .mvpop pre .f{color:#82aaff}
   .mvpop pre{margin:8px 0 0;padding:9px 11px;background:#1f2937;color:#e5e7eb;border-radius:7px;
     font-family:ui-monospace,Consolas,"Courier New",monospace;font-size:11px;line-height:1.7;
     overflow:auto;white-space:pre-wrap}
@@ -981,10 +986,11 @@ function mOpen(el){
           + p.code.map((c, i) => {
               const note = (c && c.sql !== undefined) ? (c.note || "") : "";
               const sql = (c && c.sql !== undefined) ? c.sql : c;
+              const codeHtml = (c && c.html) ? c.html : mEsc(sql);
               return (note
                   ? `<div class="ccap">${mEsc(note)}</div>`
                   : `<div class="ccap ccap-mute">示例 ${i + 1}</div>`)
-                + `<pre>${mEsc(sql)}</pre>`;
+                + `<pre class="sql">${codeHtml}</pre>`;
             }).join("")
         : "");
   const pop = $("mvpop");
