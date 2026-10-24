@@ -888,6 +888,7 @@ function detSelect(p){
 }
 function detMark(lv){
   if (!detSelP) return false;
+  if (lv < 1 || lv > 3) lv = 1;
   const cur = markGet(detSelP);
   if (cur === lv) delete marks[detSelP]; else marks[detSelP] = lv;   // 走原有标记
   saveMarks();
@@ -1302,8 +1303,8 @@ function mKeydown(e){
   const map = { a: 0, s: 1, d: 2 };
   const k = (e.key || "").toLowerCase();
   if (!(k in map)) return;
-  // 长链图：优先作用于选中的细节卡
-  if (detSelP && MODE === "chain"){ e.preventDefault(); detMark(map[k]); return; }
+  // 长链图：优先作用于选中的细节卡（marks 用 1/2/3，0=未标记，故 +1）
+  if (detSelP && MODE === "chain"){ e.preventDefault(); detMark(map[k] + 1); return; }
   if (!pop || !pop.dataset.i) return;
   const p = MV_ALL[+pop.dataset.i];
   if (!p) return;
