@@ -221,6 +221,9 @@ CSS = r"""
   .mvpop .ms{font-size:11.8px;color:#4b5563;line-height:1.75;margin-bottom:7px}
   .mvpop .mo{font-size:11.2px;color:#b45309;line-height:1.65;margin:8px 0 4px;
     background:#fffbeb;border:1px solid #fde68a;border-radius:7px;padding:7px 9px}
+  .mvpop .ccap{font-size:10.5px;font-weight:700;color:#0E7490;margin:11px 0 -2px;
+    padding-left:7px;border-left:2px solid #0E7490}
+  .mvpop .ccap-mute{color:#9ca3af;border-left-color:#d6d3cb;font-weight:600}
   .mvpop pre{margin:8px 0 0;padding:9px 11px;background:#1f2937;color:#e5e7eb;border-radius:7px;
     font-family:ui-monospace,Consolas,"Courier New",monospace;font-size:11px;line-height:1.7;
     overflow:auto;white-space:pre-wrap}
@@ -974,7 +977,15 @@ function mOpen(el){
   const body = (p.text || []).map(t => `<div class="ms">${mEsc(t)}</div>`).join("")
     + (p.tips || []).map(t => `<div class="mo">⚠ ${mEsc(t)}</div>`).join("")
     + (p.code && p.code.length
-        ? `<div class="tag">代码示例 · ${p.code.length} 段</div>` + p.code.map(c => `<pre>${mEsc(c)}</pre>`).join("")
+        ? `<div class="tag">代码示例 · ${p.code.length} 段</div>`
+          + p.code.map((c, i) => {
+              const note = (c && c.sql !== undefined) ? (c.note || "") : "";
+              const sql = (c && c.sql !== undefined) ? c.sql : c;
+              return (note
+                  ? `<div class="ccap">${mEsc(note)}</div>`
+                  : `<div class="ccap ccap-mute">示例 ${i + 1}</div>`)
+                + `<pre>${mEsc(sql)}</pre>`;
+            }).join("")
         : "");
   const pop = $("mvpop");
   pop.innerHTML = `<div class="ph-head"><h4>${mEsc(p.label)}</h4><button class="x" onclick="mClose()">×</button></div>`
