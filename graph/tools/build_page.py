@@ -237,6 +237,55 @@ CSS = r"""
   .pt.on{background:#eff6ff;box-shadow:0 1px 3px rgba(37,99,235,.18)}
   .arw{flex:0 0 16px;display:flex;align-items:center;justify-content:center;color:#cfcac0;
     font-size:15px;margin-top:16px;user-select:none}
+
+  /* 右侧信息框：补回被误删的样式 */
+  .panel.show{transform:translateX(0)}
+  .panel-head{padding:20px 22px 15px;border-bottom:1px solid #f1eee8;flex:0 0 auto}
+  .panel .lay{font-size:10.5px;font-weight:800;letter-spacing:.6px;color:#6b7280;margin-bottom:7px}
+  .panel h2{margin:0;font-size:18px;font-weight:800;color:#111827;line-height:1.35}
+  .panel .aka{font-size:11px;color:#9ca3af;margin-top:5px;
+    font-family:ui-monospace,Consolas,"Courier New",monospace}
+  .panel-body{padding:15px 22px 44px;overflow:auto;flex:1 1 auto}
+  .panel h3{font-size:10.5px;font-weight:800;color:#9ca3af;letter-spacing:.5px;margin:17px 0 8px}
+  .panel h3:first-child{margin-top:0}
+  .panel p{margin:0 0 10px;font-size:12.5px;line-height:1.78;color:#374151}
+  .panel .sc{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;
+    color:#374151;background:#f7f5f1;border-radius:999px;padding:4px 10px;margin:0 6px 6px 0}
+  .panel .sc i{width:7px;height:7px;border-radius:50%;display:block}
+  .panel ul{margin:6px 0 0;padding-left:16px}
+  .panel li{font-size:12px;line-height:1.72;color:#374151;margin-bottom:5px}
+  .panel .kchips{display:flex;flex-wrap:wrap;gap:6px}
+  .panel .kchip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;
+    color:#374151;background:#f7f5f1;border:1px solid #e8e5de;padding:4px 9px;border-radius:999px;
+    cursor:pointer;transition:.14s}
+  .panel .kchip:hover{background:#fff;border-color:#c9c4ba;color:#111827}
+  .panel .kchip i{width:7px;height:7px;border-radius:50%;display:block}
+
+  /* 右侧信息框（ID 选择器兜底，压住历史规则） */
+  #panel{display:flex!important;flex-direction:column!important;
+    transform:translateX(103%)!important;transition:transform .26s cubic-bezier(.34,.02,.2,1)!important}
+  #panel.show{transform:none!important}
+  #panel-head{padding:20px 22px 15px!important;border-bottom:1px solid #f1eee8!important;flex:0 0 auto!important}
+  #panel-body{display:block!important;flex:1 1 auto!important;padding:15px 22px 44px!important;
+    overflow:auto!important;font-size:12.5px!important;line-height:1.78!important;color:#374151!important}
+  /* 全部展开按钮 */
+  .expandbtn{position:fixed;right:200px;bottom:14px;z-index:22;display:none;align-items:center;gap:6px;
+    font-family:var(--font);font-size:11.5px;font-weight:700;color:#374151;background:#fff;
+    border:1px solid #dedad2;padding:7px 13px;border-radius:999px;cursor:pointer;
+    box-shadow:0 4px 14px rgba(17,24,39,.10);transition:.15s}
+  .expandbtn:hover{background:#f7f5f1;border-color:#c9c4ba}
+  .expandbtn.show{display:flex}
+
+  /* MySQL 标记 */
+  .mkbar{display:flex;align-items:center;gap:6px;margin:0 0 12px;font-size:10.5px;color:#9ca3af}
+  .mkbar b{font-weight:800;color:#6b7280;margin-right:2px}
+  .mkbtn{border:1px solid #e8e5de;background:#fff;border-radius:999px;font-size:10.5px;font-weight:700;
+    padding:3px 9px;cursor:pointer;color:#6b7280;transition:.14s}
+  .mkbtn:hover{border-color:#c9c4ba;color:#111827}
+  .mkbtn.on0{background:#FEF2F2;border-color:#FCA5A5;color:#B91C1C}
+  .mkbtn.on1{background:#FFFBEB;border-color:#FCD34D;color:#B45309}
+  .mkbtn.on2{background:#ECFDF5;border-color:#6EE7B7;color:#047857}
+  .pt .mkdot{width:6px;height:6px;border-radius:50%;flex:0 0 6px;margin-left:2px}
 """
 
 BODY = r"""
@@ -264,11 +313,12 @@ BODY = r"""
   <div class="legend" id="legend"></div>
   <div class="themes" id="themes"></div>
   <div class="tcard" id="themecard"></div>
+  <button class="expandbtn" id="btn-expand-all">⊞ 全部展开</button>
   <button class="backbtn" id="btn-back">↩ 返回知识网络</button>
   <div class="panel" id="panel">
     <button class="close" id="panel-close">×</button>
     <div class="ph" id="panel-head"></div>
-    <div class="pb" id="panel-body"></div>
+    <div class="panel-body" id="panel-body"></div>
   </div>
 </div>
 <div class="mysqlview" id="mysqlview">
@@ -280,6 +330,29 @@ BODY = r"""
   <div class="mvmask" id="mvmask"></div>
   <div class="mvpop" id="mvpop"></div>
 </div>
+<style>
+  .panel{display:flex;flex-direction:column}
+  .panel.show{transform:translateX(0)!important}
+  .panel-head{padding:20px 22px 15px;border-bottom:1px solid #f1eee8;flex:0 0 auto!important}
+  .panel .lay{font-size:10.5px;font-weight:800;letter-spacing:.6px;color:#6b7280;margin-bottom:7px}
+  .panel h2{margin:0;font-size:18px;font-weight:800;color:#111827;line-height:1.35}
+  .panel .aka{font-size:11px;color:#9ca3af;margin-top:5px}
+  .panel-body{display:block!important;flex:1 1 auto;padding:15px 22px 44px;overflow:auto;
+    font-size:12.5px;line-height:1.78;color:#374151}
+  .panel h3{font-size:10.5px;font-weight:800;color:#9ca3af;letter-spacing:.5px;margin:17px 0 8px}
+  .panel h3:first-child{margin-top:0}
+  .panel p{margin:0 0 10px}
+  .panel .sc{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;
+    color:#374151;background:#f7f5f1;border-radius:999px;padding:4px 10px;margin:0 6px 6px 0}
+  .panel .sc i{width:7px;height:7px;border-radius:50%;display:block}
+  .panel ul{margin:6px 0 0;padding-left:16px}
+  .panel li{font-size:12px;line-height:1.72;color:#374151;margin-bottom:5px}
+  .panel .kchips{display:flex;flex-wrap:wrap;gap:6px}
+  .panel .kchip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;
+    color:#374151;background:#f7f5f1;border:1px solid #e8e5de;padding:4px 9px;border-radius:999px;
+    cursor:pointer}
+  .panel .kchip i{width:7px;height:7px;border-radius:50%;display:block}
+</style>
 """
 
 JS = r"""
@@ -911,11 +984,29 @@ function focusScenario(id){
 
   $("btn-back").classList.add("show");
   $("legend").style.display = "none";
+  allExpanded = false;
+  $("btn-expand-all").textContent = "⊞ 全部展开";
+  $("btn-expand-all").classList.add("show");
   $("brandsub").textContent = sc.label + " · " + sc.steps.length + " 个环节";
   $("hint").innerHTML = "<b>点阶段</b>收起/展开 · <b>点环节</b>看细节 · <b>点知识点</b>看详情（再点关闭） · <b>拖拽</b>平移 · <b>滚轮</b>缩放";
   updateStats();
 }
 
+let allExpanded = false;
+function toggleExpandAll(){
+  if (MODE !== "chain") return;
+  allExpanded = !allExpanded;
+  ChainView.state.collapsedStage.clear();
+  ChainView.state.collapsedItem.clear();
+  if (!allExpanded){
+    const cd = chainData(scById[curScenario]);
+    cd.main.forEach((col, i) => {
+      col.items.forEach((it, j) => { if (it.details.length) ChainView.state.collapsedItem.add(i + "-" + j); });
+    });
+  }
+  ChainView.render(false);
+  $("btn-expand-all").textContent = allExpanded ? "⊟ 全部收起" : "⊞ 全部展开";
+}
 function backToNet(){
   if ($("mysqlview").classList.contains("show")) return;
   const oldPts = null;
@@ -925,6 +1016,7 @@ function backToNet(){
   renderThemeChips();
   setChip(null);
   $("btn-back").classList.remove("show");
+  $("btn-expand-all").classList.remove("show");
   $("legend").style.display = "";
   $("panel").classList.remove("show");
   panelCid = null;
@@ -973,32 +1065,66 @@ function mEsc(x){
 }
 let MV_ALL = [];
 function mToggle(el){ el.parentNode.classList.toggle("open"); }
-function mOpen(el){
-  const row = el.parentNode;
-  const p = MV_ALL[+row.dataset.i];
-  if (!p) return;
-  document.querySelectorAll(".pt.on").forEach(x => x.classList.remove("on"));
-  row.classList.add("on");
+let MV_MARKS = {};
+try { MV_MARKS = JSON.parse(localStorage.getItem("mm-mysql-marks-v1") || "{}"); } catch (e) { MV_MARKS = {}; }
+const MV_MCOLOR = ["#DC2626", "#D97706", "#047857"];
+const MV_MNAME = ["不会", "仅了解", "理解"];
+function mMark(id, lv){
+  if (MV_MARKS[id] === lv) delete MV_MARKS[id]; else MV_MARKS[id] = lv;
+  try { localStorage.setItem("mm-mysql-marks-v1", JSON.stringify(MV_MARKS)); } catch (e) {}
+  const pop = $("mvpop");
+  const idx = +pop.dataset.i;
+  const p = MV_ALL[idx];
+  if (p) pop.innerHTML = mvPopHtml(p);
+  document.querySelectorAll(".pt").forEach(row => {
+    const it = MV_ALL[+row.dataset.i];
+    if (!it) return;
+    const ph = row.querySelector(".ph");
+    let dot = ph.querySelector(".mkdot");
+    const lv2 = MV_MARKS[it.id];
+    if (lv2){
+      if (!dot){ dot = document.createElement("em"); dot.className = "mkdot"; ph.appendChild(dot); }
+      dot.style.background = MV_MCOLOR[lv2];
+    } else if (dot){ dot.remove(); }
+  });
+}
+function mvPopHtml(p){
   const body = (p.text || []).map(t => `<div class="ms">${mEsc(t)}</div>`).join("")
     + (p.tips || []).map(t => `<div class="mo">⚠ ${mEsc(t)}</div>`).join("")
     + (p.code && p.code.length
         ? `<div class="tag">代码示例 · ${p.code.length} 段</div>`
-          + p.code.map((c, i) => {
+          + p.code.map((c, k) => {
               const note = (c && c.sql !== undefined) ? (c.note || "") : "";
               const sql = (c && c.sql !== undefined) ? c.sql : c;
               const codeHtml = (c && c.html) ? c.html : mEsc(sql);
-              return (note
-                  ? `<div class="ccap">${mEsc(note)}</div>`
-                  : `<div class="ccap ccap-mute">示例 ${i + 1}</div>`)
+              return (note ? `<div class="ccap">${mEsc(note)}</div>`
+                           : `<div class="ccap ccap-mute">示例 ${k + 1}</div>`)
                 + `<pre class="sql">${codeHtml}</pre>`;
             }).join("")
         : "");
+  const lv = MV_MARKS[p.id];
+  const bar = `<div class="mkbar"><b>标记</b>`
+    + MV_MNAME.map((nm, k) =>
+        `<button class="mkbtn${lv === k ? " on" + k : ""}" onclick="mMark('${p.id}',${k})">${nm}</button>`
+      ).join("")
+    + `</div>`;
+  return `<div class="ph-head"><h4>${mEsc(p.label)}</h4><button class="x" onclick="mClose()">×</button></div>`
+    + `<div class="ph-body">${bar}${body || '<div class="ms">—</div>'}</div>`;
+}
+function mOpen(el){
+  const row = el.parentNode;
+  const idx = +row.dataset.i;
+  const p = MV_ALL[idx];
+  if (!p) return;
+  document.querySelectorAll(".pt.on").forEach(x => x.classList.remove("on"));
+  row.classList.add("on");
   const pop = $("mvpop");
-  pop.innerHTML = `<div class="ph-head"><h4>${mEsc(p.label)}</h4><button class="x" onclick="mClose()">×</button></div>`
-    + `<div class="ph-body">${body || '<div class="ms">—</div>'}</div>`;
+  pop.dataset.i = String(idx);
+  pop.innerHTML = mvPopHtml(p);
   $("mvmask").classList.add("show");
   requestAnimationFrame(() => pop.classList.add("show"));
 }
+
 function mClose(){
   $("mvpop").classList.remove("show");
   $("mvmask").classList.remove("show");
@@ -1013,8 +1139,10 @@ function buildMysql(){
       const pts = g.points.map(p => {
         const n = (p.code || []).length;
         const idx = MV_ALL.push(Object.assign({ color: col }, p)) - 1;
+        const mkl = MV_MARKS[p.id];
         return `<div class="pt" style="color:${col}" data-i="${idx}">`
           + `<div class="ph" onclick="mOpen(this)"><span>${mEsc(p.label)}</span>`
+          + (mkl ? `<em class="mkdot" style="background:${MV_MCOLOR[mkl]}"></em>` : "")
           + (n ? `<i>${n} 段</i>` : "") + `</div></div>`;
       }).join("");
       return `<div class="gp" style="color:${col}">`
@@ -1165,6 +1293,7 @@ function toggleTheme(id){
 }
 
 $("btn-back").onclick = backToNet;
+$("btn-expand-all").onclick = toggleExpandAll;
 $("tab-mysql").onclick = () => setMysqlView(true);
 $("mvmask").onclick = mClose;
 document.addEventListener("keydown", e => { if (e.key === "Escape") mClose(); });
@@ -1241,6 +1370,9 @@ HTML = r"""<!DOCTYPE html>
 """
 
 
+PANEL_FIX = '\n/* 右侧信息框：前置关键规则，避免被后面坏掉的 CSS 区吞掉 */\n.panel{display:flex!important;flex-direction:column!important}\n.panel.show{transform:translateX(0)!important}\n.panel:not(.show){transform:translateX(100%)!important}\n.panel-head{padding:20px 22px 15px!important;border-bottom:1px solid #f1eee8!important;flex:0 0 auto!important}\n.panel-body{display:block!important;flex:1 1 auto!important;padding:15px 22px 44px!important;\n  overflow:auto!important;font-size:12.5px!important;line-height:1.78!important;color:#374151!important}\n.panel .lay{font-size:10.5px;font-weight:800;letter-spacing:.6px;color:#6b7280;margin-bottom:7px}\n.panel h2{margin:0;font-size:18px;font-weight:800;color:#111827;line-height:1.35}\n.panel .aka{font-size:11px;color:#9ca3af;margin-top:5px}\n.panel h3{font-size:10.5px;font-weight:800;color:#9ca3af;letter-spacing:.5px;margin:17px 0 8px}\n.panel p{margin:0 0 10px}\n.panel .sc{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;\n  color:#374151;background:#f7f5f1;border-radius:999px;padding:4px 10px;margin:0 6px 6px 0}\n.panel .sc i{width:7px;height:7px;border-radius:50%;display:block}\n.panel ul{margin:6px 0 0;padding-left:16px}\n.panel li{font-size:12px;line-height:1.72;color:#374151;margin-bottom:5px}\n.panel .kchips{display:flex;flex-wrap:wrap;gap:6px}\n.panel .kchip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;\n  color:#374151;background:#f7f5f1;border:1px solid #e8e5de;padding:4px 9px;border-radius:999px;cursor:pointer}\n.panel .kchip i{width:7px;height:7px;border-radius:50%;display:block}\n'
+
+
 def main():
     graph = json.load(io.open(GRAPH, encoding="utf-8"))
     src = read(SRC_INDEX)
@@ -1260,6 +1392,7 @@ def main():
     js = js.replace("__MYSQL__", json.dumps(mysql, ensure_ascii=False, separators=(",", ":")))
     js = js.replace("__CHAINVIEW__", chain)
     page = HTML.replace("__CSS__", CSS).replace("__BODY__", BODY).replace("__JS__", js)
+    page = page.replace("<style>", "<style>" + PANEL_FIX, 1)
     io.open(OUT, "w", encoding="utf-8", newline="\n").write(page)
     print("写出", OUT, os.path.getsize(OUT), "bytes")
     print("  概念", len(graph["concepts"]), " 场景", len(graph["scenarios"]),
