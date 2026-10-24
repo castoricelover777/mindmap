@@ -302,6 +302,7 @@
     <h2>MySQL 知识栏目</h2>
     <div class="mvs" id="mv-stat"></div>
     <div class="mv-actions">
+      <button class="mvab" id="mv-expand" title="一次展开 / 收起所有分组">⊞ 展开全部</button>
       <button class="mvab" id="mv-export" title="把标记导出为 JSON，可换电脑导入">↓ 导出标记</button>
       <button class="mvab" id="mv-import" title="导入之前导出的标记 JSON">↑ 导入标记</button>
       <input type="file" id="mv-file" accept=".json,application/json" style="display:none">
@@ -1477,6 +1478,13 @@ function mRebuild(){
   MV_ALL = [];
   buildMysql();
 }
+function mToggleAllGroups(){
+  const gs = Array.prototype.slice.call(document.querySelectorAll(".gp"));
+  if (!gs.length) return;
+  const anyClosed = gs.some(g => !g.classList.contains("open"));
+  gs.forEach(g => g.classList.toggle("open", anyClosed));
+  $("mv-expand").textContent = anyClosed ? "⊟ 收起全部" : "⊞ 展开全部";
+}
 function mExport(){
   const payload = { type: "mindmap-mysql-marks", v: 1,
                     exportedAt: new Date().toISOString().slice(0, 19), marks: MV_MARKS };
@@ -1663,6 +1671,7 @@ function toggleTheme(id){
 
 $("btn-back").onclick = backToNet;
 $("btn-expand-all").onclick = toggleExpandAll;
+$("mv-expand").onclick = mToggleAllGroups;
 $("mv-export").onclick = mExport;
 $("mv-import").onclick = () => $("mv-file").click();
 $("mv-file").onchange = e => {
