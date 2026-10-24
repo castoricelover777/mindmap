@@ -286,6 +286,11 @@ CSS = r"""
   .mkbtn.on1{background:#FFFBEB;border-color:#FCD34D;color:#B45309}
   .mkbtn.on2{background:#ECFDF5;border-color:#6EE7B7;color:#047857}
   .pt .mkdot{width:6px;height:6px;border-radius:50%;flex:0 0 6px;margin-left:2px}
+
+  .mv-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
+  .mvab{font-family:var(--font);font-size:11px;font-weight:700;color:#374151;background:#fff;
+    border:1px solid #e2ded6;border-radius:999px;padding:5px 11px;cursor:pointer;transition:.15s}
+  .mvab:hover{background:#f7f5f1;border-color:#c9c4ba}
 """
 
 BODY = r"""
@@ -325,6 +330,11 @@ BODY = r"""
   <div class="mv-bar">
     <h2>MySQL 知识栏目</h2>
     <div class="mvs" id="mv-stat"></div>
+    <div class="mv-actions">
+      <button class="mvab" id="mv-export" title="把标记导出为 JSON，可换电脑导入">↓ 导出标记</button>
+      <button class="mvab" id="mv-import" title="导入之前导出的标记 JSON">↑ 导入标记</button>
+      <input type="file" id="mv-file" accept=".json,application/json" style="display:none">
+    </div>
   </div>
   <div class="mv-cols" id="mv-body"></div>
   <div class="mvmask" id="mvmask"></div>
@@ -1155,8 +1165,55 @@ function buildMysql(){
       + `<div class="mg">${groups}</div></div>`;
   });
   $("mv-body").innerHTML = cols.join('<div class="arw">→</div>');
+  mStat();
+}
+function mSave(){
+  try { localStorage.setItem("mm-mysql-marks-v1", JSON.stringify(MV_MARKS)); } catch (e) {}
+}
+function mStat(){
+  const n = Object.keys(MV_MARKS).length;
   $("mv-stat").textContent = MYSQL.meta.chapters + " 章 · " + MYSQL.meta.groups + " 组 · "
-    + MYSQL.meta.points + " 个知识点 · " + MYSQL.meta.withCode + " 段代码 · 来源：" + MYSQL.meta.source;
+    + MYSQL.meta.points + " 个知识点 · " + MYSQL.meta.withCode + " 段代码"
+    + (n ? " · 已标记 " + n : "")
+    + " · 来源：" + MYSQL.meta.source;
+}
+function mRebuild(){
+  mysqlBuilt = false;
+  MV_ALL = [];
+  buildMysql();
+}
+function mExport(){
+  const payload = { type: "mindmap-mysql-marks", v: 1,
+                    exportedAt: new Date().toISOString().slice(0, 19), marks: MV_MARKS };
+  const blob = new Blob([JSON.stringify(payload, null, 1)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "mm-mysql-marks.json";
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 800);
+}
+function mImport(file){
+  const fr = new FileReader();
+  fr.onload = () => {
+    try {
+      const d = JSON.parse(fr.result);
+      const mk = d.marks || d;
+      if (!mk || typeof mk !== "object") throw new Error("格式不对");
+      let n = 0;
+      Object.keys(mk).forEach(k => {
+        const v = +mk[k];
+        if (v >= 0 && v <= 2){ MV_MARKS[k] = v; n++; }
+      });
+      mSave();
+      mClose();
+      mRebuild();
+      alert("已导入 " + n + " 条 MySQL 标记");
+    } catch (e) {
+      alert("导入失败：" + e.message);
+    }
+  };
+  fr.readAsText(file);
 }
 function setMysqlView(on){
   if (typeof mClose === "function") mClose();
@@ -1294,6 +1351,12 @@ function toggleTheme(id){
 
 $("btn-back").onclick = backToNet;
 $("btn-expand-all").onclick = toggleExpandAll;
+$("mv-export").onclick = mExport;
+$("mv-import").onclick = () => $("mv-file").click();
+$("mv-file").onchange = e => {
+  if (e.target.files && e.target.files[0]) mImport(e.target.files[0]);
+  e.target.value = "";
+};
 $("tab-mysql").onclick = () => setMysqlView(true);
 $("mvmask").onclick = mClose;
 document.addEventListener("keydown", e => { if (e.key === "Escape") mClose(); });
