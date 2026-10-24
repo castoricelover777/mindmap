@@ -1,11 +1,12 @@
 {
  "meta": {
   "title": "MySQL",
-  "chapters": 4,
-  "groups": 8,
-  "points": 54,
-  "withCode": 24,
-  "source": "课件 05-数据库 / 06-java操作数据库 + 笔记 day6~7"
+  "chapters": 5,
+  "groups": 13,
+  "points": 84,
+  "withCode": 46,
+  "source": "课件 05/06 + 笔记 day6~7；「进阶（补充）」为通用知识，不在课件内",
+  "note": "进阶章节不是课件内容，是补齐的知识体系"
  },
  "chapters": [
   {
@@ -793,6 +794,379 @@
        "code": [],
        "tips": [
         "结论：使用Mybatis的注解，主要是来完成一些简单的增删改查功能。如果需要实现复杂的SQL功能，建议使用XML来配置映射语句。"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "cadv",
+   "label": "MySQL 进阶（补充）",
+   "chapter": "MySQL 进阶",
+   "groups": [
+    {
+     "id": "gadv1",
+     "label": "索引原理",
+     "points": [
+      {
+       "id": "padv90678529",
+       "label": "为什么用 B+ 树",
+       "text": [
+        "非叶子节点只存键值、一页能放几百个键，所以树很矮（千万级数据 3~4 层）；叶子节点用双向链表串起来，范围查询和排序不用回表遍历。"
+       ],
+       "code": [
+        "-- 一次 B+ 树查找大致是 3~4 次磁盘 IO\nexplain select * from emp where id = 100;"
+       ],
+       "tips": [
+        "注意：索引不是越多越好，每个索引都要占空间、拖慢写入"
+       ]
+      },
+      {
+       "id": "padv52486773",
+       "label": "聚簇索引与二级索引",
+       "text": [
+        "InnoDB 的主键索引就是聚簇索引，叶子节点存的是整行数据；二级索引的叶子只存主键值，所以查其它列要「回表」。",
+        "一张表只能有一个聚簇索引，没主键时用第一个非空唯一索引，都没有就隐式生成 row_id。"
+       ],
+       "code": [
+        "-- 主键查询：一次 B+ 树\nselect * from emp where id = 1;\n-- 二级索引查询：先查 name 索引拿到 id，再回表\nselect * from emp where name = '张三';"
+       ],
+       "tips": []
+      },
+      {
+       "id": "padv76665099",
+       "label": "回表与覆盖索引",
+       "text": [
+        "要查的列全在索引里就不用回表，执行计划里会显示 Using index。把常用查询列放进联合索引，是性价比最高的一招。"
+       ],
+       "code": [
+        "create index idx_dept_hire on emp(dept_id, hire_date);\n-- 覆盖索引：Extra 显示 Using index\nexplain select dept_id, hire_date from emp where dept_id = 1;"
+       ],
+       "tips": [
+        "注意：select * 几乎一定会回表"
+       ]
+      },
+      {
+       "id": "padv81541081",
+       "label": "联合索引与最左前缀",
+       "text": [
+        "索引 (a,b,c) 能命中 a、a,b、a,b,c；跳过 a 直接用 b 用不上索引。范围查询（>、<、between、like）会让后面的列失效。"
+       ],
+       "code": [
+        "-- 能用到索引\nselect * from emp where dept_id = 1 and hire_date > '2020-01-01';\n-- 用不到（跳过了最左列）\nselect * from emp where hire_date > '2020-01-01';"
+       ],
+       "tips": []
+      },
+      {
+       "id": "padv26817480",
+       "label": "索引失效的常见场景",
+       "text": [
+        "字段上做函数或运算、隐式类型转换（字符串列传数字）、前导模糊 like '%张'、or 连接非索引列、!= 或 is not null 大范围、范围条件之后的列。"
+       ],
+       "code": [
+        "-- 失效：字段上用了函数\nselect * from emp where year(hire_date) = 2020;\n-- 改写：范围条件\nselect * from emp where hire_date >= '2020-01-01' and hire_date < '2021-01-01';"
+       ],
+       "tips": []
+      },
+      {
+       "id": "padv21896129",
+       "label": "EXPLAIN 怎么看",
+       "text": [
+        "重点看四列：type（性能 all<index<range<ref<eq_ref<const）、key（实际用到的索引）、rows（预估扫描行数）、Extra（Using index 好，Using filesort / Using temporary 要警惕）。"
+       ],
+       "code": [
+        "explain select * from emp where dept_id = 1 order by hire_date desc;"
+       ],
+       "tips": []
+      },
+      {
+       "id": "padv21670137",
+       "label": "前缀索引",
+       "text": [
+        "长字符串（如 url、邮箱）可以只索引前 N 个字符，省空间；代价是不能做覆盖索引，也无法用于 order by。"
+       ],
+       "code": [
+        "alter table emp add index idx_email(email(10));"
+       ],
+       "tips": []
+      },
+      {
+       "id": "padv36572227",
+       "label": "索引下推 ICP",
+       "text": [
+        "MySQL 5.6+ 把 where 里能用索引判断的条件下推到存储引擎层，减少回表次数，Extra 里显示 Using index condition。"
+       ],
+       "code": [
+        "explain select * from emp where name like '张%' and age = 20;"
+       ],
+       "tips": []
+      }
+     ]
+    },
+    {
+     "id": "gadv2",
+     "label": "事务与并发",
+     "points": [
+      {
+       "id": "padv47721130",
+       "label": "ACID 四个特性",
+       "text": [
+        "原子性（undo log 回滚）、一致性（约束与业务规则）、隔离性（锁 + MVCC）、持久性（redo log 刷盘）。"
+       ],
+       "code": [],
+       "tips": []
+      },
+      {
+       "id": "padv72941489",
+       "label": "四种隔离级别",
+       "text": [
+        "读未提交 / 读已提交 / 可重复读（InnoDB 默认）/ 串行化。级别越高越安全，并发越低。"
+       ],
+       "code": [
+        "select @@transaction_isolation;\nset session transaction isolation level read committed;"
+       ],
+       "tips": [
+        "注意：多数互联网业务用「读已提交」，可减少间隙锁与死锁"
+       ]
+      },
+      {
+       "id": "padv41357309",
+       "label": "脏读、不可重复读、幻读",
+       "text": [
+        "脏读=读到别人未提交的数据；不可重复读=同一事务两次读同一行结果不同；幻读=同一事务两次范围查询多出行。",
+        "可重复读靠 MVCC 解决前两个，靠间隙锁（当前读时）压制幻读。"
+       ],
+       "code": [],
+       "tips": [
+        "注意：快照读（普通 select）不会幻读，当前读（for update）才需要间隙锁"
+       ]
+      },
+      {
+       "id": "padv58106604",
+       "label": "MVCC 怎么实现的",
+       "text": [
+        "每行有隐藏列 trx_id 和 roll_pointer，配合 undo log 组成版本链；事务开始时生成 ReadView，沿着版本链找到自己可见的那个版本。"
+       ],
+       "code": [
+        "-- 快照读：不加锁，走 MVCC\nselect * from emp where id = 1;"
+       ],
+       "tips": []
+      },
+      {
+       "id": "padv2730318",
+       "label": "redo / undo / binlog 三种日志",
+       "text": [
+        "redo log 是 InnoDB 的物理日志，循环写，用于崩溃恢复；undo log 是逻辑日志，用于回滚和 MVCC；binlog 是 server 层的逻辑日志，用于归档和主从复制。"
+       ],
+       "code": [],
+       "tips": [
+        "注意：redo 保证持久性，undo 保证原子性，binlog 保证可复制"
+       ]
+      },
+      {
+       "id": "padv91699715",
+       "label": "两阶段提交",
+       "text": [
+        "写 redo（prepare）→ 写 binlog → 写 redo（commit）。中间崩溃时，用 binlog 是否完整来决定提交还是回滚，保证两份日志一致。"
+       ],
+       "code": [],
+       "tips": [
+        "注意：这就是为什么 binlog 和 redo 的写入顺序不能反"
+       ]
+      },
+      {
+       "id": "padv50667213",
+       "label": "长事务的危害",
+       "text": [
+        "undo log 不能及时清理导致版本链过长、占用大量空间；锁持有时间长；主从延迟变大。"
+       ],
+       "code": [
+        "select * from information_schema.innodb_trx where time_to_sec(timediff(now(), trx_started)) > 60;"
+       ],
+       "tips": []
+      }
+     ]
+    },
+    {
+     "id": "gadv3",
+     "label": "锁",
+     "points": [
+      {
+       "id": "padv83640273",
+       "label": "锁的粒度",
+       "text": [
+        "全局锁（FTWRL，做全库逻辑备份）、表锁（MyISAM 常用）、行锁（InnoDB 默认，加在索引上）。"
+       ],
+       "code": [],
+       "tips": [
+        "注意：行锁加不到索引上会退化为表锁"
+       ]
+      },
+      {
+       "id": "padv91507110",
+       "label": "共享锁与排他锁",
+       "text": [
+        "S 锁（读锁）之间兼容，X 锁（写锁）与任何锁都不兼容。普通 select 不加锁，for update 加 X 锁，lock in share mode 加 S 锁。"
+       ],
+       "code": [
+        "-- 排他锁\nselect * from emp where id = 1 for update;\n-- 共享锁\nselect * from emp where id = 1 lock in share mode;"
+       ],
+       "tips": []
+      },
+      {
+       "id": "padv49439488",
+       "label": "间隙锁与临键锁",
+       "text": [
+        "可重复读下，范围更新会对区间加临键锁（记录锁 + 前面的间隙），用来防幻读；代价是并发写入容易互相阻塞。"
+       ],
+       "code": [
+        "-- 会锁住 (5, 10) 这个区间\nupdate emp set salary = 1 where id between 6 and 9;"
+       ],
+       "tips": []
+      },
+      {
+       "id": "padv35659680",
+       "label": "死锁怎么排查",
+       "text": [
+        "两个事务互相等对方持有的锁。用 SHOW ENGINE INNODB STATUS 看 LATEST DETECTED DEADLOCK 段；预防手段：小事务、固定加锁顺序、命中索引缩小锁范围。"
+       ],
+       "code": [
+        "show engine innodb status;"
+       ],
+       "tips": []
+      },
+      {
+       "id": "padv65070256",
+       "label": "乐观锁与悲观锁",
+       "text": [
+        "乐观锁用版本号字段在 update 时校验，失败重试；悲观锁直接 select ... for update 锁住再改。冲突少用乐观，冲突多用悲观。"
+       ],
+       "code": [
+        "-- 乐观锁：带上 version 条件\nupdate emp set salary = salary + 100, version = version + 1\nwhere id = 1 and version = 3;"
+       ],
+       "tips": []
+      }
+     ]
+    },
+    {
+     "id": "gadv4",
+     "label": "引擎与调优",
+     "points": [
+      {
+       "id": "padv15052677",
+       "label": "InnoDB 与 MyISAM",
+       "text": [
+        "InnoDB 支持事务、行锁、外键、MVCC、崩溃恢复；MyISAM 只有表锁、不支持事务。MySQL 5.5 之后默认 InnoDB。"
+       ],
+       "code": [],
+       "tips": [
+        "注意：MyISAM 已被淘汰，别再选它"
+       ]
+      },
+      {
+       "id": "padv37015367",
+       "label": "主键为什么用自增 bigint",
+       "text": [
+        "自增保证顺序写入，不会造成页分裂；UUID 随机插入会频繁分裂、产生碎片。bigint 是给未来留余量。"
+       ],
+       "code": [
+        "create table emp (\n  id bigint primary key auto_increment,\n  name varchar(20) not null\n) engine = InnoDB default charset = utf8mb4;"
+       ],
+       "tips": []
+      },
+      {
+       "id": "padv13323827",
+       "label": "字符集 utf8 与 utf8mb4",
+       "text": [
+        "MySQL 的 utf8 实际是 utf8mb3（最多 3 字节），存不了 emoji；一律用 utf8mb4。"
+       ],
+       "code": [
+        "create database demo default charset = utf8mb4;"
+       ],
+       "tips": []
+      },
+      {
+       "id": "padv67290229",
+       "label": "慢查询日志",
+       "text": [
+        "打开 slow_query_log 并设置 long_query_time，用 mysqldumpslow 或 pt-query-digest 找最耗时的 SQL。"
+       ],
+       "code": [
+        "set global slow_query_log = on;\nset global long_query_time = 1;\n-- 查看当前慢查询条数\nshow global status like 'Slow_queries';"
+       ],
+       "tips": []
+      },
+      {
+       "id": "padv23313482",
+       "label": "深分页优化",
+       "text": [
+        "limit 100000, 10 会先扫 10 万行再丢弃。两种解法：延迟关联（先用覆盖索引取 id 再 join）或游标分页（where id > 上次最大 id）。"
+       ],
+       "code": [
+        "-- 延迟关联\nselect e.* from emp e join (select id from emp order by id limit 100000, 10) t on e.id = t.id;\n-- 游标分页（推荐）\nselect * from emp where id > 100000 order by id limit 10;"
+       ],
+       "tips": []
+      },
+      {
+       "id": "padv64032553",
+       "label": "批量插入优化",
+       "text": [
+        "一次 insert 多个 values、用事务包住、关闭自动提交、大批量用 load data，都比逐条插入快一个量级。"
+       ],
+       "code": [
+        "insert into emp(name, dept_id) values ('a',1), ('b',2), ('c',3);\n-- 文件导入\nload data local infile '/tmp/emp.csv' into table emp fields terminated by ',';"
+       ],
+       "tips": []
+      }
+     ]
+    },
+    {
+     "id": "gadv5",
+     "label": "复制与高可用",
+     "points": [
+      {
+       "id": "padv51332474",
+       "label": "binlog 三种格式",
+       "text": [
+        "STATEMENT 记录 SQL、ROW 记录行变化、MIXED 混合。生产一般用 ROW，最安全、可精确还原。"
+       ],
+       "code": [
+        "show variables like 'binlog_format';"
+       ],
+       "tips": []
+      },
+      {
+       "id": "padv78744575",
+       "label": "主从复制原理",
+       "text": [
+        "主库写 binlog → dump 线程推给从库 → 从库 IO 线程写 relay log → SQL 线程重放。从库默认是延迟的。"
+       ],
+       "code": [
+        "-- 8.0 之前\nshow master status;\nchange master to master_host='192.168.1.10', master_user='repl', master_password='xxx', master_log_file='mysql-bin.000001', master_log_pos=154;\nstart slave; show slave status\\G"
+       ],
+       "tips": []
+      },
+      {
+       "id": "padv5861626",
+       "label": "读写分离与主从延迟",
+       "text": [
+        "主库写、从库读能扛读多写少，但主从延迟会导致「刚写完查不到」。解决办法：强制走主库、半同步复制、或用缓存兜住。"
+       ],
+       "code": [],
+       "tips": [
+        "注意：写后立刻读的场景不要走从库"
+       ]
+      },
+      {
+       "id": "padv82333466",
+       "label": "分库分表的取舍",
+       "text": [
+        "垂直拆（按业务）/ 水平拆（按分片键）。能靠索引、缓存、读写分离解决的，先别拆；拆了就要面对分布式事务和跨库 join。"
+       ],
+       "code": [],
+       "tips": [
+        "注意：分片键选错，后期几乎无法改"
        ]
       }
      ]
