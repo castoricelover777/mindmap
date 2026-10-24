@@ -495,13 +495,23 @@ function migrateOldMarks(){
 
 /* ================= 统计 ================= */
 function updateStats(){
-  const c = [0,0,0,0];
-  let total = 0;
+  const c = [0, 0, 0, 0];
+  let nDet = 0, nCon = 0, nMy = 0;
+  // ① 细节卡（含无细节的环节）
   G.scenarios.forEach(sc => sc.steps.forEach(st => {
-    if (st.details.length) st.details.forEach((_, k) => { c[markGet(st.id + "." + k)]++; total++; });
-    else { c[markGet(st.id)]++; total++; }
+    if (st.details.length) st.details.forEach((_, k) => { c[markGet(st.id + "." + k)]++; nDet++; });
+    else { c[markGet(st.id)]++; nDet++; }
   }));
+  // ② 概念
+  G.concepts.forEach(k => { c[markGet(k.id)]++; nCon++; });
+  // ③ MySQL（0/1/2 → 1/2/3）
+  let myMarked = 0;
+  Object.keys(MV_MARKS).forEach(k => { const v = +MV_MARKS[k]; if (v >= 0 && v <= 2){ c[v + 1]++; myMarked++; } });
+  nMy = (typeof MYSQL !== "undefined" && MYSQL.meta) ? MYSQL.meta.points : 0;
+  if (nMy > myMarked) c[0] += nMy - myMarked;   // MySQL 未标记的也算进去
   const box = $("stats"); if (!box) return;
+  const tip = `概念 ${nCon} · 细节卡 ${nDet} · MySQL ${nMy} · 合计 ${nCon + nDet + nMy}`;
+  box.title = tip;
   box.innerHTML =
       `<span><i class="dot" style="background:${MARK_COLORS[1]}"></i>不会 <b>${c[1]}</b></span>`
     + `<span><i class="dot" style="background:${MARK_COLORS[2]}"></i>仅了解 <b>${c[2]}</b></span>`
