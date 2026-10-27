@@ -262,6 +262,28 @@
     color:#9ca3af;background:#f4f2ed;border-radius:3px;padding:0 3px;line-height:14px;vertical-align:1px}
   .mkbtn.on0 .key,.mkbtn.on1 .key,.mkbtn.on2 .key{color:inherit;background:rgba(255,255,255,.65)}
   .mkbar .keyhint{margin-left:6px;font-size:9.5px;color:#c2bdb4}
+
+/* === 移动端切换栏 grid 修复 v3（独立站点）=== */
+@media (max-width: 900px){
+  .topbar{flex-wrap:wrap !important;height:auto !important;overflow:visible !important;
+          padding:6px 8px !important;gap:5px !important}
+  .brand{flex:1 0 100% !important;margin-bottom:2px}
+  .spacer{display:none !important}
+  .seg{display:grid !important;grid-template-columns:repeat(4,1fr) !important;
+       gap:4px !important;width:100% !important;flex:1 0 100% !important;
+       order:-1 !important;padding:3px !important;box-sizing:border-box}
+  .seg a{min-width:0 !important;width:auto !important;flex:none !important;
+         text-align:center !important;padding:7px 2px !important;
+         font-size:11.5px !important;line-height:1.2;white-space:nowrap;
+         overflow:hidden;text-overflow:ellipsis;background:transparent;border-radius:6px}
+  .seg a.on{background:#fff;box-shadow:0 1px 3px rgba(17,24,39,.14)}
+  .btns{flex-wrap:nowrap !important;overflow-x:auto !important;width:100%}
+  .btns::-webkit-scrollbar{display:none}
+  button{flex:none;font-size:11px;padding:5px 8px;white-space:nowrap}
+  .stats{flex:1 0 100% !important;justify-content:center !important;font-size:9.5px !important}
+  .legend{display:none !important}
+  .hint{font-size:10px;left:8px;bottom:8px;padding:4px 8px;max-width:calc(100% - 16px)}
+}
 </style>
 </head>
 <body>

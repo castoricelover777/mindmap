@@ -8,6 +8,8 @@ def read(p):
     with io.open(p, encoding="utf-8") as f:
         return f.read()
 
+MOBILE_CSS_4COL = '/* === 移动端切换栏 grid 修复 v3（独立站点）=== */\n@media (max-width: 900px){\n  .topbar{flex-wrap:wrap !important;height:auto !important;overflow:visible !important;\n          padding:6px 8px !important;gap:5px !important}\n  .brand{flex:1 0 100% !important;margin-bottom:2px}\n  .spacer{display:none !important}\n  .seg{display:grid !important;grid-template-columns:repeat(4,1fr) !important;\n       gap:4px !important;width:100% !important;flex:1 0 100% !important;\n       order:-1 !important;padding:3px !important;box-sizing:border-box}\n  .seg a{min-width:0 !important;width:auto !important;flex:none !important;\n         text-align:center !important;padding:7px 2px !important;\n         font-size:11.5px !important;line-height:1.2;white-space:nowrap;\n         overflow:hidden;text-overflow:ellipsis;background:transparent;border-radius:6px}\n  .seg a.on{background:#fff;box-shadow:0 1px 3px rgba(17,24,39,.14)}\n  .btns{flex-wrap:nowrap !important;overflow-x:auto !important;width:100%}\n  .btns::-webkit-scrollbar{display:none}\n  button{flex:none;font-size:11px;padding:5px 8px;white-space:nowrap}\n  .stats{flex:1 0 100% !important;justify-content:center !important;font-size:9.5px !important}\n  .legend{display:none !important}\n  .hint{font-size:10px;left:8px;bottom:8px;padding:4px 8px;max-width:calc(100% - 16px)}\n}'
+
 idx = read(SRC + r"\index.html")
 chn = read(SRC + r"\chain.html")
 
@@ -218,7 +220,8 @@ html_head = """<!DOCTYPE html>
       <a class="on">全链路图</a>
       <a href="graph.html?tab=mysql" title="MySQL 知识栏目">MySQL</a>
       <a href="https://castoricelover777.github.io/blog/" target="_blank" rel="noopener">博客源码</a>
-    </div>
+    
+      <a href="llm.html">数据分析</a></div>
     <div class="btns">
       <button id="btn-expand">全部展开</button>
       <button id="btn-collapse">只看阶段</button>
@@ -645,6 +648,11 @@ glue = glue.replace("__MIND__", mind_code).replace("__CHAIN__", chain_code)
 
 out = html_head + "<script>" + glue + "</script>\n</body>\n</html>\n"
 
+if "移动端切换栏" not in out:
+    out = out.replace("</style>", MOBILE_CSS_4COL + "</style>", 1)
+if "llm.html" not in out:
+    out = out.replace("</a>\n    </div>", '</a>\n      <a href="llm.html">数据分析</a>\n    </div>', 1)
+mo = re.search(r"<style>(.*?)</style>", out, re.S)
 io.open(BASE + r"\index.html", "w", encoding="utf-8", newline="\n").write(out)
 print("written index.html:", len(out.encode("utf-8")), "bytes")
 print("DATA literal chars:", len(DATA_LIT))
