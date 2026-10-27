@@ -494,6 +494,27 @@ function migrateOldMarks(){
 }
 
 /* ================= 统计 ================= */
+function dumpAllMarks(){
+  const out = { type: "mindmap-all-marks", v: 1,
+                exportedAt: new Date().toISOString().slice(0, 19),
+                graph: {}, detail: {}, mysql: {}, old: {} };
+  const pick = (k) => { try { return JSON.parse(localStorage.getItem(k) || "{}"); } catch (e) { return {}; } };
+  out.graph = pick("mm-graph-marks-v1");
+  out.detail = pick("mm-detail-marks-v1");
+  out.mysql = pick("mm-mysql-marks-v1");
+  out.old = pick("mm-marks-v1");
+  const n = Object.keys(out.graph).length + Object.keys(out.detail).length + Object.keys(out.mysql).length;
+  const blob = new Blob([JSON.stringify(out, null, 1)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "marks-all.json";
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 900);
+  const box = $("hint");
+  if (box) box.textContent = "已导出全部标记：" + n + " 条（marks-all.json 已下载）";
+  return n;
+}
 function updateStats(){
   const c = [0, 0, 0, 0];
   let nDet = 0, nCon = 0, nMy = 0;
@@ -1521,6 +1542,7 @@ window.addEventListener("resize", () => { clearTimeout(window._t); window._t = s
   }
   const q = new URLSearchParams(location.search);
   /* 净图模式：隐藏所有界面元素，导海报用 */
+  if (q.get("dump") === "1"){ setTimeout(dumpAllMarks, 700); }
   if (q.get("clean") === "1"){
     document.querySelector(".topbar").style.display = "none";
     ["hint", "legend", "themes", "themecard", "btn-back"].forEach(id => {
