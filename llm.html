@@ -281,6 +281,7 @@ function loadAuthorMarks(){
 try { state.marks = JSON.parse(localStorage.getItem(LS_KEY) || "{}") || {}; }
 catch (e) { state.marks = {}; }
 function saveMarks(){ try { localStorage.setItem(LS_KEY, JSON.stringify(state.marks)); } catch(e){} }
+let selPath = null;
 function markOf(n){ return state.marks[n._path] || 0; }
 function cycleMark(n){
   const next = (markOf(n) + 1) % 4;
@@ -290,6 +291,38 @@ function cycleMark(n){
   render(true);        // true = 保持当前缩放/平移，不重新适配
   updateStats();
 }
+function findNodeByPath(n, p){
+  if (n._path === p) return n;
+  const cs = n.c || [];
+  for (let i = 0; i < cs.length; i++){
+    const r = findNodeByPath(cs[i], p);
+    if (r) return r;
+  }
+  return null;
+}
+function setMarkByKey(lv){
+  if (!selPath) return false;
+  const node = findNodeByPath(DATA, selPath);
+  if (!node) return false;
+  if (node.c && node.c.length) return false;   // 只有叶子节点可标记
+  if (state.marks[selPath] === lv) delete state.marks[selPath];
+  else state.marks[selPath] = lv;
+  saveMarks();
+  render(true);
+  updateStats();
+  return true;
+}
+document.addEventListener("keydown", function(e){
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const tag = (e.target && e.target.tagName || "").toLowerCase();
+  if (tag === "input" || tag === "textarea") return;
+  const k = (e.key || "").toLowerCase();
+  const map = { a: 1, s: 2, d: 3 };
+  if (!(k in map)) return;
+  if (!selPath) return;
+  e.preventDefault();
+  setMarkByKey(map[k]);
+});
 function updateStats(){
   const c = [0,0,0,0];
   const walk = (n) => { if (!(n.c && n.c.length)) c[markOf(n)]++; (n.c||[]).forEach(walk); };
@@ -429,7 +462,7 @@ function render(keepView){
   const gN = el("g", {});
   nodes.forEach(n => {
     const lv = n._level;
-    const g = el("g", { class:"node" });
+    const g = el("g", { class:"node", "data-p": n._path || "" });
     const isRoot = lv === 0;
     const isLeaf = !(n.c && n.c.length);
     const mk = (!isRoot && isLeaf) ? markOf(n) : 0;
@@ -445,6 +478,11 @@ function render(keepView){
       "stroke-opacity": mk ? 1 : (lv >= 3 ? .35 : 1)
     });
     if (lv === 2 && !mk) rect.setAttribute("stroke-opacity", ".55");
+    if (!isRoot && isLeaf && n._path && n._path === selPath){
+      rect.setAttribute("stroke", "#2563eb");
+      rect.setAttribute("stroke-width", "2.6");
+      rect.setAttribute("stroke-opacity", "1");
+    }
     g.appendChild(rect);
 
     const fs = FS[lv], lh = fs*1.4;
@@ -510,6 +548,7 @@ function render(keepView){
     const title = el("title", {}); title.textContent = n.t; g.appendChild(title);
     g.addEventListener("click", ev => {
       ev.stopPropagation();
+      selPath = (!isRoot && isLeaf && n._path) ? n._path : null;
       if (n.c && n.c.length){
         if (state.collapsed.has(n)) state.collapsed.delete(n); else state.collapsed.add(n);
         renderKeepNode(n);
