@@ -310,7 +310,8 @@ BODY = r"""
       <a class="on" id="tab-graph">知识图谱</a>
       <a id="tab-mysql">MySQL</a>
       <a href="https://castoricelover777.github.io/blog/" target="_blank" rel="noopener">博客源码</a>
-    </div>
+    
+      <a href="llm.html" style="margin-left:6px">数据分析</a></div>
     <div class="chips" id="chips"></div>
     <div class="stats" id="stats"></div>
     <button id="btn-fit">适应窗口</button>
