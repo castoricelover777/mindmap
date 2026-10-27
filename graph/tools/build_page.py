@@ -525,8 +525,9 @@ function dumpAllMarks(){
   out.graph = pick("mm-graph-marks-v1");
   out.detail = pick("mm-detail-marks-v1");
   out.mysql = pick("mm-mysql-marks-v1");
+  out.llm = pick("mm-marks-llm-v1");
   out.old = pick("mm-marks-v1");
-  const n = Object.keys(out.graph).length + Object.keys(out.detail).length + Object.keys(out.mysql).length;
+  const n = Object.keys(out.graph).length + Object.keys(out.detail).length + Object.keys(out.mysql).length + Object.keys(out.llm).length;
   const blob = new Blob([JSON.stringify(out, null, 1)], { type: "application/json" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
