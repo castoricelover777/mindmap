@@ -1909,7 +1909,7 @@ const SRC_LAYER_COLOR = {
 const SRC_ICON = { controller: "▣", service: "◈", mapper: "◉", pojo: "◆",
                    exception: "⚠", config: "⚙", utils: "✎", shared: "❖", dao: "◉" };
 
-const SRCV = { sid: null, active: false, expanded: new Set(), key: null, drawer: false };
+const SRCV = { sid: null, active: false, expanded: new Set(), key: null, drawer: false, savedView: null };
 
 const S_LAYER_W = 212, S_LAYER_H = 46, S_GAP_CL = 96;
 const S_CLASS_W = 250, S_CLASS_H = 36, S_GAP_LC = 70, S_CLASS_GAP = 7, S_LAYER_GAP = 12;
@@ -2083,7 +2083,7 @@ function srcPaint(){
       ev.stopPropagation();
       if (SRCV.expanded.has(def.id)) SRCV.expanded.delete(def.id);
       else SRCV.expanded.add(def.id);
-      srcPaint(); srcFit();
+      srcPaint();
     });
     g.appendChild(gs);
   });
@@ -2116,12 +2116,12 @@ function srcPaint(){
   });
 
   scene.appendChild(g);
-  // 树整体在左，把画布内容右移/缩放，保证「源码树 + 网图」同时可见
-  srcFit();
+  // 注意：这里不自动适配 —— 点击层框/文件框不应该让整个画布跳位置
 }
 
-/* 适配：只按「源码树」定位与缩放；右侧网图保持原比例（允许超出屏幕，可拖动/缩放） */
-function srcFit(){
+/* 适配：只在打开源码树时调用一次（reserve=true 预留左侧抽屉宽度）。
+   之后点层框 / 点文件框 / 开关抽屉都不再改动画布位置。 */
+function srcFit(reserve){
   if (!SRCV.active) return;
   const layer = document.getElementById("srcLayer");
   if (!layer) return;
@@ -2131,18 +2131,16 @@ function srcFit(){
   const svgW = svg.clientWidth, svgH = svg.clientHeight;
   const bar = document.querySelector(".topbar");
   const padTop = (bar ? bar.offsetHeight : 58) + 18, padBottom = 56;
-  const drawerW = SRCV.drawer ? Math.min(560, Math.round(svgW * 0.44)) : 0;
+  const drawerW = reserve ? Math.min(560, Math.round(svgW * 0.44))
+                : (SRCV.drawer ? Math.min(560, Math.round(svgW * 0.44)) : 0);
   const x0 = drawerW + 26, x1 = svgW - 26;
   const availW = Math.max(220, x1 - x0);
   const availH = Math.max(200, svgH - padTop - padBottom);
 
-  // 树自己放得下就行：够大就保持当前比例，放不下才缩
-  const fitS = Math.min(availW / b.width, availH / b.height, 1.15);
-  // 树优先可读：至少 0.78，最多撑到 fitS（网图留在右侧，超出部分可拖动/缩放查看）
-  state.scale = Math.min(fitS, Math.max(state.scale, Math.min(0.78, fitS)));
-
-  state.tx = Math.round(x0 - b.x * state.scale);
-  state.ty = Math.round(padTop + (availH - b.height * state.scale) / 2 - b.y * state.scale);
+  // 保持用户当前的缩放比例，只平移，把源码树露在可视区左侧
+  const s = state.scale;
+  state.tx = Math.round(x0 - b.x * s);
+  state.ty = Math.round(padTop + (availH - b.height * s) / 2 - b.y * s);
   applyZoom();
 }
 
@@ -2151,6 +2149,7 @@ function openSrcTree(sid){
   const sc = SRC.scenes[sid];
   if (!sc){ alert("这个场景还没有关联源码。"); return; }
   SRCV.sid = sid; SRCV.active = true; SRCV.key = null;
+  SRCV.savedView = { s: state.scale, x: state.tx, y: state.ty };   // 关闭时还原
   SRCV.expanded = new Set();
   sc.layers.slice(0, 2).forEach(l => SRCV.expanded.add(l.id));
   armedScenario = sid; netSel = null; curScenario = null;
@@ -2159,18 +2158,23 @@ function openSrcTree(sid){
   $("srcBar").classList.add("show");
   $("srcWho").textContent = (scById[sid] || {}).label || sid;
   srcPaint();
+  srcFit(true);      // 只在这里定位一次，预留左侧抽屉宽度
 }
 window.openSrcTree = openSrcTree;
 window.openSrc = openSrcTree;
 
 function closeSrcTree(){
   SRCV.active = false; SRCV.key = null; SRCV.sid = null;
+  armedScenario = null; netSel = null; setChip(null);   // 清掉残留，避免下次点卡片直接跳长链
   closeSrcDrawer();
   const layer = document.getElementById("srcLayer");
   if (layer) layer.remove();
   $("srcBar").classList.remove("show");
-  // 恢复网图视角
-  renderNet(false);
+  // 恢复网图并还原打开前的视角（缩放/平移都回到原样）
+  const v = SRCV.savedView;
+  SRCV.savedView = null;
+  renderNet(true);
+  if (v){ state.scale = v.s; state.tx = v.x; state.ty = v.y; applyZoom(); }
 }
 
 function srcFirstKey(){
@@ -2217,15 +2221,13 @@ function openSrcDrawer(key){
   $("srcGut").textContent = gut;
   $("srcPre").innerHTML = body;
   $("srcDrawer").classList.add("show");
-  const wasOpen = SRCV.drawer;
   SRCV.drawer = true;
-  if (!wasOpen) srcFit();
 }
 
 function closeSrcDrawer(){
   if (!$("srcDrawer").classList.contains("show")) return;
   $("srcDrawer").classList.remove("show");
-  if (SRCV.drawer){ SRCV.drawer = false; srcFit(); }
+  SRCV.drawer = false;
 }
 
 function srcStep(d){
@@ -2273,16 +2275,6 @@ document.addEventListener("click", ev => {
   if (ev.target.closest("#scene g[data-key]")) return; // 点另一个文件：直接切换
   closeSrcDrawer();
 }, true);
-
-/* 点画布空白处 → 收起源码树 */
-svg.addEventListener("click", ev => {
-  if (!SRCV.active) return;
-  const t = ev.target;
-  const onNode = t.closest && (t.closest("#srcLayer .snode") || t.closest("g[data-sc]") || t.closest("g.is-active"));
-  if (onNode) return;
-  if (SRCV.drawer){ closeSrcDrawer(); return; }
-  closeSrcTree();
-});
 
 document.addEventListener("keydown", ev => {
   if (ev.key === "Escape"){
