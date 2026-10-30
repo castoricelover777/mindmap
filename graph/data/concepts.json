@@ -945,6 +945,33 @@
    "gloss": "图表由前端组件画，服务端只提供类目数组与对应的数值数组",
    "learned": null,
    "ep": null
+  },
+  {
+   "id": "c.clazz.status",
+   "label": "班级状态推导",
+   "aka": "未开班 / 在读中 / 已结课",
+   "layer": "framework",
+   "gloss": "状态不存库，按当前时间与开课、结课日期现算，避免定时任务刷新",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.exception.custom",
+   "label": "自定义业务异常",
+   "aka": "BusinessException",
+   "layer": "framework",
+   "gloss": "业务规则不满足时抛自定义异常，由全局处理器转成可读提示而不是 500",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.sql.increment",
+   "label": "字段自增更新",
+   "aka": "set x = x + 1",
+   "layer": "persistence",
+   "gloss": "计数、扣分这类累加交给数据库算，避免「先查后改」的并发覆盖",
+   "learned": null,
+   "ep": null
   }
  ]
 }

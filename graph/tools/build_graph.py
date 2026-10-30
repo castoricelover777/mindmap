@@ -95,7 +95,18 @@ def main():
         "details": st["details"],
     } for i, st in enumerate(emp["steps"])]
 
-    scenarios = [reg, dept, emp, ref]
+    # ---- 班级与学员管理场景（课件 11 + 接口文档）----
+    clz = rd("scenario-clazz.json")
+    clz["steps"] = [{
+        "id": "st.clazz.%d" % i,
+        "label": st["label"],
+        "phase": st["phase"],
+        "color": clz["phases"][st["phase"]]["color"],
+        "concepts": st["concepts"],
+        "details": st["details"],
+    } for i, st in enumerate(clz["steps"])]
+
+    scenarios = [reg, dept, emp, clz, ref]
 
     # 链视图的「传递物」标签与回流文案：每个场景各不相同，不能写死
     reg["flow"] = ["JSON 字符串", "HTTP 请求报文", "User 对象", "insert(user)", "受影响行数 int"]

@@ -156,8 +156,9 @@ REGISTER_MAP = {
 # 部门管理场景搬到 content_dept.py 里单独维护（18 个环节，与课件 07 原文对齐）
 from content_dept import DEPT, REF_MAP
 from content_emp import EMP, EXTRA_CONCEPTS
+from content_clazz import CLAZZ, EXTRA_CONCEPTS_CLAZZ
 
-C = C + EXTRA_CONCEPTS   # 员工管理带来的 20 个新知识点（均未学）
+C = C + EXTRA_CONCEPTS + EXTRA_CONCEPTS_CLAZZ   # 员工(09/10)与班级(11)带来的新知识点
 
 
 # ---------------------------------------------------------------- 概念之间的关系边
@@ -251,6 +252,10 @@ def main():
         for cid in st["concepts"]:
             if cid not in known:
                 bad.append(("emp", st["label"][:12], cid))
+    for st in CLAZZ["steps"]:
+        for cid in st["concepts"]:
+            if cid not in known:
+                bad.append(("clazz", st["label"][:12], cid))
     for t in THEMES:
         for cid in t["members"]:
             if cid not in known:
@@ -276,6 +281,8 @@ def main():
               ensure_ascii=False, indent=1)
     json.dump(EMP, io.open(os.path.join(OUT, "scenario-emp.json"), "w", encoding="utf-8"),
               ensure_ascii=False, indent=1)
+    json.dump(CLAZZ, io.open(os.path.join(OUT, "scenario-clazz.json"), "w", encoding="utf-8"),
+              ensure_ascii=False, indent=1)
     json.dump(THEMES, io.open(os.path.join(OUT, "themes.json"), "w", encoding="utf-8"),
               ensure_ascii=False, indent=1)
     json.dump(REGISTER_MAP, io.open(os.path.join(OUT, "map-register.json"), "w", encoding="utf-8"),
@@ -288,6 +295,7 @@ def main():
 
     print("概念 %d 个，层 %d 个，关系边 %d 条" % (len(concepts), len(LAYERS), len(EDGES)))
     print("部门场景 %d 步 / %d 条细节" % (len(DEPT["steps"]), sum(len(s["details"]) for s in DEPT["steps"])))
+    print("班级场景 %d 步 / %d 条细节" % (len(CLAZZ["steps"]), sum(len(s["details"]) for s in CLAZZ["steps"])))
     print("母题 %d 条" % len(THEMES))
     from collections import Counter
     print("层分布:", dict(Counter(c["layer"] for c in concepts)))
