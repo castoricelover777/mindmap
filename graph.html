@@ -378,6 +378,9 @@
     <div class="chips" id="chips"></div>
     <div class="stats" id="stats"></div>
     <button id="btn-src">源码</button>
+    <button id="btn-mk-export" title="导出全部标记为 JSON（换电脑/换浏览器可用它恢复）">导出标记</button>
+    <button id="btn-mk-import" title="从 JSON 恢复标记（支持本页导出文件与 ?dump=1 的汇总文件）">导入标记</button>
+    <input type="file" id="mk-file" accept=".json,application/json" style="display:none">
     <button id="btn-fit">适应窗口</button>
     <div class="zoom">
       <button id="btn-out">−</button><span class="val" id="zoomval">100%</span><button id="btn-in">+</button>
@@ -521,6 +524,9 @@ const MARK_TINTS  = ["#ffffff", "#FEF2F2", "#FFFBEB", "#F0FDF4"];
 const MARK_NAMES  = ["未标记", "不会", "仅了解", "理解"];
 const LS_KEY = "mm-graph-marks-v1";
 const LS_OLD = "mm-marks-v1";
+const LS_MIG = "mm-graph-migrated-v1";     // 迁移只做一次的标记
+const LS_SEED = "mm-graph-seeded-v1";      // 内置快照播种只做一次
+const SEED_MARKS = {"st.register.1.0.0":3,"st.register.1.0.1":3,"st.register.1.0.4":3,"st.register.1.0.2":2,"st.register.1.0.3":2,"st.register.1.1.0":3,"st.register.1.1.1":3,"st.register.1.1.2":3,"st.register.1.1.3":3,"st.register.1.1.4":2,"st.register.1.1.5":2,"st.register.1.2.0":2,"st.register.1.2.1":3,"st.register.1.2.2":1,"st.register.1.2.3":1,"st.register.1.3.0":3,"st.register.1.3.3":1,"st.register.1.3.1":3,"st.register.1.3.2":2,"st.register.1.3.4":2,"st.register.1.3.5":1,"st.register.1.4.0":3,"st.register.1.4.1":3,"st.register.1.4.2":2,"st.register.1.4.3":2,"st.register.1.5.0":3,"st.register.1.5.2":2,"st.register.1.5.3":2,"st.register.1.5.6":2,"st.register.1.5.5":2,"st.register.1.5.4":1,"st.register.1.5.1":3,"st.register.1.6.0":3,"st.register.1.6.5":2,"st.register.1.6.4":2,"st.register.1.6.3":3,"st.register.1.6.1":2,"st.register.1.6.2":3,"st.register.1.7.0":3,"st.register.1.7.1":2,"st.register.1.7.2":3,"st.register.1.7.3":3,"st.register.1.7.4":3,"st.register.1.7.5":1,"st.register.2.0.0":2,"st.register.2.0.1":1,"st.register.2.0.2":1,"st.register.2.0.3":1,"st.register.2.1.0":3,"st.register.2.1.1":2,"st.register.2.1.2":2,"st.register.2.1.3":2,"st.register.2.1.4":3,"st.register.2.1.5":2,"st.register.2.1.6":2,"st.register.2.1.7":2,"st.register.2.1.8":2,"st.register.2.1.9":2,"st.register.2.1.10":2,"st.register.2.1.11":3,"st.register.2.1.12":2,"st.register.2.2.0":3,"st.register.2.2.1":3,"st.register.2.2.2":3,"st.register.2.2.3":2,"st.register.2.2.4":3,"st.register.2.2.5":1,"st.register.2.2.6":3,"st.register.2.2.8":2,"st.register.2.2.7":3,"st.register.2.3.1":2,"st.register.2.3.0":2,"st.register.2.3.2":3,"st.register.2.3.3":2,"st.register.2.3.4":2,"st.register.2.3.6":1,"st.register.2.3.5":2,"st.register.2.4.0":1,"st.register.2.4.1":1,"st.register.2.4.2":1,"st.register.2.4.3":1,"st.register.2.4.4":1,"st.register.3.0.0":3,"st.register.3.0.1":3,"st.register.3.0.2":2,"st.register.3.0.3":2,"st.register.3.0.4":2,"st.register.3.0.5":3,"st.register.3.1.0":2,"st.register.3.1.1":1,"st.register.3.1.2":1,"st.register.3.1.3":1,"st.register.3.1.4":1,"st.register.3.2.0":2,"st.register.3.2.1":2,"st.register.3.2.2":2,"st.register.3.3.2":2,"st.register.3.3.1":2,"st.register.3.3.0":2,"st.register.3.3.3":2,"st.register.3.4.0":2,"st.register.3.4.1":2,"st.register.3.4.2":2,"st.register.3.4.3":2,"st.register.3.5.0":3,"st.register.3.5.1":3,"st.register.3.5.2":3,"st.register.3.5.3":3,"st.register.3.5.4":2,"st.register.3.6.0":3,"st.register.3.6.1":3,"st.register.3.6.3":2,"st.register.3.6.2":3,"st.register.3.7.0":3,"st.register.3.7.1":3,"st.register.3.7.2":3,"st.register.3.7.4":2,"st.register.3.7.3":1,"st.register.3.7.5":3,"st.register.3.7.6":2,"st.register.3.7.9":1,"st.register.3.7.8":2,"st.register.3.7.7":1,"st.register.3.8.0":3,"st.register.3.8.1":3,"st.register.3.8.2":3,"st.register.4.0.0":3,"st.register.4.0.1":3,"st.register.4.0.2":2,"st.register.4.0.3":2,"st.register.4.1.0":3,"st.register.4.1.1":3,"st.register.4.1.2":3,"st.register.4.1.3":3,"st.register.4.2.0":2,"st.register.4.2.1":1,"st.register.4.2.2":3,"st.register.4.2.3":3,"st.register.4.2.4":3,"st.register.4.2.5":3,"st.register.4.2.6":2,"st.register.4.2.7":2,"st.register.4.3.1":2,"st.register.4.3.0":2,"st.register.4.4.0":2,"st.register.4.4.1":2,"st.register.4.4.2":3,"st.register.4.4.3":1,"st.register.4.4.4":1,"st.register.4.4.5":1,"st.register.4.4.6":1,"st.register.4.4.7":1,"st.register.4.5.0":3,"st.register.4.5.1":3,"st.register.5.0.0":2,"st.register.5.0.1":2,"st.register.5.0.2":1,"st.register.5.1.0":2,"st.register.5.1.1":1,"st.register.5.1.3":2,"st.register.5.1.2":2,"st.register.5.2.0":3,"st.register.5.2.1":3,"st.register.5.2.2":2,"st.register.5.2.3":2,"st.register.5.3.0":3,"st.register.5.3.1":3,"st.register.5.3.2":3,"st.register.5.3.3":3,"st.register.5.3.4":3,"st.register.5.3.5":3,"st.register.5.3.6":3,"st.register.5.4.0":2,"st.register.5.4.1":2,"st.register.5.4.2":2,"st.register.5.4.3":2,"st.register.5.4.4":2,"st.register.5.5.0":3,"st.register.5.5.1":3,"st.register.5.5.2":1,"st.register.5.5.4":2,"st.register.5.5.3":1,"st.register.5.6.0":3,"st.register.5.6.1":2,"st.register.5.6.3":1,"st.register.5.6.4":2,"st.register.5.6.2":1,"st.register.6.0.1":1,"st.register.6.0.0":3,"st.register.6.1.0":2,"st.register.6.1.1":2,"st.register.6.1.2":2,"st.register.6.1.3":2,"st.register.6.1.4":2,"st.register.6.2.0":2,"st.register.6.2.2":1,"st.register.6.2.1":3,"st.register.6.3.0":2,"st.register.6.3.1":3,"st.register.6.3.2":2,"st.register.6.3.3":2,"st.register.6.3.4":2,"st.register.6.3.5":2,"st.register.6.3.6":3,"st.register.6.3.7":2,"st.register.6.4.0":3,"st.register.6.4.1":2,"st.register.6.4.2":3,"st.register.6.4.3":1,"st.register.6.4.4":3,"st.register.6.4.5":2,"st.register.6.4.6":2,"st.register.6.4.7":1,"st.register.6.4.8":2,"st.register.6.5.0":1,"st.register.6.5.1":1,"st.register.6.5.2":1,"st.register.6.6.1":1,"st.register.6.6.0":1,"st.register.6.7.0":3,"st.register.6.7.2":1,"st.register.6.7.3":1,"st.register.6.7.1":1,"st.register.6.8.4":1,"st.register.6.8.0":1,"st.register.6.8.1":1,"st.register.6.8.2":2,"st.register.6.8.3":2,"st.dept.0.0":3,"st.dept.0.1":2,"st.dept.0.2":2,"st.dept.0.3":3,"st.dept.0.4":1,"st.dept.0.5":3,"st.dept.0.6":3,"st.dept.0.7":3,"st.dept.0.8":3,"st.dept.0.9":2,"st.dept.0.10":2,"st.dept.0.11":2,"st.dept.0.12":2,"st.dept.0.13":3,"st.dept.0.14":3,"st.dept.1.0":3,"st.dept.1.1":3,"st.dept.1.2":3,"st.dept.1.3":3,"st.dept.1.4":3,"st.dept.1.5":3,"st.dept.1.6":3,"st.dept.1.7":3,"st.dept.1.8":3,"st.dept.1.9":3,"st.dept.1.10":3,"st.dept.2.0":3,"st.dept.2.1":3,"st.dept.2.2":3,"st.dept.2.4":3,"st.dept.2.3":3,"st.dept.2.5":3,"st.dept.2.6":3,"st.dept.2.7":3,"st.dept.3.0":3,"st.dept.3.1":3,"st.dept.3.2":2,"st.dept.3.3":2,"st.dept.3.4":3,"st.dept.3.5":2,"st.dept.3.7":3,"st.dept.3.6":3,"st.dept.3.9":3,"st.dept.3.10":3,"st.dept.3.8":3,"st.dept.4.0":3,"st.dept.4.1":3,"st.dept.4.2":3,"st.dept.4.3":3,"st.dept.4.4":3,"st.dept.4.5":3,"st.dept.4.6":3,"st.dept.4.7":3,"st.dept.4.8":3,"st.dept.4.9":3,"st.dept.4.10":3,"st.dept.5.0":3,"st.dept.5.1":3,"st.dept.5.2":3,"st.dept.5.3":3,"st.dept.5.4":3,"st.dept.5.5":3,"st.dept.6.0":3,"st.dept.6.1":3,"st.dept.6.2":3,"st.dept.6.3":3,"st.dept.6.5":2,"st.dept.6.4":2,"st.dept.6.6":3,"st.dept.6.7":3,"st.dept.6.8":3,"st.dept.6.9":3,"st.dept.6.10":3,"st.dept.8.0":3,"st.dept.8.1":3,"st.dept.8.2":3,"st.dept.8.5":3,"st.dept.8.4":3,"st.dept.8.3":3,"st.dept.9.0":2,"st.dept.9.1":2,"st.dept.9.2":2,"st.dept.9.3":2,"st.dept.9.4":2,"st.dept.9.5":3,"st.dept.9.6":3,"st.dept.9.7":3,"st.dept.9.8":3,"st.dept.10.0":3,"st.dept.10.1":3,"st.dept.10.2":3,"st.dept.10.4":3,"st.dept.10.5":3,"st.dept.10.6":3,"st.dept.11.0":3,"st.dept.11.1":3,"st.dept.11.2":3,"st.dept.11.3":3,"st.dept.11.4":3,"st.dept.11.5":3,"st.dept.11.7":3,"st.dept.11.8":3,"st.dept.12.0":3,"st.dept.12.1":3,"st.dept.12.2":3,"st.dept.12.3":3,"st.dept.12.4":3,"st.dept.12.5":3,"st.dept.12.6":3,"st.dept.14.0":3,"st.dept.14.1":3,"st.dept.14.2":3,"st.dept.14.3":3,"st.dept.14.4":3,"st.dept.14.5":3,"st.dept.14.6":3,"st.dept.15.0":3,"st.dept.15.1":3,"st.dept.15.2":3,"st.dept.15.3":3,"st.dept.15.5":3,"st.dept.15.4":3,"st.dept.13.0":2,"st.dept.13.1":2,"st.dept.13.2":2,"st.dept.13.3":2,"st.dept.13.4":2,"st.dept.13.5":2,"st.dept.13.6":2,"st.dept.13.7":2,"st.dept.13.8":2,"st.dept.16.0":3,"st.dept.16.1":3,"st.dept.16.2":3,"st.dept.16.3":3,"st.dept.16.4":3,"st.dept.16.5":2,"st.dept.16.6":3,"st.dept.16.7":2,"st.dept.16.8":3,"st.dept.16.10":3,"st.dept.16.9":3,"st.dept.17.0":3,"st.dept.17.1":3,"st.dept.17.2":3,"st.dept.17.3":3,"st.dept.17.4":3,"st.dept.17.5":2,"st.dept.17.6":2,"st.dept.18.0":3,"st.dept.18.1":3,"st.dept.18.2":3,"st.dept.18.3":3,"st.dept.18.4":2,"st.dept.18.5":2,"st.dept.7.5":2,"st.dept.7.6":2,"st.dept.7.7":2,"st.dept.7.8":2,"st.dept.7.9":2,"st.dept.7.0":2,"st.dept.7.1":2,"st.dept.7.2":2,"st.dept.7.3":2,"st.dept.7.4":2,"st.dept.7.10":2,"st.dept.7.11":2,"st.dept.7.12":2,"st.dept.10.3":2,"st.dept.11.6":2,"st.dept.18.6":2,"st.emp.0.0":3,"st.emp.0.1":3,"st.emp.0.2":3,"st.emp.0.3":3,"st.emp.0.4":3,"st.emp.0.5":3,"st.emp.0.6":3,"st.emp.0.7":3,"st.emp.0.8":3,"st.emp.0.9":3,"st.emp.0.10":3,"st.emp.0.11":3,"st.emp.1.0":3,"st.emp.1.1":3,"st.emp.1.2":3,"st.emp.1.3":3,"st.emp.1.4":3,"st.emp.1.5":3,"st.emp.1.6":3,"st.emp.1.7":3,"st.emp.1.8":3,"st.emp.1.9":2,"st.emp.2.0":3,"st.emp.2.1":3,"st.emp.2.2":3,"st.emp.2.3":2,"st.emp.2.4":3,"st.emp.2.5":3,"st.emp.2.6":2,"st.emp.2.7":2,"st.emp.2.9":2,"st.emp.2.8":3,"st.emp.3.0":3,"st.emp.3.1":3,"st.emp.3.2":3,"st.emp.3.3":3,"st.emp.3.4":3,"st.emp.3.5":3,"st.emp.4.0":3,"st.emp.4.1":3,"st.emp.4.3":3,"st.emp.4.2":3,"st.emp.4.4":3,"st.emp.4.5":3,"st.emp.4.6":3,"st.emp.5.0":3,"st.emp.5.1":3,"st.emp.5.2":2,"st.emp.5.3":2,"st.emp.5.4":3,"st.emp.5.5":2,"st.emp.5.6":3,"st.emp.6.0":3,"st.emp.6.1":3,"st.emp.6.4":2,"st.emp.6.7":3,"st.emp.7.0":3,"st.emp.7.1":3,"st.emp.7.2":3,"st.emp.7.4":2,"st.emp.7.3":3,"st.emp.8.1":3,"st.emp.8.2":3,"st.emp.8.0":3,"st.emp.8.3":3,"st.emp.8.4":3,"st.emp.9.0":3,"st.emp.9.1":3,"st.emp.9.2":3,"st.emp.9.3":3,"st.emp.9.5":3,"st.emp.9.4":3,"st.emp.10.0":3,"st.emp.10.2":3,"st.emp.10.1":3,"st.emp.10.3":3,"st.emp.10.4":3,"st.emp.10.5":3,"st.emp.11.0":2,"st.emp.11.2":2,"st.emp.11.3":2,"st.emp.11.4":2,"st.emp.11.5":2,"st.emp.11.1":3,"st.emp.12.0":2,"st.emp.12.1":2,"st.emp.12.2":3,"st.emp.12.3":3,"st.emp.12.5":3,"st.emp.12.4":3,"st.emp.13.0":2,"st.emp.13.2":2,"st.emp.14.0":2,"st.emp.14.1":2,"st.emp.13.3":1,"st.emp.13.1":2,"st.emp.13.4":1,"st.emp.13.5":1,"st.emp.14.2":2,"st.emp.14.3":2,"st.emp.14.5":2,"st.emp.14.4":2,"st.emp.6.2":2,"st.emp.6.3":2,"st.emp.6.5":2,"st.emp.6.6":2};               // marks.json 里的内置标记快照
 let marks = {};
 try { marks = JSON.parse(localStorage.getItem(LS_KEY) || "{}") || {}; } catch(e){ marks = {}; }
 function saveMarks(){ try { localStorage.setItem(LS_KEY, JSON.stringify(marks)); } catch(e){} }
@@ -532,9 +538,15 @@ function markCyclePath(p){
 }
 /* 旧标记迁移：老的 r-阶段-环节-细节 路径 → 新的语义 id */
 function migrateOldMarks(){
+  /* 只做一次，而且只补「当前还没有标记」的位置：
+     绝不再用旧快照覆盖你后来改过的标记（旧版每次加载都会覆盖，会吃掉新标记） */
+  try { if (localStorage.getItem(LS_MIG) === "1") return 0; } catch(e){}
   let old = null;
   try { old = JSON.parse(localStorage.getItem(LS_OLD) || "null"); } catch(e){}
-  if (!old || typeof old !== "object") return 0;
+  if (!old || typeof old !== "object"){
+    try { localStorage.setItem(LS_MIG, "1"); } catch(e){}
+    return 0;
+  }
   const byPath = {};
   G.scenarios.forEach(sc => sc.steps.forEach(st => { if (st.path) byPath[st.path] = st; }));
   let n = 0;
@@ -544,17 +556,38 @@ function migrateOldMarks(){
     let m = k.match(/^r-(\d+)-(\d+)-(\d+)$/);
     if (m){
       const st = byPath["r-" + m[1] + "-" + m[2]];
-      if (st){ marks[st.id + "." + m[3]] = v; n++; }
+      if (st){
+        const id = st.id + "." + m[3];
+        if (!marks[id]){ marks[id] = v; n++; }     // 已有就保留
+      }
       return;
     }
     m = k.match(/^r-(\d+)-(\d+)$/);
     if (m){
       const st = byPath["r-" + m[1] + "-" + m[2]];
-      if (st){ marks[st.id] = v; n++; }
+      if (st && !marks[st.id]){ marks[st.id] = v; n++; }
     }
   });
+  try { localStorage.setItem(LS_MIG, "1"); } catch(e){}
   if (n) saveMarks();
   return n;
+}
+
+/* 内置快照播种：只在「本地一条标记都没有」且没播种过时做一次，
+   这样换浏览器 / 清缓存后标记能自动回来；你手动清空过就不再强行灌入。 */
+function seedMarks(){
+  try {
+    if (localStorage.getItem(LS_SEED) === "1") return 0;
+    if (Object.keys(marks).length){ localStorage.setItem(LS_SEED, "1"); return 0; }
+    let n = 0;
+    Object.keys(SEED_MARKS || {}).forEach(k => {
+      const v = SEED_MARKS[k];
+      if (!marks[k] && v >= 1 && v <= 3){ marks[k] = v; n++; }
+    });
+    if (n) saveMarks();
+    localStorage.setItem(LS_SEED, "1");
+    return n;
+  } catch(e){ return 0; }
 }
 
 /* ================= 统计 ================= */
@@ -1870,14 +1903,98 @@ window.addEventListener("mouseup", () => { drag = false; svg.classList.remove("d
 svg.addEventListener("click", () => { /* 点空白：保留，便于后续取消选中 */ });
 window.addEventListener("resize", () => { clearTimeout(window._t); window._t = setTimeout(() => redraw(false), 150); });
 
+
+/* ================= 标记导出 / 导入（图谱这一套） ================= */
+function markValidIds(){
+  const s = new Set();
+  G.scenarios.forEach(sc => sc.steps.forEach(st => {
+    s.add(st.id);
+    (st.details || []).forEach((_, k) => s.add(st.id + "." + k));
+  }));
+  return s;
+}
+function exportGraphMarks(){
+  const out = { app: "mindmap-graph", version: 1,
+                exportedAt: new Date().toISOString().slice(0, 19),
+                total: Object.keys(marks).length, marks: marks };
+  const d = new Date();
+  const ymd = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0")
+            + "-" + String(d.getDate()).padStart(2, "0");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(out, null, 1)], { type: "application/json" }));
+  a.download = "graph-marks-" + ymd + ".json";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+function importGraphMarks(obj){
+  let src = null;
+  if (obj && typeof obj === "object"){
+    if (obj.marks && typeof obj.marks === "object") src = obj.marks;        // marks.json / 本页导出
+    else if (obj.graph && typeof obj.graph === "object") src = obj.graph;   // ?dump=1 汇总
+    else if (obj.detail && typeof obj.detail === "object") src = obj.detail;
+    else src = obj;                                                        // 纯 map
+  }
+  if (!src) return "文件里没有可识别的标记数据";
+  const valid = markValidIds();
+  // id 层级因场景而异（注册是 st.register.阶段.环节.细节，其他是 st.emp.环节.细节），
+  // 所以只做前缀与取值校验，是否属于当前图谱交给 valid 集合判断
+  const keys = Object.keys(src).filter(k =>
+    k.indexOf("st.") === 0 && src[k] >= 1 && src[k] <= 3);
+  const good = keys.filter(k => valid.has(k));
+  const bad = keys.filter(k => !valid.has(k));
+  if (!good.length) return "没有匹配到当前图谱的标记（文件中 " + keys.length + " 条都无法对应）";
+  const who = (obj.app || obj.type || "标记文件");
+  const overwrite = confirm(
+    "来源：" + who + "\n" +
+    "有效标记 " + good.length + " 条" + (bad.length ? "（另有 " + bad.length + " 条不在当前图谱，将跳过）" : "") + "\n\n" +
+    "确定 = 覆盖合并（文件里的值优先）\n" +
+    "取消 = 只补空缺（你现有的标记一律不动）");
+  // 覆盖前先备份当前状态，万一导错还能救回来
+  try { localStorage.setItem("mm-graph-marks-backup-v1", JSON.stringify(marks)); } catch(e){}
+  let n = 0;
+  good.forEach(k => {
+    if (!overwrite && marks[k]) return;
+    marks[k] = src[k]; n++;
+  });
+  saveMarks(); redraw(true); updateStats();
+  return "导入 " + n + " 条" + (bad.length ? "，跳过 " + bad.length + " 条" : "") +
+         "；当前共 " + Object.keys(marks).length + " 条";
+}
+(function(){
+  const be = document.getElementById("btn-mk-export");
+  const bi = document.getElementById("btn-mk-import");
+  const fi = document.getElementById("mk-file");
+  if (be) be.onclick = exportGraphMarks;
+  if (bi && fi){
+    bi.onclick = () => fi.click();
+    fi.addEventListener("change", ev => {
+      const f = ev.target.files && ev.target.files[0];
+      if (!f) return;
+      const fr = new FileReader();
+      fr.onload = () => {
+        let msg;
+        try { msg = importGraphMarks(JSON.parse(fr.result)); }
+        catch (e) { msg = "解析失败：" + e.message; }
+        alert(msg);
+      };
+      fr.readAsText(f, "utf-8");
+      ev.target.value = "";
+    });
+  }
+})();
+
 /* ================= 启动 ================= */
 (function(){
   const migrated = migrateOldMarks();
+  const seeded = seedMarks();
   renderNet(false);
   updateStats();
   renderThemeChips();
   if (migrated){
     $("hint").innerHTML += ' · <b>已迁移旧标记 ' + migrated + ' 条</b>';
+  }
+  if (seeded){
+    $("hint").innerHTML += ' · <b>已载入内置标记 ' + seeded + ' 条</b>';
   }
   const q = new URLSearchParams(location.search);
   /* 净图模式：隐藏所有界面元素，导海报用 */

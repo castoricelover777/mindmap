@@ -13,6 +13,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 GRAPH = os.path.join(ROOT, "graph", "data", "graph.json")
 MYSQL_JSON = os.path.join(ROOT, "graph", "data", "mysql.json")
 SOURCE_JSON = os.path.join(ROOT, "graph", "data", "source.json")
+MARKS_JSON = os.path.join(ROOT, "marks.json")
 SRC_INDEX = os.path.join(ROOT, "index.html")
 OUT = os.path.join(ROOT, "graph.html")
 
@@ -341,6 +342,9 @@ BODY = r"""
     <div class="chips" id="chips"></div>
     <div class="stats" id="stats"></div>
     <button id="btn-src">源码</button>
+    <button id="btn-mk-export" title="导出全部标记为 JSON（换电脑/换浏览器可用它恢复）">导出标记</button>
+    <button id="btn-mk-import" title="从 JSON 恢复标记（支持本页导出文件与 ?dump=1 的汇总文件）">导入标记</button>
+    <input type="file" id="mk-file" accept=".json,application/json" style="display:none">
     <button id="btn-fit">适应窗口</button>
     <div class="zoom">
       <button id="btn-out">−</button><span class="val" id="zoomval">100%</span><button id="btn-in">+</button>
@@ -485,6 +489,9 @@ const MARK_TINTS  = ["#ffffff", "#FEF2F2", "#FFFBEB", "#F0FDF4"];
 const MARK_NAMES  = ["未标记", "不会", "仅了解", "理解"];
 const LS_KEY = "mm-graph-marks-v1";
 const LS_OLD = "mm-marks-v1";
+const LS_MIG = "mm-graph-migrated-v1";     // 迁移只做一次的标记
+const LS_SEED = "mm-graph-seeded-v1";      // 内置快照播种只做一次
+const SEED_MARKS = __SEED__;               // marks.json 里的内置标记快照
 let marks = {};
 try { marks = JSON.parse(localStorage.getItem(LS_KEY) || "{}") || {}; } catch(e){ marks = {}; }
 function saveMarks(){ try { localStorage.setItem(LS_KEY, JSON.stringify(marks)); } catch(e){} }
@@ -496,9 +503,15 @@ function markCyclePath(p){
 }
 /* 旧标记迁移：老的 r-阶段-环节-细节 路径 → 新的语义 id */
 function migrateOldMarks(){
+  /* 只做一次，而且只补「当前还没有标记」的位置：
+     绝不再用旧快照覆盖你后来改过的标记（旧版每次加载都会覆盖，会吃掉新标记） */
+  try { if (localStorage.getItem(LS_MIG) === "1") return 0; } catch(e){}
   let old = null;
   try { old = JSON.parse(localStorage.getItem(LS_OLD) || "null"); } catch(e){}
-  if (!old || typeof old !== "object") return 0;
+  if (!old || typeof old !== "object"){
+    try { localStorage.setItem(LS_MIG, "1"); } catch(e){}
+    return 0;
+  }
   const byPath = {};
   G.scenarios.forEach(sc => sc.steps.forEach(st => { if (st.path) byPath[st.path] = st; }));
   let n = 0;
@@ -508,17 +521,38 @@ function migrateOldMarks(){
     let m = k.match(/^r-(\d+)-(\d+)-(\d+)$/);
     if (m){
       const st = byPath["r-" + m[1] + "-" + m[2]];
-      if (st){ marks[st.id + "." + m[3]] = v; n++; }
+      if (st){
+        const id = st.id + "." + m[3];
+        if (!marks[id]){ marks[id] = v; n++; }     // 已有就保留
+      }
       return;
     }
     m = k.match(/^r-(\d+)-(\d+)$/);
     if (m){
       const st = byPath["r-" + m[1] + "-" + m[2]];
-      if (st){ marks[st.id] = v; n++; }
+      if (st && !marks[st.id]){ marks[st.id] = v; n++; }
     }
   });
+  try { localStorage.setItem(LS_MIG, "1"); } catch(e){}
   if (n) saveMarks();
   return n;
+}
+
+/* 内置快照播种：只在「本地一条标记都没有」且没播种过时做一次，
+   这样换浏览器 / 清缓存后标记能自动回来；你手动清空过就不再强行灌入。 */
+function seedMarks(){
+  try {
+    if (localStorage.getItem(LS_SEED) === "1") return 0;
+    if (Object.keys(marks).length){ localStorage.setItem(LS_SEED, "1"); return 0; }
+    let n = 0;
+    Object.keys(SEED_MARKS || {}).forEach(k => {
+      const v = SEED_MARKS[k];
+      if (!marks[k] && v >= 1 && v <= 3){ marks[k] = v; n++; }
+    });
+    if (n) saveMarks();
+    localStorage.setItem(LS_SEED, "1");
+    return n;
+  } catch(e){ return 0; }
 }
 
 /* ================= 统计 ================= */
@@ -1584,14 +1618,98 @@ window.addEventListener("mouseup", () => { drag = false; svg.classList.remove("d
 svg.addEventListener("click", () => { /* 点空白：保留，便于后续取消选中 */ });
 window.addEventListener("resize", () => { clearTimeout(window._t); window._t = setTimeout(() => redraw(false), 150); });
 
+
+/* ================= 标记导出 / 导入（图谱这一套） ================= */
+function markValidIds(){
+  const s = new Set();
+  G.scenarios.forEach(sc => sc.steps.forEach(st => {
+    s.add(st.id);
+    (st.details || []).forEach((_, k) => s.add(st.id + "." + k));
+  }));
+  return s;
+}
+function exportGraphMarks(){
+  const out = { app: "mindmap-graph", version: 1,
+                exportedAt: new Date().toISOString().slice(0, 19),
+                total: Object.keys(marks).length, marks: marks };
+  const d = new Date();
+  const ymd = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0")
+            + "-" + String(d.getDate()).padStart(2, "0");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(out, null, 1)], { type: "application/json" }));
+  a.download = "graph-marks-" + ymd + ".json";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+function importGraphMarks(obj){
+  let src = null;
+  if (obj && typeof obj === "object"){
+    if (obj.marks && typeof obj.marks === "object") src = obj.marks;        // marks.json / 本页导出
+    else if (obj.graph && typeof obj.graph === "object") src = obj.graph;   // ?dump=1 汇总
+    else if (obj.detail && typeof obj.detail === "object") src = obj.detail;
+    else src = obj;                                                        // 纯 map
+  }
+  if (!src) return "文件里没有可识别的标记数据";
+  const valid = markValidIds();
+  // id 层级因场景而异（注册是 st.register.阶段.环节.细节，其他是 st.emp.环节.细节），
+  // 所以只做前缀与取值校验，是否属于当前图谱交给 valid 集合判断
+  const keys = Object.keys(src).filter(k =>
+    k.indexOf("st.") === 0 && src[k] >= 1 && src[k] <= 3);
+  const good = keys.filter(k => valid.has(k));
+  const bad = keys.filter(k => !valid.has(k));
+  if (!good.length) return "没有匹配到当前图谱的标记（文件中 " + keys.length + " 条都无法对应）";
+  const who = (obj.app || obj.type || "标记文件");
+  const overwrite = confirm(
+    "来源：" + who + "\n" +
+    "有效标记 " + good.length + " 条" + (bad.length ? "（另有 " + bad.length + " 条不在当前图谱，将跳过）" : "") + "\n\n" +
+    "确定 = 覆盖合并（文件里的值优先）\n" +
+    "取消 = 只补空缺（你现有的标记一律不动）");
+  // 覆盖前先备份当前状态，万一导错还能救回来
+  try { localStorage.setItem("mm-graph-marks-backup-v1", JSON.stringify(marks)); } catch(e){}
+  let n = 0;
+  good.forEach(k => {
+    if (!overwrite && marks[k]) return;
+    marks[k] = src[k]; n++;
+  });
+  saveMarks(); redraw(true); updateStats();
+  return "导入 " + n + " 条" + (bad.length ? "，跳过 " + bad.length + " 条" : "") +
+         "；当前共 " + Object.keys(marks).length + " 条";
+}
+(function(){
+  const be = document.getElementById("btn-mk-export");
+  const bi = document.getElementById("btn-mk-import");
+  const fi = document.getElementById("mk-file");
+  if (be) be.onclick = exportGraphMarks;
+  if (bi && fi){
+    bi.onclick = () => fi.click();
+    fi.addEventListener("change", ev => {
+      const f = ev.target.files && ev.target.files[0];
+      if (!f) return;
+      const fr = new FileReader();
+      fr.onload = () => {
+        let msg;
+        try { msg = importGraphMarks(JSON.parse(fr.result)); }
+        catch (e) { msg = "解析失败：" + e.message; }
+        alert(msg);
+      };
+      fr.readAsText(f, "utf-8");
+      ev.target.value = "";
+    });
+  }
+})();
+
 /* ================= 启动 ================= */
 (function(){
   const migrated = migrateOldMarks();
+  const seeded = seedMarks();
   renderNet(false);
   updateStats();
   renderThemeChips();
   if (migrated){
     $("hint").innerHTML += ' · <b>已迁移旧标记 ' + migrated + ' 条</b>';
+  }
+  if (seeded){
+    $("hint").innerHTML += ' · <b>已载入内置标记 ' + seeded + ' 条</b>';
   }
   const q = new URLSearchParams(location.search);
   /* 净图模式：隐藏所有界面元素，导海报用 */
@@ -1648,9 +1766,15 @@ def main():
 
     mysql = json.load(io.open(MYSQL_JSON, encoding="utf-8"))
     source = json.load(io.open(SOURCE_JSON, encoding="utf-8"))
+    try:
+        seed_marks = json.load(io.open(MARKS_JSON, encoding="utf-8"))
+        seed_marks = seed_marks.get("marks", seed_marks) if isinstance(seed_marks, dict) else {}
+    except Exception:
+        seed_marks = {}
     js = JS.replace("__GRAPH__", json.dumps(graph, ensure_ascii=False, separators=(",", ":")))
     js = js.replace("__MYSQL__", json.dumps(mysql, ensure_ascii=False, separators=(",", ":")))
     js = js.replace("__CHAINVIEW__", chain)
+    js = js.replace("__SEED__", json.dumps(seed_marks, ensure_ascii=False, separators=(",", ":")))
     page = HTML.replace("__CSS__", CSS).replace("__BODY__", BODY).replace("__JS__", js)
     page = page.replace("<style>", "<style>" + PANEL_FIX, 1)
     page = page.replace("</style>", SRC_CSS + "\n</style>", 1)
