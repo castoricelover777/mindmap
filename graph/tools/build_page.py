@@ -329,7 +329,7 @@ BODY = r"""
   <div class="topbar">
     <div class="brand">
       <h1>前后端知识图谱</h1>
-      <span class="sub" id="brandsub">点场景高亮 · 双击看源码 · 再点一次排成长链</span>
+      <span class="sub" id="brandsub">点场景看源码树 · 点层展开 · 点类看代码 · 双击排成长链</span>
     </div>
     <div class="spacer"></div>
     <div class="seg">
@@ -798,11 +798,12 @@ function renderNet(keep){
       g.style.cursor = "pointer";
       g.addEventListener("click", ev => {
         ev.stopPropagation();
-        if (armedScenario === n.id) focusScenario(n.id); else armScenario(n.id);
+        if (armedScenario === n.id){ focusScenario(n.id); }
+        else { armScenario(n.id); if (window.openSrcTree) window.openSrcTree(n.id); }
       });
       g.addEventListener("dblclick", ev => {
         ev.stopPropagation();
-        if (window.openSrc) window.openSrc(n.id);
+        focusScenario(n.id);
       });
       gN.appendChild(g);
       return;
@@ -879,6 +880,7 @@ let armedScenario = null;      // 第一次点击：已淡化、未移动
 let panelCid = null;           // 右侧信息框当前展示的概念
 
 function redraw(keep){
+  if (MODE === "src"){ if (window.srcRender) window.srcRender(keep); return; }
   if (MODE === "net") renderNet(keep);
   else ChainView.render(keep);
 }
@@ -1183,8 +1185,8 @@ function backToNet(){
   $("legend").style.display = "";
   $("panel").classList.remove("show");
   panelCid = null;
-  $("brandsub").textContent = "点场景高亮 · 双击看源码 · 再点一次排成长链";
-  $("hint").innerHTML = "<b>点场景</b>淡化无关 · <b>再点一次</b>排成链条 · <b>点知识点</b>看详情 · <b>点母题</b>看横贯线索";
+  $("brandsub").textContent = "点场景看源码树 · 点层展开 · 点类看代码 · 双击排成长链";
+  $("hint").innerHTML = "<b>点场景</b>看源码树 · <b>点层框</b>展开子类 · <b>点类框</b>看代码 · <b>点知识点</b>看详情";
   renderNet(false);
   if (oldPts && Object.keys(oldPts).length) flipFrom(oldPts);
   scene.style.opacity = "0";
