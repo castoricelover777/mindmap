@@ -122,24 +122,27 @@ v4.8 起删除了「知识点链条」这一套视图（`renderRibbon` / `layout
 **覆盖边界**：课件 05/06 只到「MySQL 概述 + DDL/DML/DQL + JDBC/MyBatis」。
 索引原理、MVCC、锁、主从、分库分表在这些课件里**没有**（词频为 0），所以栏目里也没有 —— 需要补的话得先补课件。
 
-## 源码视图（v6.1）
+## 源码视图（v6.2）
 
-**单击场景卡** → 源码树从卡片**左侧**长出来，和右侧知识点同一套画布与视觉语言：
+**单击场景卡** → 源码树从卡片**左侧**长出来，**右侧知识点网图不隐藏**（源码树是叠加层）：
 
 ```
-[ 文件框 ]  ←  [ 三层架构框 ]  ←  [ 场景卡 ]
-UserController   Controller 层      用户注册全链路
+[ 代码抽屉 ]  [ 文件框 ]  [ 三层架构框 ]  [ 场景卡 ]  [ 知识点网图 → ]
+UserController   Controller 层    用户注册全链路
 UserService      Service 层（2）
 UserServiceImpl  Mapper 层（2）
                  Pojo 实体（1）
 ```
 
-- 层框：Controller / Service / Mapper / Pojo / 异常 / 配置 / 工具，右侧圆钮显示文件数，
-  默认展开前两层；**点层框**展开/收起该类下的文件框
-- 文件框：**点一下** → 右侧滑出代码抽屉（行号 + 语法高亮 + Maven 目录面包屑 + package + 行数 + 方法）
-- 右下角操作条：`▸ 排成长链` 转到长链视图、`↩ 返回知识网络` 回网图
-- **双击场景卡** = 直接排成长链（跳过源码树）
-- 顶栏「源码」按钮：对当前选中/聚焦的场景打开源码树
+- **代码抽屉在左侧**（`min(560px, 44vw)`），点击抽屉以外的任何地方**自动收起**
+- 层框：Controller / Service / Mapper / Pojo / 异常 / 配置 / 工具，圆钮显示文件数，默认展开前两层
+- **点层框**展开/收起该类下的文件框；**点文件框** → 左侧抽屉出代码
+  （行号 + 语法高亮 + Maven 目录面包屑 + package + 行数 + 方法 + 复制/翻页）
+- 底部操作条：`▸ 排成长链`、`✕ 收起源码树`；点画布空白、按 Esc 也会收起
+- **双击场景卡** = 直接排成长链
+
+**适配策略**：只按「源码树」定位置与比例（至少 0.78 保证可读），
+右侧网图保持原比例继续向右延伸，超出部分可拖动 / 滚轮缩放查看 —— 两者同时可见。
 
 **数据来源**（源码不在本仓库，构建时扫描并内联，产物仍是自包含单文件）：
 
@@ -148,11 +151,10 @@ UserServiceImpl  Mapper 层（2）
 | `tlias-web-management` | `D:\web-ai-project02\tlias-web-management` | 部门 / 员工 / 班级学员（统计部分） |
 | `springboot-web-case` | `F:\myusb\web-ai-code\web-project01\springboot-web-case` | 用户注册（早期三层示例，Dao 而非 Mapper） |
 
-场景 → 文件的映射写在 `tools/build_source_index.py` 的 `scene(...)` 调用里，改映射就改它。
+场景 → 文件的映射写在 `tools/build_source_index.py` 的 `scene(...)` 调用里。
 
 **覆盖实情**：
-- 注册链路用的是早期示例工程（Controller → Service → Dao），另有 UserController2/3、
-  UserServiceImpl2、UserDaoImpl2 是课件变体，未列入
+- 注册链路用的是早期示例工程（Controller → Service → Dao），UserController2/3 等课件变体未列入
 - 第 11 节是「照接口文档自己完成」的作业，`ClazzController` / `StudentController` 等**源码不存在**，
   班级场景只列已实现的统计部分（Report*）与公共类
 

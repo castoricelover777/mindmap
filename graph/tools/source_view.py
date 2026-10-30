@@ -1,35 +1,37 @@
 # -*- coding: utf-8 -*-
 """
-source_view.py —— 源码视图 v2：在画布里从场景卡左侧长出源码树
+source_view.py —— 源码视图 v3
 
-与 v1 的区别：不再是全屏覆盖层，而是和右侧知识点一样的 SVG 画布
-      场景卡（右） ← 三层架构框（中） ← 类框（左），贝塞尔连线
-      点层框展开/收起该类下的类框；点类框 → 右侧滑出代码抽屉（行号 + 语法高亮 + Maven 面包屑）
+三条要求：
+  1) 代码框放左边（抽屉从左滑出）
+  2) 点代码框以外的地方自动收起
+  3) 右侧知识点网图**不隐藏**——源码树是叠加层，画在场景卡左侧
 
-由 build_page.py 注入：SRC_CSS / SRC_BODY / SRC_JS（含 __SRC__ 占位符）
+做法：不再切 MODE，直接在 net 视图上追加一层 <g id="srcTree">，
+      场景卡左←三层架构框左←文件框，绘制后按「画布减去左侧抽屉」重新适配。
 """
 
 SRC_CSS = r"""
-/* ================= 源码树（画布内） ================= */
-.snode{cursor:pointer}
-.snode text{font-family:var(--font);dominant-baseline:middle;pointer-events:none}
+/* ================= 源码树（叠加在网图上） ================= */
+#srcLayer text{font-family:var(--font);dominant-baseline:middle;pointer-events:none}
+#srcLayer .snode{cursor:pointer}
 
-#srcActions{position:fixed;left:16px;bottom:16px;z-index:35;display:none;align-items:center;gap:8px;
-  background:rgba(255,255,255,.96);border:1px solid #e2ded6;border-radius:10px;padding:7px 9px;
-  box-shadow:0 4px 16px rgba(17,24,39,.08);font-size:11.5px;color:#6b7280}
-#srcActions.show{display:flex}
-#srcActions .who{font-weight:800;color:#111827;margin-right:2px}
-#srcActions button{font-family:inherit;font-size:11.5px;font-weight:600;color:#374151;background:#fff;
+#srcBar{position:fixed;left:16px;bottom:16px;z-index:35;display:none;align-items:center;gap:8px;
+  background:rgba(255,255,255,.97);border:1px solid #e2ded6;border-radius:10px;padding:7px 9px;
+  box-shadow:0 4px 16px rgba(17,24,39,.10);font-size:11.5px;color:#6b7280}
+#srcBar.show{display:flex}
+#srcBar .who{font-weight:800;color:#111827;margin-right:2px}
+#srcBar button{font-family:inherit;font-size:11.5px;font-weight:600;color:#374151;background:#fff;
   border:1px solid #dedad2;padding:5px 10px;border-radius:7px;cursor:pointer}
-#srcActions button:hover{background:#f2efe9}
+#srcBar button:hover{background:#f2efe9}
 
-/* ================= 代码抽屉 ================= */
-#srcDrawer{position:fixed;top:0;right:0;bottom:0;width:min(620px,52vw);z-index:55;
-  background:#fff;border-left:1px solid #e2ded6;display:flex;flex-direction:column;
-  transform:translateX(102%);transition:transform .22s cubic-bezier(.3,.7,.3,1);
-  box-shadow:-10px 0 34px rgba(17,24,39,.14)}
+/* ================= 代码抽屉（左侧） ================= */
+#srcDrawer{position:fixed;top:0;left:0;bottom:0;width:min(560px,44vw);z-index:55;
+  background:#fff;border-right:1px solid #e2ded6;display:flex;flex-direction:column;
+  transform:translateX(-102%);transition:transform .22s cubic-bezier(.3,.7,.3,1);
+  box-shadow:10px 0 34px rgba(17,24,39,.16)}
 #srcDrawer.show{transform:none}
-#srcDTop{flex:none;display:flex;align-items:center;gap:10px;padding:10px 14px;
+#srcDTop{flex:none;display:flex;align-items:center;gap:9px;padding:10px 14px;
   border-bottom:1px solid #e8e5de;background:#faf9f6}
 #srcDTop .nm{font-size:13.5px;font-weight:800;color:#111827;font-family:var(--mono)}
 #srcDTop .sp{flex:1}
@@ -68,16 +70,16 @@ SRC_CSS = r"""
 
 @media (max-width: 900px){
   #srcDrawer{width:100%}
-  #srcActions{left:8px;bottom:8px;font-size:10.5px;padding:6px 7px}
+  #srcBar{left:8px;bottom:8px;font-size:10.5px;padding:6px 7px}
   #srcGut,#srcPre{font-size:11px}
 }
 """
 
 SRC_BODY = r"""
-<div id="srcActions">
+<div id="srcBar">
   <span class="who" id="srcWho"></span>
   <button id="srcToChain">▸ 排成长链</button>
-  <button id="srcToNet">↩ 返回知识网络</button>
+  <button id="srcCloseTree">✕ 收起源码树</button>
 </div>
 <div id="srcDrawer">
   <div id="srcDTop">
@@ -96,7 +98,7 @@ SRC_BODY = r"""
 
 SRC_JS = r"""
 <script>
-/* ================= 源码树（画布内，向左生长） ================= */
+/* ================= 源码树（叠加在网图上，向左生长） ================= */
 const SRC = __SRC__;
 
 const SRC_LAYER_COLOR = {
@@ -106,12 +108,10 @@ const SRC_LAYER_COLOR = {
 const SRC_ICON = { controller: "▣", service: "◈", mapper: "◉", pojo: "◆",
                    exception: "⚠", config: "⚙", utils: "✎", shared: "❖", dao: "◉" };
 
-const SRCV = { sid: null, expanded: new Set(), key: null, drawer: false };
+const SRCV = { sid: null, active: false, expanded: new Set(), key: null, drawer: false };
 
-/* 尺寸 */
-const S_CARD_W = 186, S_CARD_H = 56;
-const S_LAYER_W = 212, S_LAYER_H = 48, S_GAP_CL = 104;
-const S_CLASS_W = 258, S_CLASS_H = 38, S_GAP_LC = 74, S_CLASS_GAP = 8, S_LAYER_GAP = 14;
+const S_LAYER_W = 212, S_LAYER_H = 46, S_GAP_CL = 96;
+const S_CLASS_W = 250, S_CLASS_H = 36, S_GAP_LC = 70, S_CLASS_GAP = 7, S_LAYER_GAP = 12;
 
 function sEsc(s){
   return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -184,229 +184,192 @@ function hlXml(code){
   return out;
 }
 
-/* ---------- 布局 ---------- */
-function srcLayout(){
+/* ---------- 布局：挂在场景卡左侧 ---------- */
+function srcPaint(){
+  if (!SRCV.active) return;
   const sc = SRC.scenes[SRCV.sid];
-  const layers = sc.layers;
-  // 层框竖直排列
-  let y = 0;
-  const L = [];
-  layers.forEach((Ly, i) => {
-    L.push({ def: Ly, x: 0, y: y, w: S_LAYER_W, h: S_LAYER_H });
-    y += S_LAYER_H + S_LAYER_GAP;
-  });
-  const layerH = y - S_LAYER_GAP;
-  const cardY = layerH / 2 - S_CARD_H / 2;
+  if (!sc) return;
+  const card = (netNodes || []).find(n => n.kind === "scenario" && n.id === SRCV.sid);
+  if (!card) return;
 
-  // 类框：挂在展开的层左侧
-  const C = [];
-  L.forEach(l => {
-    if (!SRCV.expanded.has(l.def.id)) return;
-    const items = l.def.items;
+  const old = document.getElementById("srcLayer");
+  if (old) old.remove();
+
+  const g = el("g", { id: "srcLayer" });
+  const gE = el("g", {});
+
+  // 层框：卡左侧一列
+  const layerRight = card.x - S_GAP_CL;
+  const layerX = layerRight - S_LAYER_W;
+  const nL = sc.layers.length;
+  const blockH = nL * S_LAYER_H + (nL - 1) * S_LAYER_GAP;
+  let y0 = card.y + card.h / 2 - blockH / 2;
+
+  const layerPos = {};
+  sc.layers.forEach((def, i) => { layerPos[def.id] = { x: layerX, y: y0 + i * (S_LAYER_H + S_LAYER_GAP) }; });
+
+  // 文件框：层框左侧
+  const classRight = layerX - S_GAP_LC;
+  const classX = classRight - S_CLASS_W;
+
+  // 连线 卡 → 层
+  sc.layers.forEach(def => {
+    const L = layerPos[def.id];
+    const x1 = card.x, y1 = card.y + card.h / 2;
+    const x2 = L.x + S_LAYER_W, y2 = L.y + S_LAYER_H / 2;
+    const mx = (x1 + x2) / 2;
+    gE.appendChild(el("path", {
+      d: `M ${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}`,
+      fill: "none", stroke: SRC_LAYER_COLOR[def.id] || "#475569", "stroke-width": 1.8, opacity: .5
+    }));
+  });
+
+  // 文件框位置
+  const files = [];
+  sc.layers.forEach(def => {
+    if (!SRCV.expanded.has(def.id)) return;
+    const L = layerPos[def.id];
+    const items = def.items;
     const totalH = items.length * S_CLASS_H + (items.length - 1) * S_CLASS_GAP;
-    let cy = l.y + S_LAYER_H / 2 - totalH / 2;
+    let cy = L.y + S_LAYER_H / 2 - totalH / 2;
     items.forEach(k => {
-      C.push({ key: k, layer: l, x: 0, y: cy, w: S_CLASS_W, h: S_CLASS_H });
+      files.push({ key: k, def: def, x: classX, y: cy });
       cy += S_CLASS_H + S_CLASS_GAP;
     });
   });
 
-  // 水平位置（向左生长）
-  const classX = -(S_GAP_CL + S_LAYER_W + S_GAP_LC + S_CLASS_W);
-  L.forEach(l => { l.x = -(S_GAP_CL + S_LAYER_W); });
-  C.forEach(c => { c.x = classX; });
-
-  // 包围盒 → 归一化到 (0,0) 起步
-  let minX = 0, maxX = S_CARD_W, minY = 0, maxY = layerH;
-  L.forEach(l => { minX = Math.min(minX, l.x); minY = Math.min(minY, l.y); maxY = Math.max(maxY, l.y + l.h); });
-  C.forEach(c => { minX = Math.min(minX, c.x); minY = Math.min(minY, c.y); maxY = Math.max(maxY, c.y + c.h); });
-  const dx = -minX;
-  const cardX = dx;
-  L.forEach(l => { l.x += dx; });
-  C.forEach(c => { c.x += dx; });
-  const totalW = dx + S_CARD_W;
-  const totalH = Math.max(maxY - minY, layerH) + 20;
-  const dy = 10 - minY;
-
-  const nodes = { card: { x: cardX, y: cardY + dy, w: S_CARD_W, h: S_CARD_H } };
-  L.forEach(l => { l.y += dy; });
-  C.forEach(c => { c.y += dy; });
-  nodes.layers = L; nodes.classes = C;
-  return { nodes, totalW, totalH, classX: classX + dx, layerX: -(S_GAP_CL + S_LAYER_W) + dx };
-}
-
-/* ---------- 绘制 ---------- */
-function srcRender(keep){
-  const sc = SRC.scenes[SRCV.sid];
-  if (!sc){ backToNet(); return; }
-  const keepView = keep ? { s: state.scale, x: state.tx, y: state.ty } : null;
-  const L = srcLayout();
-
-  scene.innerHTML = "";
-  const gE = el("g", {});
-
-  // 场景卡 → 层框
-  const card = L.nodes.card;
-  L.nodes.layers.forEach(l => {
-    const x1 = card.x, y1 = card.y + card.h / 2;
-    const x2 = l.x + l.w, y2 = l.y + l.h / 2;
+  // 连线 层 → 文件
+  files.forEach(f => {
+    const L = layerPos[f.def.id];
+    const x1 = L.x, y1 = L.y + S_LAYER_H / 2;
+    const x2 = f.x + S_CLASS_W, y2 = f.y + S_CLASS_H / 2;
     const mx = (x1 + x2) / 2;
     gE.appendChild(el("path", {
       d: `M ${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}`,
-      fill: "none", stroke: SRC_LAYER_COLOR[l.def.id] || "#475569",
-      "stroke-width": 2, opacity: .55
+      fill: "none", stroke: SRC_LAYER_COLOR[f.def.id] || "#475569", "stroke-width": 1.2, opacity: .38
     }));
   });
-  // 层框 → 类框
-  L.nodes.classes.forEach(c => {
-    const x1 = c.layer.x, y1 = c.layer.y + c.layer.h / 2;
-    const x2 = c.x + c.w, y2 = c.y + c.h / 2;
-    const mx = (x1 + x2) / 2;
-    gE.appendChild(el("path", {
-      d: `M ${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}`,
-      fill: "none", stroke: SRC_LAYER_COLOR[c.layer.def.id] || "#475569",
-      "stroke-width": 1.3, opacity: .4
-    }));
-  });
-  scene.appendChild(gE);
+  g.appendChild(gE);
 
-  const gN = el("g", {});
-
-  // ---- 场景卡（右侧） ----
-  const gsc = scById[SRCV.sid] || { label: SRCV.sid, sub: "", color: "#111827" };
-  const gc = el("g", { class: "snode" });
-  gc.appendChild(el("rect", { x: card.x, y: card.y, width: card.w, height: card.h, rx: card.h / 2,
-    fill: "#fff", stroke: gsc.color, "stroke-width": 1.8 }));
-  gc.appendChild(el("circle", { cx: card.x + 20, cy: card.y + card.h / 2, r: 6, fill: gsc.color }));
-  const ct = el("text", { x: card.x + 36, y: card.y + card.h / 2 - 4, "font-size": 14,
-    "font-weight": 800, fill: "#111827" });
-  let lab = gsc.label;
-  while (lab.length > 2 && textW(lab, 14, 800) > card.w - 46) lab = lab.slice(0, -1);
-  if (lab !== gsc.label) lab += "…";
-  ct.textContent = lab;
-  gc.appendChild(ct);
-  const cs = el("text", { x: card.x + 36, y: card.y + card.h / 2 + 13, "font-size": 10, fill: "#6b7280" });
-  cs.textContent = "源码 " + (sc.layers.reduce((n, x) => n + x.items.length, 0)) + " 个文件";
-  gc.appendChild(cs);
-  gN.appendChild(gc);
-
-  // ---- 层框（中间列） ----
-  L.nodes.layers.forEach(l => {
-    const color = SRC_LAYER_COLOR[l.def.id] || "#475569";
-    const open = SRCV.expanded.has(l.def.id);
-    const g = el("g", { class: "snode" });
-    g.setAttribute("data-layer", l.def.id);
-    g.appendChild(el("rect", { x: l.x, y: l.y, width: l.w, height: l.h, rx: 10,
+  // ---- 层框 ----
+  sc.layers.forEach(def => {
+    const L = layerPos[def.id];
+    const color = SRC_LAYER_COLOR[def.id] || "#475569";
+    const open = SRCV.expanded.has(def.id);
+    const gs = el("g", { class: "snode" });
+    gs.setAttribute("data-layer", def.id);
+    gs.appendChild(el("rect", { x: L.x, y: L.y, width: S_LAYER_W, height: S_LAYER_H, rx: 10,
       fill: "#fff", stroke: color, "stroke-width": 1.5 }));
-    g.appendChild(el("rect", { x: l.x, y: l.y + 8, width: 4, height: l.h - 16, rx: 2, fill: color }));
-    const t = el("text", { x: l.x + 18, y: l.y + l.h / 2 - 7, "font-size": 12.5,
+    gs.appendChild(el("rect", { x: L.x, y: L.y + 8, width: 4, height: S_LAYER_H - 16, rx: 2, fill: color }));
+    const t = el("text", { x: L.x + 18, y: L.y + S_LAYER_H / 2 - 7, "font-size": 12.5,
       "font-weight": 700, fill: "#1f2937" });
-    t.textContent = SRC_ICON[l.def.id] + " " + l.def.label;
-    g.appendChild(t);
-    const t2 = el("text", { x: l.x + 18, y: l.y + l.h / 2 + 10, "font-size": 10, fill: "#9ca3af" });
-    let d = l.def.desc || "";
-    while (d.length > 4 && textW(d, 10, 400) > l.w - 54) d = d.slice(0, -1);
+    t.textContent = SRC_ICON[def.id] + " " + def.label;
+    gs.appendChild(t);
+    const t2 = el("text", { x: L.x + 18, y: L.y + S_LAYER_H / 2 + 10, "font-size": 9.5, fill: "#9ca3af" });
+    let d = def.desc || "";
+    while (d.length > 4 && textW(d, 9.5, 400) > S_LAYER_W - 60) d = d.slice(0, -1);
     t2.textContent = d;
-    g.appendChild(t2);
-    // 计数 + 展开标记
-    const bx = l.x + l.w - 34;
-    g.appendChild(el("circle", { cx: bx, cy: l.y + l.h / 2, r: 11,
+    gs.appendChild(t2);
+    const bx = L.x + S_LAYER_W - 24;
+    gs.appendChild(el("circle", { cx: bx, cy: L.y + S_LAYER_H / 2, r: 10,
       fill: open ? color : "#f1eee8" }));
-    const bt = el("text", { x: bx, y: l.y + l.h / 2 + 0.5, "text-anchor": "middle",
-      "font-size": 10.5, "font-weight": 800, fill: open ? "#fff" : "#6b7280" });
-    bt.textContent = open ? "−" : String(l.def.items.length);
-    g.appendChild(bt);
-    g.appendChild(el("title", {})).textContent = l.def.label + "：" + (l.def.desc || "");
-    g.style.cursor = "pointer";
-    g.addEventListener("click", ev => {
+    const bt = el("text", { x: bx, y: L.y + S_LAYER_H / 2 + 0.5, "text-anchor": "middle",
+      "font-size": 10, "font-weight": 800, fill: open ? "#fff" : "#6b7280" });
+    bt.textContent = open ? "−" : String(def.items.length);
+    gs.appendChild(bt);
+    gs.appendChild(el("title", {})).textContent = def.label + "：" + (def.desc || "");
+    gs.addEventListener("click", ev => {
       ev.stopPropagation();
-      if (SRCV.expanded.has(l.def.id)) SRCV.expanded.delete(l.def.id);
-      else SRCV.expanded.add(l.def.id);
-      srcRender(true);
+      if (SRCV.expanded.has(def.id)) SRCV.expanded.delete(def.id);
+      else SRCV.expanded.add(def.id);
+      srcPaint(); srcFit();
     });
-    gN.appendChild(g);
+    g.appendChild(gs);
   });
 
-  // ---- 类框（左列） ----
-  L.nodes.classes.forEach(c => {
-    const f = SRC.files[c.key];
-    const color = SRC_LAYER_COLOR[c.layer.def.id] || "#475569";
-    const act = (c.key === SRCV.key);
-    const g = el("g", { class: "snode" });
-    g.setAttribute("data-key", c.key);
-    g.appendChild(el("rect", { x: c.x, y: c.y, width: c.w, height: c.h, rx: 8,
+  // ---- 文件框 ----
+  files.forEach(f => {
+    const info = SRC.files[f.key];
+    const color = SRC_LAYER_COLOR[f.def.id] || "#475569";
+    const act = (f.key === SRCV.key);
+    const gs = el("g", { class: "snode" });
+    gs.setAttribute("data-key", f.key);
+    gs.appendChild(el("rect", { x: f.x, y: f.y, width: S_CLASS_W, height: S_CLASS_H, rx: 8,
       fill: act ? "#e8f4f2" : "#fff",
       stroke: act ? "#0d9488" : "#e2ded6", "stroke-width": act ? 1.8 : 1 }));
-    g.appendChild(el("rect", { x: c.x, y: c.y + 7, width: 3, height: c.h - 14, rx: 1.5,
-      fill: color, opacity: .8 }));
-    const nm = el("text", { x: c.x + 13, y: c.y + c.h / 2, "font-size": 11.5,
-      "font-weight": act ? 700 : 500, fill: act ? "#0f766e" : "#1f2937",
-      "font-family": "var(--mono)" });
-    nm.textContent = f.name;
-    g.appendChild(nm);
-    const ln = el("text", { x: c.x + c.w - 10, y: c.y + c.h / 2, "text-anchor": "end",
+    gs.appendChild(el("rect", { x: f.x, y: f.y + 6, width: 3, height: S_CLASS_H - 12, rx: 1.5,
+      fill: color, opacity: .85 }));
+    const nm = el("text", { x: f.x + 12, y: f.y + S_CLASS_H / 2, "font-size": 11.5,
+      "font-weight": act ? 700 : 500, fill: act ? "#0f766e" : "#1f2937", "font-family": "var(--mono)" });
+    let n2 = info.name;
+    while (n2.length > 3 && textW(n2, 11.5, 600) > S_CLASS_W - 62) n2 = n2.slice(0, -1);
+    nm.textContent = n2;
+    gs.appendChild(nm);
+    const ln = el("text", { x: f.x + S_CLASS_W - 10, y: f.y + S_CLASS_H / 2, "text-anchor": "end",
       "font-size": 9.5, fill: "#9ca3af" });
-    ln.textContent = f.lines + " 行";
-    g.appendChild(ln);
-    g.appendChild(el("title", {})).textContent = f.rel + "（" + f.lines + " 行）";
-    g.style.cursor = "pointer";
-    g.addEventListener("click", ev => { ev.stopPropagation(); srcPick(c.key); });
-    gN.appendChild(g);
+    ln.textContent = info.lines + " 行";
+    gs.appendChild(ln);
+    gs.appendChild(el("title", {})).textContent = info.rel + "（" + info.lines + " 行）";
+    gs.addEventListener("click", ev => { ev.stopPropagation(); srcPick(f.key); });
+    g.appendChild(gs);
   });
 
-  scene.appendChild(gN);
-
-  if (keepView){ state.scale = keepView.s; state.tx = keepView.x; state.ty = keepView.y; applyZoom(); }
-  else srcFit();
-  updateSrcActions();
+  scene.appendChild(g);
+  // 树整体在左，把画布内容右移/缩放，保证「源码树 + 网图」同时可见
+  srcFit();
 }
 
-/* 适配：抽屉打开时按剩余宽度居中 */
+/* 适配：只按「源码树」定位与缩放；右侧网图保持原比例（允许超出屏幕，可拖动/缩放） */
 function srcFit(){
-  const L = srcLayout();
+  if (!SRCV.active) return;
+  const layer = document.getElementById("srcLayer");
+  if (!layer) return;
+  const b = layer.getBBox();
+  if (!b.width || !b.height) return;
+
   const svgW = svg.clientWidth, svgH = svg.clientHeight;
   const bar = document.querySelector(".topbar");
-  const padTop = (bar ? bar.offsetHeight : 58) + 20, padBottom = 64;
-  const drawerW = SRCV.drawer ? Math.min(620, Math.round(svgW * 0.52)) : 0;
-  const availW = Math.max(320, svgW - drawerW - 60);
-  const availH = Math.max(240, svgH - padTop - padBottom);
-  const sc = Math.min(availW / L.totalW, availH / L.totalH, 1.25);
-  state.scale = Math.max(sc, 0.14);
-  const w = L.totalW * state.scale, h = L.totalH * state.scale;
-  state.tx = Math.round(30 + (availW - w) / 2);
-  state.ty = Math.round(padTop + (availH - h) / 2);
+  const padTop = (bar ? bar.offsetHeight : 58) + 18, padBottom = 56;
+  const drawerW = SRCV.drawer ? Math.min(560, Math.round(svgW * 0.44)) : 0;
+  const x0 = drawerW + 26, x1 = svgW - 26;
+  const availW = Math.max(220, x1 - x0);
+  const availH = Math.max(200, svgH - padTop - padBottom);
+
+  // 树自己放得下就行：够大就保持当前比例，放不下才缩
+  const fitS = Math.min(availW / b.width, availH / b.height, 1.15);
+  // 树优先可读：至少 0.78，最多撑到 fitS（网图留在右侧，超出部分可拖动/缩放查看）
+  state.scale = Math.min(fitS, Math.max(state.scale, Math.min(0.78, fitS)));
+
+  state.tx = Math.round(x0 - b.x * state.scale);
+  state.ty = Math.round(padTop + (availH - b.height * state.scale) / 2 - b.y * state.scale);
   applyZoom();
 }
 
-/* ---------- 打开 ---------- */
+/* ---------- 打开 / 收起 ---------- */
 function openSrcTree(sid){
   const sc = SRC.scenes[sid];
   if (!sc){ alert("这个场景还没有关联源码。"); return; }
-  SRCV.sid = sid;
-  SRCV.key = null;
+  SRCV.sid = sid; SRCV.active = true; SRCV.key = null;
   SRCV.expanded = new Set();
-  // 默认展开前两层（Controller / Service），让用户一眼看到结构
   sc.layers.slice(0, 2).forEach(l => SRCV.expanded.add(l.id));
-  MODE = "src";
-  netSel = null; armedScenario = sid; curScenario = null;
+  armedScenario = sid; netSel = null; curScenario = null;
   setChip(sid);
   $("panel").classList.remove("show");
-  ["legend", "themes", "hint"].forEach(id => {
-    const e = $(id); if (e) e.style.display = "none";
-  });
-  $("btn-back").classList.add("show");
-  $("srcActions").classList.add("show");
+  $("srcBar").classList.add("show");
   $("srcWho").textContent = (scById[sid] || {}).label || sid;
-  $("btn-expand-all").classList.remove("show");
-  srcRender(false);
+  srcPaint();
 }
 window.openSrcTree = openSrcTree;
-window.openSrc = openSrcTree;   // 兼容旧入口（双击卡片 / 顶栏按钮）
+window.openSrc = openSrcTree;
 
 function closeSrcTree(){
-  SRCV.sid = null; SRCV.key = null;
+  SRCV.active = false; SRCV.key = null; SRCV.sid = null;
   closeSrcDrawer();
-  $("srcActions").classList.remove("show");
+  const layer = document.getElementById("srcLayer");
+  if (layer) layer.remove();
+  $("srcBar").classList.remove("show");
+  // 恢复网图视角
+  renderNet(false);
 }
 
 function srcFirstKey(){
@@ -417,15 +380,14 @@ function srcFirstKey(){
 }
 
 function srcPick(key){
-  SRCV.key = key;
-  // 展开所属层
   const sc = SRC.scenes[SRCV.sid];
   sc.layers.forEach(l => { if (l.items.indexOf(key) >= 0) SRCV.expanded.add(l.id); });
-  srcRender(true);
+  SRCV.key = key;
+  srcPaint();
   openSrcDrawer(key);
 }
 
-/* ---------- 代码抽屉 ---------- */
+/* ---------- 代码抽屉（左侧） ---------- */
 function openSrcDrawer(key){
   const f = SRC.files[key];
   if (!f) return;
@@ -456,12 +418,13 @@ function openSrcDrawer(key){
   $("srcDrawer").classList.add("show");
   const wasOpen = SRCV.drawer;
   SRCV.drawer = true;
-  if (!wasOpen) srcFit();          // 抽屉占位后重新适配，树不被挡
+  if (!wasOpen) srcFit();
 }
 
 function closeSrcDrawer(){
+  if (!$("srcDrawer").classList.contains("show")) return;
   $("srcDrawer").classList.remove("show");
-  if (SRCV.drawer){ SRCV.drawer = false; if (MODE === "src") srcFit(); }
+  if (SRCV.drawer){ SRCV.drawer = false; srcFit(); }
 }
 
 function srcStep(d){
@@ -475,16 +438,18 @@ function srcStep(d){
   srcPick(list[i]);
 }
 
-function updateSrcActions(){
-  const on = (MODE === "src");
-  $("srcActions").classList.toggle("show", on);
-  if (on) $("srcWho").textContent = (scById[SRCV.sid] || {}).label || (SRCV.sid || "");
-}
-
 /* ---------- 事件 ---------- */
 $("srcDClose").onclick = closeSrcDrawer;
 $("srcPrev").onclick = () => srcStep(-1);
 $("srcNext").onclick = () => srcStep(+1);
+$("srcCloseTree").onclick = closeSrcTree;
+$("srcToChain").onclick = () => {
+  const sid = SRCV.sid;
+  SRCV.active = false; closeSrcDrawer();
+  const layer = document.getElementById("srcLayer"); if (layer) layer.remove();
+  $("srcBar").classList.remove("show");
+  focusScenario(sid);
+};
 $("srcCopy").onclick = () => {
   const f = SRC.files[SRCV.key];
   if (!f) return;
@@ -499,26 +464,42 @@ $("srcCopy").onclick = () => {
     ta.remove();
   }
 };
-$("srcToNet").onclick = () => {
+
+/* 点代码框以外的地方 → 自动收起代码框 */
+document.addEventListener("click", ev => {
+  if (!SRCV.drawer) return;
+  if (ev.target.closest("#srcDrawer")) return;        // 点在抽屉内
+  if (ev.target.closest("#scene g[data-key]")) return; // 点另一个文件：直接切换
+  closeSrcDrawer();
+}, true);
+
+/* 点画布空白处 → 收起源码树 */
+svg.addEventListener("click", ev => {
+  if (!SRCV.active) return;
+  const t = ev.target;
+  const onNode = t.closest && (t.closest("#srcLayer .snode") || t.closest("g[data-sc]") || t.closest("g.is-active"));
+  if (onNode) return;
+  if (SRCV.drawer){ closeSrcDrawer(); return; }
   closeSrcTree();
-  ["themes", "hint", "legend"].forEach(id => {
-    const e = $(id); if (e) e.style.display = "";
-  });
-  backToNet();
-};
-$("srcToChain").onclick = () => {
-  const sid = SRCV.sid;
-  closeSrcTree();
-  ["themes", "hint", "legend"].forEach(id => {
-    const e = $(id); if (e) e.style.display = "";
-  });
-  focusScenario(sid);
-};
-document.addEventListener("keydown", ev => {
-  if (ev.key === "Escape"){ if (SRCV.drawer) closeSrcDrawer(); else if (MODE === "src") $("srcToNet").click(); }
 });
 
-/* 顶栏「源码」按钮：对当前选中/聚焦的场景打开源码树 */
+document.addEventListener("keydown", ev => {
+  if (ev.key === "Escape"){
+    if (SRCV.drawer) closeSrcDrawer();
+    else if (SRCV.active) closeSrcTree();
+  }
+});
+
+/* 每次重绘网图后，把源码树重新贴回场景卡左侧 */
+(function(){
+  const _renderNet = renderNet;
+  renderNet = function(keep){
+    _renderNet(keep);
+    if (SRCV.active) srcPaint();
+  };
+})();
+
+/* 顶栏「源码」按钮 */
 (function(){
   const btn = document.getElementById("btn-src");
   if (!btn) return;
