@@ -380,6 +380,7 @@
     <button id="btn-src">源码</button>
     <button id="btn-mk-export" title="导出全部标记为 JSON（换电脑/换浏览器可用它恢复）">导出标记</button>
     <button id="btn-mk-import" title="从 JSON 恢复标记（支持本页导出文件与 ?dump=1 的汇总文件）">导入标记</button>
+    <button id="btn-mk-status" title="查看各类标记的实际数量">标记状态</button>
     <input type="file" id="mk-file" accept=".json,application/json" style="display:none">
     <button id="btn-fit">适应窗口</button>
     <div class="zoom">
@@ -1992,10 +1993,65 @@ function importGraphMarks(obj){
   }
 })();
 
+
+/* ================= 标记状态自查 ================= */
+function markStatusReport(){
+  const valid = markValidIds();
+  function cnt(getIds){
+    let marked = 0, total = 0;
+    getIds((id) => { total++; if (marks[id]) marked++; });
+    return [marked, total];
+  }
+  const cpt = cnt(cb => G.concepts.forEach(c => cb(c.id)));
+  const det = cnt(cb => G.scenarios.forEach(sc => sc.steps.forEach(st => {
+    if ((st.details || []).length) st.details.forEach((_, k) => cb(st.id + "." + k));
+    else cb(st.id);
+  })));
+  let my = 0;
+  try { my = Object.keys(JSON.parse(localStorage.getItem("mm-mysql-marks-v1") || "{}")).length; } catch (e) {}
+  const myTotal = (typeof MYSQL !== "undefined" && MYSQL.meta) ? MYSQL.meta.points : 0;
+  const inStore = Object.keys(marks).length;
+  const known = Object.keys(marks).filter(k => valid.has(k)).length;
+  const unknown = inStore - known;
+  const seeded = localStorage.getItem(LS_SEED) === "1" ? "已补齐过" : "未补齐";
+  return [
+    "本地标记总数：" + inStore + " 条（其中 " + known + " 条属于当前图谱" +
+      (unknown > 0 ? "，" + unknown + " 条是已失效的旧 id" : "") + "）",
+    "",
+    "概念（知识点）：" + cpt[0] + " / " + cpt[1],
+    "细节 + 环节：  " + det[0] + " / " + det[1],
+    "MySQL 栏目：   " + my + " / " + myTotal,
+    "",
+    "顶部「未标记」= 三者未标记之和：" +
+      ((cpt[1] - cpt[0]) + (det[1] - det[0]) + (myTotal - my)) + "  ← 与右上角数字对上就说明读取正常",
+    "",
+    "内置快照：" + seeded + "（快照里有 " + Object.keys(SEED_MARKS || {}).length + " 条）",
+    "说明：快照只包含「细节」级标记，概念级别的标记从未产生过，所以概念那一行是 0。"
+  ].join("\n");
+}
+(function(){
+  const b = document.getElementById("btn-mk-status");
+  if (b) b.onclick = () => alert(markStatusReport());
+})();
+
+/* 播种/补齐后给一条轻提示（原来只在底部小字，容易看不到） */
+function seedToast(n){
+  if (!n) return;
+  const d = document.createElement("div");
+  d.textContent = "已从内置快照补齐 " + n + " 条标记";
+  d.style.cssText = "position:fixed;left:50%;left:50%;transform:translateX(-50%);top:70px;z-index:9999;"
+    + "background:#0f766e;color:#fff;font-size:12.5px;font-weight:700;padding:9px 16px;border-radius:9px;"
+    + "box-shadow:0 8px 24px rgba(15,23,42,.25);opacity:0;transition:opacity .25s";
+  document.body.appendChild(d);
+  requestAnimationFrame(() => { d.style.opacity = "1"; });
+  setTimeout(() => { d.style.opacity = "0"; setTimeout(() => d.remove(), 400); }, 3200);
+}
+
 /* ================= 启动 ================= */
 (function(){
   const migrated = migrateOldMarks();
   const seeded = seedMarks();
+  if (seeded) seedToast(seeded);
   renderNet(false);
   updateStats();
   renderThemeChips();
