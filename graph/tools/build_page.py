@@ -329,7 +329,7 @@ BODY = r"""
   <div class="topbar">
     <div class="brand">
       <h1>前后端知识图谱</h1>
-      <span class="sub" id="brandsub">点场景看源码树 · 点层展开 · 点类看代码 · 双击排成长链</span>
+      <span class="sub" id="brandsub">单击场景看源码树 · 点层展开 · 点类看代码 · 双击排成长链</span>
     </div>
     <div class="spacer"></div>
     <div class="seg">
@@ -798,11 +798,16 @@ function renderNet(keep){
       g.style.cursor = "pointer";
       g.addEventListener("click", ev => {
         ev.stopPropagation();
-        if (armedScenario === n.id){ focusScenario(n.id); }
-        else { armScenario(n.id); if (window.openSrcTree) window.openSrcTree(n.id); }
+        // 单击只看源码树；延时 220ms，让双击能把这次单击取消掉
+        clearTimeout(cardClickTimer);
+        cardClickTimer = setTimeout(() => {
+          armScenario(n.id);
+          if (window.openSrcTree) window.openSrcTree(n.id);
+        }, 220);
       });
       g.addEventListener("dblclick", ev => {
         ev.stopPropagation();
+        clearTimeout(cardClickTimer);
         focusScenario(n.id);
       });
       gN.appendChild(g);
@@ -879,6 +884,7 @@ const MORPH_MS = 680;
 let armedScenario = null;      // 第一次点击：已淡化、未移动
 let panelCid = null;           // 右侧信息框当前展示的概念
 
+let cardClickTimer = null;
 function redraw(keep){
   if (MODE === "src"){ if (window.srcRender) window.srcRender(keep); return; }
   if (MODE === "net") renderNet(keep);
@@ -1185,8 +1191,8 @@ function backToNet(){
   $("legend").style.display = "";
   $("panel").classList.remove("show");
   panelCid = null;
-  $("brandsub").textContent = "点场景看源码树 · 点层展开 · 点类看代码 · 双击排成长链";
-  $("hint").innerHTML = "<b>点场景</b>看源码树 · <b>点层框</b>展开子类 · <b>点类框</b>看代码 · <b>点知识点</b>看详情";
+  $("brandsub").textContent = "单击场景看源码树 · 点层展开 · 点类看代码 · 双击排成长链";
+  $("hint").innerHTML = "<b>单击场景</b>看源码树 · <b>双击场景</b>排成长链 · <b>点知识点</b>看详情";
   renderNet(false);
   if (oldPts && Object.keys(oldPts).length) flipFrom(oldPts);
   scene.style.opacity = "0";

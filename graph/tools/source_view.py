@@ -482,6 +482,32 @@ document.addEventListener("keydown", ev => {
   }
 });
 
+
+/* ---------- 拖拽保护：拖完松手浏览器仍会派发 click，这里吞掉，避免误开/误重置 ---------- */
+(function(){
+  const D = { down: false, moved: false, x: 0, y: 0 };
+  svg.addEventListener("mousedown", e => { D.down = true; D.moved = false; D.x = e.clientX; D.y = e.clientY; }, true);
+  window.addEventListener("mousemove", e => {
+    if (!D.down) return;
+    if (Math.abs(e.clientX - D.x) + Math.abs(e.clientY - D.y) > 5) D.moved = true;
+  }, true);
+  window.addEventListener("mouseup", () => {
+    D.down = false;
+    // 拖到窗口外松手时不会有 click，这里兜底清掉，避免吞掉下一次真实点击
+    setTimeout(() => { D.moved = false; }, 60);
+  }, true);
+  const eat = e => {
+    if (!D.moved) return;
+    e.stopPropagation();
+    e.preventDefault();
+    D.moved = false;
+  };
+  document.addEventListener("click", eat, true);
+  document.addEventListener("dblclick", eat, true);
+  // 触摸拖动同理
+  svg.addEventListener("touchmove", () => { D.moved = true; }, { passive: true, capture: true });
+})();
+
 /* 每次重绘网图后，把源码树重新贴回场景卡左侧 */
 (function(){
   const _renderNet = renderNet;
