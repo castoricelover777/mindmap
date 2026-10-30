@@ -775,11 +775,23 @@ function renderNet(keep){
       const dot = el("circle", { cx: n.x + 20, cy: n.y + n.h / 2, r: 6, fill: n.color });
       g.appendChild(dot);
       const t1 = el("text", { x: n.x + 36, y: n.y + n.h / 2 - 4, "font-size": 14, "font-weight": 800, fill: "#111827" });
-      t1.textContent = n.label;
+      // 卡片固定宽，文字必须裁到框内，否则会画到卡片外面
+      const AVAIL = n.w - 46;
+      let lab = n.label;
+      while (lab.length > 2 && textW(lab, 14, 800) > AVAIL) lab = lab.slice(0, -1);
+      if (lab !== n.label) lab += "…";
+      t1.textContent = lab;
       g.appendChild(t1);
       const t2 = el("text", { x: n.x + 36, y: n.y + n.h / 2 + 13, "font-size": 10, fill: "#6b7280" });
-      t2.textContent = n.sub || "";
+      let sb0 = n.sub || "";
+      let sb = sb0;
+      while (sb.length > 1 && textW(sb, 10, 400) > AVAIL) sb = sb.slice(0, -1);
+      if (sb !== sb0) sb += "…";
+      t2.textContent = sb;
       g.appendChild(t2);
+      const _ttl = el("title", {});
+      _ttl.textContent = n.label + (n.sub ? " · " + n.sub : "");
+      g.appendChild(_ttl);
       g.style.cursor = "pointer";
       g.addEventListener("click", ev => {
         ev.stopPropagation();

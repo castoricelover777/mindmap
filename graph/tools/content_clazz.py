@@ -22,7 +22,7 @@ EXTRA_CONCEPTS_CLAZZ = [
 ]
 
 CLAZZ = {
- "id": "s.clazz", "label": "班级与学员管理", "sub": "照接口文档自己写：班级 + 学员 + 统计",
+ "id": "s.clazz", "label": "班级与学员管理", "sub": "班级 + 学员 + 统计",
  "color": "#0D9488", "source": "课件 11-后端Web实战(自己完成) + 接口文档",
  "phases": [
    {"label": "数据准备", "color": "#BE123C"},

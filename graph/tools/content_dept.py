@@ -5,7 +5,7 @@
 """
 
 DEPT = {
- "id": "s.dept", "label": "部门管理 CRUD", "sub": "接口定义 → 三层实现 → 联调 → 日志",
+ "id": "s.dept", "label": "部门管理 CRUD", "sub": "接口·三层·联调·日志",
  "color": "#0E7490", "source": "课件 07-后端Web实战(部门管理) + tlias 源码",
  "phases": [
    {"label": "准备工作", "color": "#334155"},
