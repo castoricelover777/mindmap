@@ -1208,9 +1208,16 @@ function toggleExpandAll(){
       col.items.forEach((it, j) => { if (it.details.length) ChainView.state.collapsedItem.add(i + "-" + j); });
     });
   }
-  ChainView.render(false);
+  // 关键：展开/收起保持当前缩放与位置，不再重新适配
+  // （原来 render(false) 会把 9 个阶段 + 全部细节重新塞进窗口，缩放被压到 19%，字都看不清）
+  ChainView.render(true);
   setTimeout(bindDetailCards, 30);
   $("btn-expand-all").textContent = allExpanded ? "⊟ 全部收起" : "⊞ 全部展开";
+  if (allExpanded){
+    // 展开后只把视口移到内容左上角，缩放保持不动
+    ChainView.state.tx = 40; ChainView.state.ty = 60;
+    ChainView.apply();
+  }
 }
 function backToNet(){
   if ($("mysqlview").classList.contains("show")) return;
