@@ -490,7 +490,7 @@ const MARK_NAMES  = ["未标记", "不会", "仅了解", "理解"];
 const LS_KEY = "mm-graph-marks-v1";
 const LS_OLD = "mm-marks-v1";
 const LS_MIG = "mm-graph-migrated-v1";     // 迁移只做一次的标记
-const LS_SEED = "mm-graph-seeded-v1";      // 内置快照播种只做一次
+const LS_SEED = "mm-graph-seeded-v2";      // 内置快照补齐只做一次（v2：从"仅空库灌入"改为"补齐空缺"）
 const SEED_MARKS = __SEED__;               // marks.json 里的内置标记快照
 let marks = {};
 try { marks = JSON.parse(localStorage.getItem(LS_KEY) || "{}") || {}; } catch(e){ marks = {}; }
@@ -541,9 +541,11 @@ function migrateOldMarks(){
 /* 内置快照播种：只在「本地一条标记都没有」且没播种过时做一次，
    这样换浏览器 / 清缓存后标记能自动回来；你手动清空过就不再强行灌入。 */
 function seedMarks(){
+  /* 把内置快照（marks.json，505 条）里「本地还没有」的位置补齐，只做一次。
+     注意：不要求本地为空 —— 早期版本写成"仅空库才灌入"，导致本地被旧迁移
+     灌了 228 条注册标记后，部门 171 / 员工 106 的标记永远补不上。 */
   try {
     if (localStorage.getItem(LS_SEED) === "1") return 0;
-    if (Object.keys(marks).length){ localStorage.setItem(LS_SEED, "1"); return 0; }
     let n = 0;
     Object.keys(SEED_MARKS || {}).forEach(k => {
       const v = SEED_MARKS[k];
