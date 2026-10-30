@@ -234,6 +234,8 @@
       <div class="mklist" id="mklist">
         <button id="btn-export">导出标记</button>
         <button id="btn-import">导入标记</button>
+        <button id="btn-mk-check">标记体检</button>
+        <button id="btn-mk-repair">修复旧标记</button>
         <button id="btn-reset">清空标记</button>
         <input type="file" id="file-import" accept=".json,application/json" style="display:none">
       </div>
@@ -885,6 +887,84 @@ window.addEventListener("resize", () => { clearTimeout(window._t); window._t = s
     if (ev.target.tagName === "BUTTON") setTimeout(close, 0);
   });
   document.addEventListener("keydown", ev => { if (ev.key === "Escape") close(); });
+})();
+</script>
+
+<script>
+/* === 孤立标记修复（结构改版后老标记上推）=== */
+(function(){
+  function nodePaths(){
+    const set = new Set();
+    (function walk(n){ if (n && n._path) set.add(n._path); (n && n.c || []).forEach(walk); })(DATA);
+    return set;
+  }
+  function split(path){
+    // "r-0-1-2" → ["r","0","1","2"]
+    const i = path.indexOf("-");
+    return i < 0 ? [path] : [path.slice(0, i)].concat(path.slice(i + 1).split("-"));
+  }
+  function report(){
+    const valid = nodePaths();
+    const keys = Object.keys(state.marks);
+    const bad = keys.filter(k => !valid.has(k));
+    return { total: keys.length, ok: keys.length - bad.length, bad };
+  }
+  function mkCheck(){
+    const r = report();
+    let msg = "节点数：" + nodePaths().size + "\n"
+            + "本地标记：" + r.total + " 条\n"
+            + "  对得上节点：" + r.ok + " 条\n"
+            + "  孤立（对不上）：" + r.bad.length + " 条";
+    if (r.bad.length){
+      msg += "\n\n孤立键示例：\n  " + r.bad.slice(0, 6).join("\n  ");
+      msg += "\n\n说明：孤立标记是页面结构改版前留下的，可点「修复旧标记」上推到最近的现存父节点。";
+    }
+    alert(msg);
+  }
+  function mkRepair(){
+    const r = report();
+    if (!r.bad.length){ alert("很好：没有孤立标记，不需要修复。\n\n当前 " + r.total + " 条标记全部对得上节点。"); return; }
+    const valid = nodePaths();
+    const targets = {};
+    let moved = 0, dropped = 0;
+    r.bad.forEach(k => {
+      const v = +state.marks[k];
+      const parts = split(k);
+      let hit = null;
+      // 至少落到「阶段-环节」这一层，不要把标记推到根节点 r（根不参与统计、没有意义）
+      for (let n = parts.length - 1; n >= 2; n--){
+        const cand = parts.slice(0, n).join("-");
+        if (valid.has(cand)){ hit = cand; break; }
+      }
+      if (!hit || !(v >= 1 && v <= 3)){ dropped++; return; }
+      targets[hit] = targets[hit] ? Math.min(targets[hit], v) : v;  // 同节点取最保守等级
+      moved++;
+    });
+    const tk = Object.keys(targets);
+    if (!tk.length){
+      alert("发现 " + r.bad.length + " 条孤立标记，但都无法对应到现存节点（层级完全不匹配）。\n\n建议：在曾经标记过的那台设备/浏览器上打开本页「导出标记」，再用「导入标记」导入。");
+      return;
+    }
+    if (!confirm("发现 " + r.bad.length + " 条孤立标记（页面结构改过，对不上节点）。\n\n"
+      + "可以把它们「上推」到最近的现存父节点：\n  " + tk.length + " 个节点将获得标记（同节点取最保守等级）\n"
+      + "  " + dropped + " 条会被丢弃（找不到对应父节点）\n\n"
+      + "修复前会自动备份当前标记。原有能对上的标记不受影响。\n\n继续？")) return;
+    try { localStorage.setItem("mm-marks-llm-backup-v1", JSON.stringify(state.marks)); } catch(e){}
+    tk.forEach(k => {
+      const cur = state.marks[k] || 0;
+      state.marks[k] = cur ? Math.min(cur, targets[k]) : targets[k];
+    });
+    r.bad.forEach(k => { delete state.marks[k]; });
+    saveMarks();
+    render(true); updateStats();
+    alert("完成\n  上推 " + moved + " 条 → " + tk.length + " 个节点\n  丢弃 " + dropped + " 条\n"
+      + "  当前标记共 " + Object.keys(state.marks).length + " 条\n\n"
+      + "（修复前的状态已备份，需要回退请删掉 localStorage 的 mm-marks-llm-backup-v1 后重新导入）");
+  }
+  const c = document.getElementById("btn-mk-check");
+  const rp = document.getElementById("btn-mk-repair");
+  if (c) c.onclick = mkCheck;
+  if (rp) rp.onclick = mkRepair;
 })();
 </script>
 </body>
