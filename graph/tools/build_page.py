@@ -582,23 +582,27 @@ function dumpAllMarks(){
   return n;
 }
 function updateStats(){
+  /* 口径：顶部四个数字只统计「细节卡」（含无细节的环节）。
+     概念与 MySQL 是另外两套库，单独在 tooltip / 「标记状态」里看，
+     不再并进来 —— 否则未标记数会虚高（细节 226 + 概念 104 + MySQL 84 = 414）。 */
   const c = [0, 0, 0, 0];
-  let nDet = 0, nCon = 0, nMy = 0;
-  // ① 细节卡（含无细节的环节）
+  let nDet = 0;
   G.scenarios.forEach(sc => sc.steps.forEach(st => {
     if (st.details.length) st.details.forEach((_, k) => { c[markGet(st.id + "." + k)]++; nDet++; });
     else { c[markGet(st.id)]++; nDet++; }
   }));
-  // ② 概念
-  G.concepts.forEach(k => { c[markGet(k.id)]++; nCon++; });
-  // ③ MySQL（0/1/2 → 1/2/3）
+  // 概念 / MySQL：只做参考，不参与顶部计数
+  let nCon = 0, conMarked = 0;
+  G.concepts.forEach(k => { nCon++; if (marks[k.id]) conMarked++; });
   let myMarked = 0;
-  Object.keys(MV_MARKS).forEach(k => { const v = +MV_MARKS[k]; if (v >= 0 && v <= 2){ c[v + 1]++; myMarked++; } });
-  nMy = (typeof MYSQL !== "undefined" && MYSQL.meta) ? MYSQL.meta.points : 0;
-  if (nMy > myMarked) c[0] += nMy - myMarked;   // MySQL 未标记的也算进去
+  Object.keys(MV_MARKS).forEach(k => { const v = +MV_MARKS[k]; if (v >= 0 && v <= 2) myMarked++; });
+  const nMy = (typeof MYSQL !== "undefined" && MYSQL.meta) ? MYSQL.meta.points : 0;
+
   const box = $("stats"); if (!box) return;
-  const tip = `概念 ${nCon} · 细节卡 ${nDet} · MySQL ${nMy} · 合计 ${nCon + nDet + nMy}`;
-  box.title = tip;
+  box.title = "细节卡 " + nDet + "（已标 " + (nDet - c[0]) + " / 未标 " + c[0] + "）"
+            + " · 概念 " + conMarked + "/" + nCon
+            + " · MySQL " + myMarked + "/" + nMy
+            + "　—— 顶部四个数字只按细节卡统计";
   box.innerHTML =
       `<span><i class="dot" style="background:${MARK_COLORS[1]}"></i>不会 <b>${c[1]}</b></span>`
     + `<span><i class="dot" style="background:${MARK_COLORS[2]}"></i>仅了解 <b>${c[2]}</b></span>`
@@ -1737,11 +1741,11 @@ function markStatusReport(){
     "细节 + 环节：  " + det[0] + " / " + det[1],
     "MySQL 栏目：   " + my + " / " + myTotal,
     "",
-    "顶部「未标记」= 三者未标记之和：" +
-      ((cpt[1] - cpt[0]) + (det[1] - det[0]) + (myTotal - my)) + "  ← 与右上角数字对上就说明读取正常",
+    "顶部「未标记」只统计细节卡：" + (det[1] - det[0]) + "  ← 与右上角数字对上就说明读取正常",
+    "（概念 " + (cpt[1] - cpt[0]) + " 条未标、MySQL " + (myTotal - my) + " 条未标，不并入顶部数字）",
     "",
     "内置快照：" + seeded + "（快照里有 " + Object.keys(SEED_MARKS || {}).length + " 条）",
-    "说明：快照只包含「细节」级标记，概念级别的标记从未产生过，所以概念那一行是 0。"
+    "说明：快照只有「细节」级标记，概念级标记从未产生过，所以概念那一行是 0。"
   ].join("\n");
 }
 (function(){
