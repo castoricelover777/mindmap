@@ -1571,6 +1571,23 @@ let MV_ALL = [];
 function mToggle(el){ el.parentNode.classList.toggle("open"); }
 let MV_MARKS = {};
 try { MV_MARKS = JSON.parse(localStorage.getItem("mm-mysql-marks-v1") || "{}"); } catch (e) { MV_MARKS = {}; }
+/* MySQL 栏目的内置快照（mysql-marks.json，54 条，取值 0/1/2） */
+const MV_SEED = {"pa2.2.1":2,"pa2.2.2":1,"pa2.3.1":1,"pa2.3.2":2,"pa3.1.1":2,"pa3.1.1.1":2,"pa3.1.1.2":2,"pa3.1.1.3":2,"pa3.1.1.4":2,"pa3.1.2.1":2,"pa3.1.2.2":2,"pa3.1.2.3":1,"pa3.1.3":2,"pa3.1.3.1":2,"pa3.1.3.2":2,"pa3.1.3.3":2,"pa3.1.3.4":2,"pa3.1.3.5":2,"pa3.2.1.1":2,"pa3.2.1.2":2,"pa3.2.2.1":2,"pa3.2.2.2":2,"pa3.2.3.1":2,"pa3.2.3.2":2,"pa3.3.1":2,"pa3.3.2":2,"pa3.3.3":2,"pa3.3.4":2,"pa3.3.5":2,"pa3.3.6":2,"pa3.3.7":2,"pa3.3.8":2,"pb2.2.1":1,"pb2.2.2":1,"pb2.2.3":1,"pb2.2.4.1":1,"pb2.2.4.2":1,"pb2.3.2":1,"pb2.3.1":1,"pb3.1.1":1,"pb3.1.2.1":1,"pb3.1.2.2":2,"pb3.1.3":1,"pb3.1.4":1,"pb3.1.4.1":2,"pb3.1.4.2":2,"pb3.1.5.1":2,"pb3.1.5.2":2,"pb3.1.5.3":2,"pb3.1.5.4":2,"pb3.1.6":1,"pb3.1.6.1":1,"pb3.1.6.2":1,"pb3.1.6.3":1};
+const LS_MV_SEED = "mm-mysql-seeded-v2";
+function seedMysqlMarks(){
+  /* 只补本地缺失的，已有的不动；只做一次 */
+  try {
+    if (localStorage.getItem(LS_MV_SEED) === "1") return 0;
+    let n = 0;
+    Object.keys(MV_SEED || {}).forEach(k => {
+      const v = +MV_SEED[k];
+      if (MV_MARKS[k] === undefined && v >= 0 && v <= 2){ MV_MARKS[k] = v; n++; }
+    });
+    if (n) localStorage.setItem("mm-mysql-marks-v1", JSON.stringify(MV_MARKS));
+    localStorage.setItem(LS_MV_SEED, "1");
+    return n;
+  } catch (e) { return 0; }
+}
 const MV_MCOLOR = ["#DC2626", "#D97706", "#047857"];
 const MV_MNAME = ["不会", "仅了解", "理解"];
 function mMark(id, lv){
@@ -2056,6 +2073,8 @@ function seedToast(n){
   const migrated = migrateOldMarks();
   const seeded = seedMarks();
   if (seeded) seedToast(seeded);
+  const mvSeeded = seedMysqlMarks();
+  if (mvSeeded) seedToast("已从内置快照补齐 MySQL 标记 " + mvSeeded + " 条");
   renderNet(false);
   updateStats();
   renderThemeChips();
@@ -2064,6 +2083,9 @@ function seedToast(n){
   }
   if (seeded){
     $("hint").innerHTML += ' · <b>已载入内置标记 ' + seeded + ' 条</b>';
+  }
+  if (mvSeeded){
+    $("hint").innerHTML += ' · <b>已载入 MySQL 标记 ' + mvSeeded + ' 条</b>';
   }
   const q = new URLSearchParams(location.search);
   /* 净图模式：隐藏所有界面元素，导海报用 */

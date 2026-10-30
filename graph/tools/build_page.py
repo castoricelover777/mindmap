@@ -14,6 +14,7 @@ GRAPH = os.path.join(ROOT, "graph", "data", "graph.json")
 MYSQL_JSON = os.path.join(ROOT, "graph", "data", "mysql.json")
 SOURCE_JSON = os.path.join(ROOT, "graph", "data", "source.json")
 MARKS_JSON = os.path.join(ROOT, "marks.json")
+MYSQL_MARKS_JSON = os.path.join(ROOT, "mysql-marks.json")
 SRC_INDEX = os.path.join(ROOT, "index.html")
 OUT = os.path.join(ROOT, "graph.html")
 
@@ -1286,6 +1287,23 @@ let MV_ALL = [];
 function mToggle(el){ el.parentNode.classList.toggle("open"); }
 let MV_MARKS = {};
 try { MV_MARKS = JSON.parse(localStorage.getItem("mm-mysql-marks-v1") || "{}"); } catch (e) { MV_MARKS = {}; }
+/* MySQL 栏目的内置快照（mysql-marks.json，54 条，取值 0/1/2） */
+const MV_SEED = __MVSEED__;
+const LS_MV_SEED = "mm-mysql-seeded-v2";
+function seedMysqlMarks(){
+  /* 只补本地缺失的，已有的不动；只做一次 */
+  try {
+    if (localStorage.getItem(LS_MV_SEED) === "1") return 0;
+    let n = 0;
+    Object.keys(MV_SEED || {}).forEach(k => {
+      const v = +MV_SEED[k];
+      if (MV_MARKS[k] === undefined && v >= 0 && v <= 2){ MV_MARKS[k] = v; n++; }
+    });
+    if (n) localStorage.setItem("mm-mysql-marks-v1", JSON.stringify(MV_MARKS));
+    localStorage.setItem(LS_MV_SEED, "1");
+    return n;
+  } catch (e) { return 0; }
+}
 const MV_MCOLOR = ["#DC2626", "#D97706", "#047857"];
 const MV_MNAME = ["不会", "仅了解", "理解"];
 function mMark(id, lv){
@@ -1771,6 +1789,8 @@ function seedToast(n){
   const migrated = migrateOldMarks();
   const seeded = seedMarks();
   if (seeded) seedToast(seeded);
+  const mvSeeded = seedMysqlMarks();
+  if (mvSeeded) seedToast("已从内置快照补齐 MySQL 标记 " + mvSeeded + " 条");
   renderNet(false);
   updateStats();
   renderThemeChips();
@@ -1779,6 +1799,9 @@ function seedToast(n){
   }
   if (seeded){
     $("hint").innerHTML += ' · <b>已载入内置标记 ' + seeded + ' 条</b>';
+  }
+  if (mvSeeded){
+    $("hint").innerHTML += ' · <b>已载入 MySQL 标记 ' + mvSeeded + ' 条</b>';
   }
   const q = new URLSearchParams(location.search);
   /* 净图模式：隐藏所有界面元素，导海报用 */
@@ -1840,10 +1863,16 @@ def main():
         seed_marks = seed_marks.get("marks", seed_marks) if isinstance(seed_marks, dict) else {}
     except Exception:
         seed_marks = {}
+    try:
+        mv_seed = json.load(io.open(MYSQL_MARKS_JSON, encoding="utf-8"))
+        mv_seed = mv_seed.get("marks", mv_seed) if isinstance(mv_seed, dict) else {}
+    except Exception:
+        mv_seed = {}
     js = JS.replace("__GRAPH__", json.dumps(graph, ensure_ascii=False, separators=(",", ":")))
     js = js.replace("__MYSQL__", json.dumps(mysql, ensure_ascii=False, separators=(",", ":")))
     js = js.replace("__CHAINVIEW__", chain)
     js = js.replace("__SEED__", json.dumps(seed_marks, ensure_ascii=False, separators=(",", ":")))
+    js = js.replace("__MVSEED__", json.dumps(mv_seed, ensure_ascii=False, separators=(",", ":")))
     page = HTML.replace("__CSS__", CSS).replace("__BODY__", BODY).replace("__JS__", js)
     page = page.replace("<style>", "<style>" + PANEL_FIX, 1)
     page = page.replace("</style>", SRC_CSS + "\n</style>", 1)
