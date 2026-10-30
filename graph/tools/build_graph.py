@@ -6,8 +6,10 @@
 输出：graph.json
 """
 import io, json, os, re, datetime
+import os
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-D = r"E:\mindmap\graph\data"
+D = os.path.join(ROOT, "graph", "data")
 OUT = os.path.join(D, "graph.json")
 
 

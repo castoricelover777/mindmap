@@ -1,7 +1,9 @@
 import io, re, json, os
+import os
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-SRC = r"E:\mindmap\graph\_src"
-OUT = r"E:\mindmap\graph\data\mysql.json"
+SRC = os.path.join(ROOT, "graph", "_src")
+OUT = os.path.join(ROOT, "graph", "data", "mysql.json")
 P = r"C:\Users\Admin1\AppData\Local\Temp\mm_graph\build_page.py"
 
 H1 = re.compile(r"^(\d+)\.\s+(\S.{0,40})$")

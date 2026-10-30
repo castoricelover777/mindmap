@@ -4,9 +4,11 @@
 黑马课件不用 Heading 样式，靠「1.1.1」编号表达层级，所以按编号深度切分。
 """
 import io, json, os, re
+import os
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-SRC_DIR = r"E:\mindmap\graph\_src"
-OUT = r"E:\mindmap\graph\data\courseware.json"
+SRC_DIR = os.path.join(ROOT, "graph", "_src")
+OUT = os.path.join(ROOT, "graph", "data", "courseware.json")
 
 FILES = [
     ("02", "前端Web开发",        r"F:\JavaBlog\tools\_docx_02_前端Web开发.txt"),

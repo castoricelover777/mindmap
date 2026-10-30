@@ -6,15 +6,16 @@
 
 | 项 | 数量 |
 |---|---|
-| 知识点（概念） | 92，分 7 层（其中 20 个是「未学」，网图用虚线框标出） |
+| 知识点（概念） | 101，分 7 层（其中 29 个是「未学」，网图用虚线框标出） |
 | 场景（业务逻辑） | 4：用户注册全链路 / 部门管理 CRUD / 员工管理 CRUD / 参考与附录 |
-| 环节（步骤） | 94 |
-| 细节 | 558 |
-| 关系边 | 190（场景→知识点 143 + 概念间 47） |
+| 环节（步骤） | 104 |
+| 细节 | 627 |
+| 关系边 | 206（场景→知识点 159 + 概念间 47） |
 | 母题 | 4 |
-| 跨场景复用概念 | 35 |
+| 跨场景复用概念 | 37 |
 
-四个场景的细节量：注册 228、部门 171、员工 106、附录 53（合 558，与顶部「未标记」总数 562 = 558 + 4 个无子项环节 一致）。
+四个场景的细节量：注册 228、部门 171、员工 175、附录 53（合 627）。
+页面顶部「未标记」= 概念 101 + 细节卡 627 + MySQL 88 = **816**，鼠标悬停可看明细。
 
 ## 目录
 
@@ -22,7 +23,8 @@
 |---|---|
 | `data/concepts.json` | 72 个知识点（层 / 一句话 / 学习日期 / 集数） |
 | `data/scenario-register.json` | 注册场景 6 阶段 / 44 环节 / 228 细节 |
-| `data/scenario-dept.json` | 部门场景 6 阶段 / 19 环节 / 171 细节 |
+| `data/scenario-dept.json` | 部门场景 6 阶段 / 19 环节 / 171 细节 |
+| `data/scenario-emp.json` | 员工场景 9 阶段 / 25 环节 / 175 细节（课件 08/09/10） |
 | `data/map-register.json` | 注册「环节 → 知识点」映射 |
 | `data/map-ref.json` | 附录「条目 → 知识点」映射 |
 | `data/edges.json` | 47 条概念间关系（依赖 / 对照 / 替代） |
@@ -37,7 +39,12 @@
 
 - `tools/author_content.py` —— **知识点库 / 母题 / 关系边 / 注册场景映射**
 - `tools/content_dept.py` —— **部门场景（19 环节 / 171 细节）**
+- `tools/content_emp.py` —— **员工管理场景（25 环节 / 175 细节）+ 29 个新增知识点**（课件 08/09/10）
 - `tools/build_page.py` —— **渲染器**（网状布局、聚焦成链、侧栏）
+- `tools/mobile_fix.py` —— 移动端顶栏 CSS，由 `build_page.py` 注入（生成物里的样式会被重建冲掉）
+
+> 注意：所有脚本的路径都基于 `__file__` 推导仓库根目录，换机器/换盘符不用改代码。
+> 新增内容步骤一律**追加在末尾**，避免 `st.emp.N` 编号位移导致已保存的学习标记错位。
 
 另外 `tools/build_index.py` 是 **`index.html`（导图+链）的生成器**：读 `_src/_orig/index.html` 与
 `_src/_orig/chain.html`（合并前的原始版），输出 `..\index.html`。实测重建结果与现文件
@@ -46,13 +53,15 @@
 ## 重新生成
 
 ```bash
-set PY=D:\dee\DSH Desktop\resources\office-runtime\primary-runtime\dependencies\python\python.exe
-%PY% graph\tools\parse_courseware.py      # 课件 docx -> courseware.json（课件变了才跑）
-%PY% graph\tools\parse_notes_register.py  # 笔记索引 + 注册场景（笔记变了才跑）
-%PY% graph\tools\author_content.py        # 内容层 + 校验（概念 id 拼错直接报错）
-%PY% graph\tools\build_graph.py           # 合并 -> graph.json（打印复用统计）
-%PY% graph\tools\build_page.py            # 内联 -> graph.html
+# 在仓库根目录执行；改动内容层时只需后三条
+python graph/tools/parse_courseware.py      # 课件 docx -> courseware.json（课件变了才跑）
+python graph/tools/parse_notes_register.py  # 笔记索引 + 注册场景（笔记变了才跑）
+python graph/tools/author_content.py        # 内容层 + 校验（概念 id 拼错直接报错）
+python graph/tools/build_graph.py           # 合并 -> graph.json（打印复用统计）
+python graph/tools/build_page.py            # 内联 -> graph.html
 ```
+
+实测：不改内容时 `build_page.py` 重建的 `graph.html` 与仓库版本**逐字节一致**（仅 `meta.built` 时间戳变化）。
 
 ## 数据约定
 
@@ -111,7 +120,7 @@ v4.8 起删除了「知识点链条」这一套视图（`renderRibbon` / `layout
 ## 现状
 
 - 已做：4 场景 / 92 概念 / 35 个复用点 / 4 条母题 / 标记迁移 / 网状↔链状切换 / 知识点侧栏 / 每场景独立的箭头标签 / 未学概念区分 / **母题独立视图**
-- 未做：时间轴拖动、移动端适配、班级与学员管理场景（讲义未提供）
+- 未做：时间轴拖动、班级与学员管理场景（讲义未提供）
 
 ## 母题视图（v4.2）
 

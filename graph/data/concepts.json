@@ -864,6 +864,87 @@
    "gloss": "把 OSS 的 endpoint/bucket 等写进 yml 再绑定到实体，不写死在代码里",
    "learned": null,
    "ep": null
+  },
+  {
+   "id": "c.file.form",
+   "label": "上传表单三要素",
+   "aka": "enctype=multipart/form-data",
+   "layer": "frontend",
+   "gloss": "file 域选文件 + POST 提交 + enctype 为 multipart/form-data，缺一后端就收不到文件",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.tx.sql",
+   "label": "事务控制三步",
+   "aka": "start transaction / commit / rollback",
+   "layer": "database",
+   "gloss": "先开启事务，全部成功则提交，任一失败则回滚，SQL 层面的原始写法",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.mvc.array-param",
+   "label": "数组 / 集合接收批量参数",
+   "aka": "String[] / List<Integer>",
+   "layer": "framework",
+   "gloss": "同名多值参数可收成数组；收成集合必须在形参前加 @RequestParam",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.mybatis.foreach",
+   "label": "foreach 拼 IN 条件",
+   "aka": "<foreach>",
+   "layer": "persistence",
+   "gloss": "批量删改时把集合拼成 (1,2,3)，一条 SQL 搞定，不循环发请求",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.mybatis.resultmap-collection",
+   "label": "一对多 resultMap 封装",
+   "aka": "<collection> / ofType",
+   "layer": "persistence",
+   "gloss": "一条 SQL 查出主表 + 子表，用 collection 把多行收进 List 属性",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.sql.dynamic-update",
+   "label": "动态 update",
+   "aka": "<set> / <if>",
+   "layer": "persistence",
+   "gloss": "只更新前端实际传了值的字段，set 标签自动去掉末尾多余逗号",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.db.unique",
+   "label": "唯一约束",
+   "aka": "unique",
+   "layer": "database",
+   "gloss": "列上加唯一约束后重复值直接报错，异常会一路抛到接口层",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.annotation.exception-handler",
+   "label": "@ExceptionHandler",
+   "aka": "@ExceptionHandler",
+   "layer": "framework",
+   "gloss": "标在方法上按异常类型捕获，配合 @RestControllerAdvice 做全局兜底",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.report.echarts",
+   "label": "ECharts 报表数据",
+   "aka": "ECharts",
+   "layer": "tooling",
+   "gloss": "图表由前端组件画，服务端只提供类目数组与对应的数值数组",
+   "learned": null,
+   "ep": null
   }
  ]
 }

@@ -4,8 +4,10 @@
 只有这个文件需要人工维护；改完重跑 build_graph.py 即可。
 """
 import io, json, os
+import os
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-OUT = r"E:\mindmap\graph\data"
+OUT = os.path.join(ROOT, "graph", "data")
 os.makedirs(OUT, exist_ok=True)
 
 # ---------------------------------------------------------------- 层

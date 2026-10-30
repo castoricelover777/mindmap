@@ -6,11 +6,13 @@
 - 零依赖单文件，数据内联
 """
 import io, json, os, re
+import os
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-GRAPH = r"E:\mindmap\graph\data\graph.json"
-MYSQL_JSON = r"E:\mindmap\graph\data\mysql.json"
-SRC_INDEX = r"E:\mindmap\index.html"
-OUT = r"E:\mindmap\graph.html"
+GRAPH = os.path.join(ROOT, "graph", "data", "graph.json")
+MYSQL_JSON = os.path.join(ROOT, "graph", "data", "mysql.json")
+SRC_INDEX = os.path.join(ROOT, "index.html")
+OUT = os.path.join(ROOT, "graph.html")
 
 
 def read(p):
