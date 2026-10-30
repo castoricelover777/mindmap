@@ -41,6 +41,18 @@ SRC_CSS = r"""
 #srcDClose{border:0;background:#f1efea;width:28px;height:28px;border-radius:7px;
   font-size:17px;line-height:1;color:#6b7280;cursor:pointer}
 
+/* 拖动改宽手柄 */
+#srcResize{position:absolute;top:0;right:-4px;width:9px;height:100%;cursor:col-resize;z-index:3}
+#srcResize::after{content:"";position:absolute;left:4px;top:50%;transform:translateY(-50%);
+  width:2px;height:46px;background:#dedad2;border-radius:2px}
+#srcResize:hover::after,#srcResize.on::after{background:#0d9488}
+/* 注释强度三档 */
+#srcCmt{display:flex;gap:2px;background:#efece6;border:1px solid #dedad2;border-radius:7px;
+  padding:2px;flex:none}
+#srcCmt button{border:0;background:transparent;padding:3px 7px;border-radius:5px;font-size:10.5px;
+  font-weight:700;color:#6b7280;cursor:pointer}
+#srcCmt button.on{background:#fff;color:#0f766e;box-shadow:0 1px 2px rgba(17,24,39,.12)}
+
 #srcCrumb{flex:none;padding:8px 14px;border-bottom:1px solid #f1eee8;font-size:11px;color:#9ca3af;
   white-space:nowrap;overflow-x:auto;font-family:var(--mono);background:#fff}
 #srcCrumb b{color:#111827;font-weight:700}
@@ -84,6 +96,11 @@ SRC_BODY = r"""
 <div id="srcDrawer">
   <div id="srcDTop">
     <span class="nm" id="srcDName">源码</span>
+    <span id="srcCmt" title="注释显示强度">
+      <button data-cmt="none">无注释</button>
+      <button data-cmt="brief">简略</button>
+      <button data-cmt="full">详细</button>
+    </span>
     <span class="sp"></span>
     <button id="srcPrev" title="上一个文件">‹</button>
     <button id="srcNext" title="下一个文件">›</button>
@@ -93,6 +110,7 @@ SRC_BODY = r"""
   <div id="srcCrumb"></div>
   <div id="srcMeta"></div>
   <div id="srcView"></div>
+  <div id="srcResize" title="拖动调整宽度"></div>
 </div>
 """
 
@@ -108,7 +126,8 @@ const SRC_LAYER_COLOR = {
 const SRC_ICON = { controller: "▣", service: "◈", mapper: "◉", pojo: "◆",
                    exception: "⚠", config: "⚙", utils: "✎", shared: "❖", dao: "◉" };
 
-const SRCV = { sid: null, active: false, expanded: new Set(), key: null, drawer: false, savedView: null };
+const SRCV = { sid: null, active: false, expanded: new Set(), key: null, drawer: false,
+               savedView: null, cmt: "full", raw: "" };
 
 const S_LAYER_W = 212, S_LAYER_H = 46, S_GAP_CL = 96;
 const S_CLASS_W = 250, S_CLASS_H = 36, S_GAP_LC = 70, S_CLASS_GAP = 7, S_LAYER_GAP = 12;
@@ -412,15 +431,21 @@ function openSrcDrawer(key){
     + (f.methods && f.methods.length ? ' · 方法: ' + sEsc(f.methods.join(", ")) : '');
 
   const isXml = /\.xml$/i.test(f.rel || f.name);
-  const body = isXml ? hlXml(f.code) : hlJava(f.code);
-  const n = f.code.split("\n").length;
+  const res = filterCode(f.code, SRCV.cmt, isXml);
+  const body = isXml ? hlXml(res.text) : hlJava(res.text);
+  const n = res.text.split("\n").length;
   let gut = "";
   for (let i = 1; i <= n; i++) gut += i + (i < n ? "\n" : "");
   $("srcView").innerHTML = '<div class="box"><div id="srcGut"></div><pre id="srcPre"></pre></div>';
   $("srcGut").textContent = gut;
   $("srcPre").innerHTML = body;
+  $("srcView").scrollTop = 0;
+  if (res.shown !== res.total){
+    $("srcMeta").innerHTML += ' · 显示 <b>' + res.shown + '</b>/' + res.total + ' 行（已省注释）';
+  }
   $("srcDrawer").classList.add("show");
   SRCV.drawer = true;
+  markCmtButtons();
 }
 
 function closeSrcDrawer(){
@@ -439,6 +464,134 @@ function srcStep(d){
   i = (i < 0) ? 0 : (i + d + list.length) % list.length;
   srcPick(list[i]);
 }
+
+
+/* ---------- 注释强度：无 / 简略 / 详细 ---------- */
+function commentRanges(code, isXml){
+  const R = [];
+  let i = 0;
+  const n = code.length;
+  while (i < n){
+    const c = code[i], c2 = code[i + 1];
+    if (!isXml && (c === '"' || c === "'")){
+      const q = c; i++;
+      while (i < n && code[i] !== q){ if (code[i] === "\\") i++; i++; }
+      i++; continue;
+    }
+    if (isXml && c === "<" && code.substr(i, 4) === "<!--"){
+      const e = code.indexOf("-->", i + 4);
+      const end = (e < 0) ? n : e + 3;
+      R.push({ s: i, e: end, block: true }); i = end; continue;
+    }
+    if (!isXml && c === "/" && c2 === "/"){
+      let e = code.indexOf("\n", i); if (e < 0) e = n;
+      R.push({ s: i, e: e, block: false }); i = e; continue;
+    }
+    if (!isXml && c === "/" && c2 === "*"){
+      const e = code.indexOf("*/", i + 2);
+      const end = (e < 0) ? n : e + 2;
+      R.push({ s: i, e: end, block: true }); i = end; continue;
+    }
+    i++;
+  }
+  return R;
+}
+
+/* full = 原样；brief = 去掉块注释（保留 // 行注释）；none = 去掉全部注释
+   去掉注释后整行变空的会被删除，所以行号是重新排的 */
+function filterCode(code, mode, isXml){
+  const lines0 = code.split("\n");
+  const total = lines0.length;
+  if (!mode || mode === "full") return { text: code, total: total, shown: total };
+  const R = commentRanges(code, isXml);
+  const mask = new Uint8Array(code.length);
+  R.forEach(r => {
+    const on = (mode === "none") || (mode === "brief" && r.block);
+    if (!on) return;
+    for (let k = r.s; k < r.e; k++) mask[k] = 1;
+  });
+  const out = [];
+  let start = 0;
+  for (let ln = 0; ln < total; ln++){
+    let stop = code.indexOf("\n", start);
+    if (stop < 0) stop = code.length;
+    let kept = "";
+    for (let k = start; k < stop; k++) if (!mask[k]) kept += code[k];
+    kept = kept.replace(/[ \t]+$/, "");
+    if (kept.trim()) out.push(kept);
+    start = stop + 1;
+  }
+  return { text: out.join("\n"), total: total, shown: out.length };
+}
+
+function markCmtButtons(){
+  document.querySelectorAll("#srcCmt button").forEach(b => {
+    b.classList.toggle("on", b.getAttribute("data-cmt") === SRCV.cmt);
+  });
+}
+function setCmt(mode){
+  SRCV.cmt = mode || "full";
+  markCmtButtons();
+  try { localStorage.setItem("mm-src-cmt", SRCV.cmt); } catch (e) {}
+  if (SRCV.key) openSrcDrawer(SRCV.key);   // 立即按新强度重排
+}
+(function(){
+  try {
+    const v = localStorage.getItem("mm-src-cmt");
+    if (v === "none" || v === "brief" || v === "full") SRCV.cmt = v;
+  } catch (e) {}
+  document.querySelectorAll("#srcCmt button").forEach(b => {
+    b.onclick = ev => { ev.stopPropagation(); setCmt(b.getAttribute("data-cmt")); };
+  });
+  markCmtButtons();
+})();
+
+/* ---------- 拖宽：拖抽屉右边缘 ---------- */
+(function(){
+  const d = $("srcDrawer"), h = $("srcResize");
+  if (!d || !h) return;
+  try {
+    const w = localStorage.getItem("mm-src-width");
+    if (w) d.style.width = w;
+  } catch (e) {}
+  let on = false, sx = 0, sw = 0;
+  h.addEventListener("mousedown", ev => {
+    ev.preventDefault(); ev.stopPropagation();
+    on = true; sx = ev.clientX; sw = d.getBoundingClientRect().width;
+    h.classList.add("on");
+    document.body.style.userSelect = "none";
+    document.body.style.cursor = "col-resize";
+  });
+  window.addEventListener("mousemove", ev => {
+    if (!on) return;
+    const w = Math.max(320, Math.min(window.innerWidth - 240, sw + (ev.clientX - sx)));
+    d.style.width = w + "px";
+  });
+  window.addEventListener("mouseup", () => {
+    if (!on) return;
+    on = false; h.classList.remove("on");
+    document.body.style.userSelect = "";
+    document.body.style.cursor = "";
+    try { localStorage.setItem("mm-src-width", d.style.width); } catch (e) {}
+  });
+  // 触摸
+  h.addEventListener("touchstart", ev => {
+    const tp = ev.touches[0];
+    on = true; sx = tp.clientX; sw = d.getBoundingClientRect().width;
+    h.classList.add("on");
+  }, { passive: true });
+  window.addEventListener("touchmove", ev => {
+    if (!on) return;
+    const tp = ev.touches[0];
+    const w = Math.max(320, Math.min(window.innerWidth - 120, sw + (tp.clientX - sx)));
+    d.style.width = w + "px";
+  }, { passive: true });
+  window.addEventListener("touchend", () => {
+    if (!on) return;
+    on = false; h.classList.remove("on");
+    try { localStorage.setItem("mm-src-width", d.style.width); } catch (e) {}
+  });
+})();
 
 /* ---------- 事件 ---------- */
 $("srcDClose").onclick = closeSrcDrawer;
