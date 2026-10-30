@@ -6,11 +6,13 @@
 - 零依赖单文件，数据内联
 """
 import io, json, os, re
+from source_view import SRC_CSS, SRC_BODY, SRC_JS
 import os
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 GRAPH = os.path.join(ROOT, "graph", "data", "graph.json")
 MYSQL_JSON = os.path.join(ROOT, "graph", "data", "mysql.json")
+SOURCE_JSON = os.path.join(ROOT, "graph", "data", "source.json")
 SRC_INDEX = os.path.join(ROOT, "index.html")
 OUT = os.path.join(ROOT, "graph.html")
 
@@ -327,7 +329,7 @@ BODY = r"""
   <div class="topbar">
     <div class="brand">
       <h1>前后端知识图谱</h1>
-      <span class="sub" id="brandsub">点场景高亮 → 再点一次排成长链</span>
+      <span class="sub" id="brandsub">点场景高亮 · 双击看源码 · 再点一次排成长链</span>
     </div>
     <div class="spacer"></div>
     <div class="seg">
@@ -338,6 +340,7 @@ BODY = r"""
       <a href="llm.html" style="margin-left:6px">数据分析</a></div>
     <div class="chips" id="chips"></div>
     <div class="stats" id="stats"></div>
+    <button id="btn-src">源码</button>
     <button id="btn-fit">适应窗口</button>
     <div class="zoom">
       <button id="btn-out">−</button><span class="val" id="zoomval">100%</span><button id="btn-in">+</button>
@@ -797,6 +800,10 @@ function renderNet(keep){
         ev.stopPropagation();
         if (armedScenario === n.id) focusScenario(n.id); else armScenario(n.id);
       });
+      g.addEventListener("dblclick", ev => {
+        ev.stopPropagation();
+        if (window.openSrc) window.openSrc(n.id);
+      });
       gN.appendChild(g);
       return;
     }
@@ -1176,7 +1183,7 @@ function backToNet(){
   $("legend").style.display = "";
   $("panel").classList.remove("show");
   panelCid = null;
-  $("brandsub").textContent = "点场景高亮 → 再点一次排成长链";
+  $("brandsub").textContent = "点场景高亮 · 双击看源码 · 再点一次排成长链";
   $("hint").innerHTML = "<b>点场景</b>淡化无关 · <b>再点一次</b>排成链条 · <b>点知识点</b>看详情 · <b>点母题</b>看横贯线索";
   renderNet(false);
   if (oldPts && Object.keys(oldPts).length) flipFrom(oldPts);
@@ -1632,11 +1639,15 @@ def main():
     chain = chain.replace('"响应 JSON + 200 回到前端，渲染提示"', '(DATA.returnNote || "")')
 
     mysql = json.load(io.open(MYSQL_JSON, encoding="utf-8"))
+    source = json.load(io.open(SOURCE_JSON, encoding="utf-8"))
     js = JS.replace("__GRAPH__", json.dumps(graph, ensure_ascii=False, separators=(",", ":")))
     js = js.replace("__MYSQL__", json.dumps(mysql, ensure_ascii=False, separators=(",", ":")))
     js = js.replace("__CHAINVIEW__", chain)
     page = HTML.replace("__CSS__", CSS).replace("__BODY__", BODY).replace("__JS__", js)
     page = page.replace("<style>", "<style>" + PANEL_FIX, 1)
+    page = page.replace("</style>", SRC_CSS + "\n</style>", 1)
+    page = page.replace("</body>", SRC_BODY + SRC_JS + "\n</body>", 1)
+    page = page.replace("__SRC__", json.dumps(source, ensure_ascii=False, separators=(",", ":")))
     io.open(OUT, "w", encoding="utf-8", newline="\n").write(page)
     print("写出", OUT, os.path.getsize(OUT), "bytes")
     print("  概念", len(graph["concepts"]), " 场景", len(graph["scenarios"]),

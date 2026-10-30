@@ -34,6 +34,7 @@
 | `data/notes-index.json` | 54 篇笔记的日期 / 集数范围 |
 | `data/graph.json` | 渲染器唯一输入 |
 | `_src/*.txt` | 课件 docx 抽取的纯文本 |
+| `data/source.json` | 源码索引：48 个文件 / 2 个工程 / 5 个场景的三层映射 |
 | `_shots/*.png` | 效果图 |
 
 ## 只有三个文件需要人工维护
@@ -42,6 +43,8 @@
 - `tools/content_dept.py` —— **部门场景（19 环节 / 171 细节）**
 - `tools/content_emp.py` —— **员工管理场景（25 环节 / 175 细节）+ 29 个新增知识点**（课件 08/09/10）
 - `tools/content_clazz.py` —— **班级与学员管理场景（20 环节 / 100 细节）+ 3 个新增知识点**（课件 11 + 接口文档）
+- `tools/source_view.py` —— **源码视图**（左三层树 + 右高亮代码 + 目录面包屑）
+- `tools/build_source_index.py` —— **源码索引生成器**（扫描 Maven 工程 → data/source.json）
 - `tools/build_page.py` —— **渲染器**（网状布局、聚焦成链、侧栏）
 - `tools/mobile_fix.py` —— 移动端顶栏 CSS，由 `build_page.py` 注入（生成物里的样式会被重建冲掉）
 
@@ -118,6 +121,38 @@ v4.8 起删除了「知识点链条」这一套视图（`renderRibbon` / `layout
 
 **覆盖边界**：课件 05/06 只到「MySQL 概述 + DDL/DML/DQL + JDBC/MyBatis」。
 索引原理、MVCC、锁、主从、分库分表在这些课件里**没有**（词频为 0），所以栏目里也没有 —— 需要补的话得先补课件。
+
+## 源码视图（v6.0）
+
+选中场景后点顶栏「源码」，或**双击场景卡**，左侧滑出源码浏览器：
+左栏是三层架构（Controller / Service / Mapper / Pojo / 异常 / 配置 / 工具），
+默认折叠，点开展开该类下的文件；右栏是带行号与语法高亮的源码，
+顶部给出 **Maven 目录面包屑 + package + 行数 + 方法名**，可「上一个/下一个」翻页，
+也可一键复制代码。
+
+**数据来源**（源码不在本仓库，构建时扫描并内联，产物仍是自包含单文件）：
+
+| 工程 | 路径 | 用于 |
+|---|---|---|
+| `tlias-web-management` | `D:\web-ai-project02\tlias-web-management` | 部门 / 员工 / 班级学员（统计部分） |
+| `springboot-web-case` | `F:\myusb\web-ai-code\web-project01\springboot-web-case` | 用户注册（早期三层示例，Dao 而非 Mapper） |
+
+场景 → 文件的映射写在 `tools/build_source_index.py` 的 `scene(...)` 调用里，改映射就改它。
+
+**覆盖实情**：
+- 注册链路用的是早期示例工程（Controller → Service → Dao），另有 UserController2/3、
+  UserServiceImpl2、UserDaoImpl2 是课件变体，未列入
+- 第 11 节是「照接口文档自己完成」的作业，`ClazzController` / `StudentController` 等**源码不存在**，
+  班级场景只列已实现的统计部分（Report*）与公共类，页面左栏顶部会显示这条说明
+
+**重新生成源码索引**（源码变了才需要跑）：
+
+```bash
+python graph/tools/build_source_index.py   # 扫描两个工程 -> data/source.json
+python graph/tools/build_page.py           # 内联进 graph.html
+```
+
+U 盘未插时 tlias 工程会被跳过，沿用上一篇 `source.json`，不会报错。
 
 ## 现状
 
