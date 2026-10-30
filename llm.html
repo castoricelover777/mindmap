@@ -176,6 +176,36 @@
 @media (max-width: 420px){
   .seg a{font-size:10.5px !important;padding:7px 1px !important}
 }
+/* === 标记下拉（窄屏可见性修复）=== */
+.mkmenu{position:relative;flex:none}
+.mklist{position:absolute;right:0;top:calc(100% + 6px);display:none;flex-direction:column;gap:3px;
+  background:#fff;border:1px solid #dedad2;border-radius:9px;padding:5px;min-width:138px;
+  box-shadow:0 10px 26px rgba(17,24,39,.16);z-index:60}
+.mkmenu.open .mklist{display:flex}
+.mklist button{width:100%;text-align:left;border:0;background:#fff;border-radius:6px;
+  padding:7px 10px;font-size:11.5px;color:#374151}
+.mklist button:hover{background:#f2efe9}
+.mkmenu.open>#btn-mk{background:#e8f4f2;border-color:#9fd3cc;color:#0f766e}
+
+@media (max-width: 1280px){
+  .topbar{gap:8px;padding:0 10px;flex-wrap:nowrap}
+  .brand{flex:none}
+  .brand h1{font-size:13px;white-space:nowrap}
+  .brand .sub{display:none}
+  .seg{flex:none}
+  .seg a{padding:5px 7px;font-size:11px}
+  .btns{flex-wrap:nowrap;gap:4px;flex:none}
+  .btns button{padding:5px 7px;font-size:11px}
+  .stats{font-size:10px;gap:6px;flex:none}
+  #btn-mk{padding:5px 8px;font-size:11px}
+  .zoom{flex:none}
+}
+@media (max-width: 1080px){
+  .brand{display:none}
+  .seg a{padding:5px 6px;font-size:10.5px}
+  .btns button{padding:5px 6px;font-size:10.5px}
+  .stats{gap:5px;font-size:9.5px}
+}
 </style>
 </head>
 <body>
@@ -199,10 +229,15 @@
       <button id="btn-fit">适应窗口</button>
     </div>
     <div class="stats" id="stats"></div>
-      <button id="btn-export">导出标记</button>
-    <button id="btn-import">导入标记</button>
-    <input type="file" id="file-import" accept=".json,application/json" style="display:none">
-    <button id="btn-reset">清空标记</button>
+      <div class="mkmenu" id="mkmenu">
+      <button id="btn-mk" title="标记：导出 / 导入 / 清空">标记 ▾</button>
+      <div class="mklist" id="mklist">
+        <button id="btn-export">导出标记</button>
+        <button id="btn-import">导入标记</button>
+        <button id="btn-reset">清空标记</button>
+        <input type="file" id="file-import" accept=".json,application/json" style="display:none">
+      </div>
+    </div>
     <div class="zoom">
       <button id="btn-out">−</button><span class="val" id="zoomval">100%</span><button id="btn-in">+</button>
     </div>
@@ -830,5 +865,27 @@ window.addEventListener("resize", () => { clearTimeout(window._t); window._t = s
 })();
 </script>
 
+
+<script>
+/* 标记下拉：点按钮开合，点别处 / 选完自动收起 */
+(function(){
+  const menu = document.getElementById("mkmenu");
+  const btn  = document.getElementById("btn-mk");
+  if (!menu || !btn) return;
+  const close = () => menu.classList.remove("open");
+  btn.addEventListener("click", ev => {
+    ev.stopPropagation();
+    menu.classList.toggle("open");
+  });
+  document.addEventListener("click", ev => {
+    if (!menu.contains(ev.target)) close();
+  }, true);
+  // 点击下拉里的任意一项（导出/导入/清空）后收起
+  menu.querySelector(".mklist").addEventListener("click", ev => {
+    if (ev.target.tagName === "BUTTON") setTimeout(close, 0);
+  });
+  document.addEventListener("keydown", ev => { if (ev.key === "Escape") close(); });
+})();
+</script>
 </body>
 </html>
