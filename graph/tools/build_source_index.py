@@ -3,7 +3,7 @@
 build_source_index.py —— 扫描源码工程，生成 graph/data/source.json
 
 两个工程：
-  tlias    D:\\web-ai-project02\\tlias-web-management   部门/员工/统计（当前主线工程）
+  tlias    D:\\project\\web-ai-project02\\tlias-web-management   部门/员工/统计（当前主线工程）
   webcase  F:\\myusb\\web-ai-code\\web-project01\\springboot-web-case   用户注册（早期三层示例）
 
 产出结构：
@@ -21,7 +21,7 @@ PROJECTS = {
     "tlias": {
         "name": "tlias-web-management",
         "kind": "Maven / Spring Boot",
-        "root": r"D:\web-ai-project02\tlias-web-management",
+        "root": r"D:\project\web-ai-project02\tlias-web-management",
     },
     "webcase": {
         "name": "springboot-web-case",
@@ -29,6 +29,14 @@ PROJECTS = {
         "root": r"F:\myusb\web-ai-code\web-project01\springboot-web-case",
     },
 }
+
+def load_prev():
+    """读取上一次的 source.json，用于工程根目录不可用时兜底保留"""
+    try:
+        with io.open(OUT, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 OUT = os.path.join(ROOT, "graph", "data", "source.json")
@@ -73,7 +81,17 @@ stats = {"scanned": 0, "kept": 0, "skipped_big": 0}
 def scan(pid, proj):
     root = proj["root"]
     if not os.path.isdir(root):
-        print("  [跳过] 工程不存在:", root)
+        # 根目录不在：沿用上一次 source.json 里该工程的文件，避免整块消失
+        prev = load_prev()
+        kept = 0
+        for k, v in (prev.get("files") or {}).items():
+            if v.get("proj") == pid:
+                files[k] = v
+                kept += 1
+        if kept:
+            print("  [沿用旧索引] 工程不存在: %s → 保留 %d 个文件" % (root, kept))
+        else:
+            print("  [跳过] 工程不存在:", root)
         return
     for dirpath, dirnames, filenames in os.walk(root):
         dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS]
