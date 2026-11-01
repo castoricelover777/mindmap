@@ -1071,6 +1071,60 @@
    "gloss": "浏览器 multipart/form-data 上传，后端 MultipartFile 接住转存 OSS，返回可访问 URL 存库",
    "learned": null,
    "ep": 133
+  },
+  {
+   "id": "c.biz.guard",
+   "label": "业务规则守卫",
+   "aka": "先判断再写库",
+   "layer": "framework",
+   "gloss": "删除/扣分这类写操作前，先在 Service 层判断业务规则，不满足就抛异常，而不是靠数据库兜底",
+   "learned": null,
+   "ep": 110
+  },
+  {
+   "id": "c.sql.atomic",
+   "label": "原子自增更新",
+   "aka": "set x = x + ?",
+   "layer": "persistence",
+   "gloss": "计数与累积分数在一条 SQL 里完成，避免「先查后改」被并发覆盖",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.mybatis.anno-sql",
+   "label": "注解式 SQL",
+   "aka": "@Update / @Select",
+   "layer": "persistence",
+   "gloss": "简单语句直接写在 Mapper 接口的注解里，省一个 XML；复杂动态 SQL 仍放 XML",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.db.dup-key",
+   "label": "唯一键冲突",
+   "aka": "DuplicateKeyException",
+   "layer": "database",
+   "gloss": "唯一约束在数据库层兜底，代码不用先查后插，冲突了转成可读提示",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.spec.src-vs-doc",
+   "label": "源码与文档不一致",
+   "aka": "以代码为准",
+   "layer": "tooling",
+   "gloss": "接口文档要求不等于代码已实现；写导图/写文档前必须先看代码实际在做什么",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.biz.count-guard",
+   "label": "关联计数守卫",
+   "aka": "count > 0 则拒绝",
+   "layer": "framework",
+   "gloss": "删主表前先 count 子表；数字要带进提示语，让用户知道还有几条挂着",
+   "learned": null,
+   "ep": null
   }
  ]
 }
