@@ -106,7 +106,18 @@ def main():
         "details": st["details"],
     } for i, st in enumerate(clz["steps"])]
 
-    scenarios = [reg, dept, emp, clz, ref]
+    # ---- 登录认证与权限校验场景（依据当前工程源码）----
+    lgn = rd("scenario-login.json")
+    lgn["steps"] = [{
+        "id": "st.login.%d" % i,
+        "label": st["label"],
+        "phase": st["phase"],
+        "color": lgn["phases"][st["phase"]]["color"],
+        "concepts": st["concepts"],
+        "details": st["details"],
+    } for i, st in enumerate(lgn["steps"])]
+
+    scenarios = [reg, dept, emp, clz, ref, lgn]
 
     # 链视图的「传递物」标签与回流文案：每个场景各不相同，不能写死
     reg["flow"] = ["JSON 字符串", "HTTP 请求报文", "User 对象", "insert(user)", "受影响行数 int"]

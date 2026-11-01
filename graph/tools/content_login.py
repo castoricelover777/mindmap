@@ -1,0 +1,216 @@
+# -*- coding: utf-8 -*-
+"""登录认证与权限校验场景（讲义 122~132 集）。
+
+依据 **当前工程源码** 撰写，不是照课件抄：
+  controller/LoginController.java      登录入口（单独一个 Controller，便于白名单排除）
+  utils/JwtUtils.java                  签发 / 解析（HS256，12 小时有效）
+  constant/LoginConstants.java         头名 token、request attribute key
+  filter/LoginCheckFilter.java         粗过滤：白名单 / OPTIONS / 有没有 token
+  interceptor/LoginCheckInterceptor.java  精校验：验签 + 过期 + 挂 Claims 到 request
+  config/WebConfig.java                注册 Filter(order=1)、Interceptor 路径、uploads 静态映射
+  exception/GlobalExceptionHandler.java 全局兜底
+
+场景编号 s.login，步骤 s.login.N。
+"""
+
+EXTRA_CONCEPTS_LOGIN = [
+  # (id, 中文标签, 英文/注解, 层, 一句话, learned, ep)
+  ("c.auth.jwt", "JWT 令牌", "header.payload.signature", "framework",
+   "服务端不存 session：登录成功签发一段带签名的字符串，客户端每次带上，验签通过即视为已登录", None, 124),
+  ("c.auth.payload", "payload 只编码不加密", "Base64Edcode（非加密）", "framework",
+   "JWT 的 payload 谁都能解出来看，所以只放 id / username / name，绝不放密码", None, 124),
+  ("c.auth.sign", "签名防篡改", "HS256 + SECRET", "framework",
+   "用密钥对前两段做 HMAC 签名，改一个字符验签就失败；密钥泄露等于任何人都能伪造令牌", None, 125),
+  ("c.auth.expire", "过期时间 exp", "ExpiredJwtException", "framework",
+   "签发时写入过期时间，解析时过期会抛异常；本项目 12 小时，过期即要求重新登录", None, 125),
+  ("c.auth.filter-vs-interceptor", "过滤器 vs 拦截器", "Filter（粗）→ Interceptor（精）", "framework",
+   "Filter 在 Servlet 层拦所有请求，只做白名单和「有没有 token」；Interceptor 在 MVC 层做验签与过期判断", None, 130),
+  ("c.auth.request-attr", "request attribute 传登录人", "setAttribute / getAttribute", "framework",
+   "验签结果挂到本次请求属性上，Controller 与 AOP 直接取用，生命周期正好一次请求", None, 131),
+  ("c.auth.whitelist", "白名单与 OPTIONS 放行", "excludePathPatterns / 预检请求", "framework",
+   "登录接口、静态资源、跨域预检必须放行，否则前端连登录都调不通", None, 128),
+  ("c.auth.token-header", "请求头携带 token", "token: xxx", "protocol",
+   "前后端约定同一个头名，前端 axios 请求拦截器统一加，后端 request.getHeader 取", None, 129),
+  ("c.auth.401", "统一未登录响应", "code=0 + 提示文案", "protocol",
+   "校验失败直接写回统一结构、不进 Controller，前端据此跳登录页", None, 132),
+  ("c.auth.registration", "Filter 用 Bean 注册", "FilterRegistrationBean + order", "framework",
+   "不用 @WebFilter：那样实例由容器创建、不在 Spring 容器里，@Autowired 会拿到 null", None, 128),
+  ("c.upload.oss", "上传到对象存储", "MultipartFile → OSS → URL", "framework",
+   "浏览器 multipart/form-data 上传，后端 MultipartFile 接住转存 OSS，返回可访问 URL 存库", None, 133),
+]
+
+
+LOGIN = {
+ "id": "s.login", "label": "登录认证与权限校验", "sub": "JWT + 过滤器 + 拦截器",
+ "color": "#4F46E5", "source": "当前工程源码：LoginController / JwtUtils / LoginCheckFilter / LoginCheckInterceptor / WebConfig",
+ "phases": [
+   {"label": "认证入口", "color": "#B91C1C"},
+   {"label": "签发令牌", "color": "#C2410C"},
+   {"label": "携带与粗过滤", "color": "#0E7490"},
+   {"label": "精校验", "color": "#4F46E5"},
+   {"label": "放行之后", "color": "#047857"},
+ ],
+ "flow": ["校验账号", "签发 JWT", "带上 token", "验签放行", "取当前登录人"],
+ "returnNote": "登录只需一次；之后每个请求都走「带 token → 粗过滤 → 精校验 → Controller」这条固定流水线",
+ "steps": [
+  # ---------------------------------------------------------------- 认证入口
+  {"label": "1.1 为什么登录单独一个 Controller", "phase": 0,
+   "concepts": ["c.springmvc.mapping", "c.annotation.requestbody", "c.auth.token-header"],
+   "details": [
+     "LoginController 只有 `@RestController`，**没有类级 @RequestMapping**，方法上直接写 `@PostMapping(\"/login\")`：登录路径就是 /login，不该挂在 /emps 下面。",
+     "源码注释给了理由：/login 是「认证入口」，要在拦截器白名单里排除（不能要求先登录）；单独一个类，路径和职责都清楚，配白名单时不容易漏。",
+     "入参用 `@RequestBody Emp emp`：前端只传 username / password，其余字段（name、deptId…）被忽略。",
+     "返回 `Result`：成功 `code=1` 且 data 里带 token；失败 `code=0`、msg=「用户名或密码错误」。",
+     "控制器只做三件事：打日志、调 `empService.login(emp)`、包装返回；账号校验逻辑不在 Controller 里。",
+     "日志只记 username，不记 password —— 密码进日志是最常见的低级泄露。",
+   ]},
+  {"label": "1.2 账号校验：不区分「用户不存在」和「密码错」", "phase": 0,
+   "concepts": ["c.auth.jwt", "c.exception.custom"],
+   "details": [
+     "`empService.login(emp)` 返回 `LoginInfo`；返回 null 就说明校验没过（用户不存在、密码不对都归为 null）。",
+     "源码注释写明：**不区分「用户不存在」和「密码错误」**，避免接口被拿来枚举账号——攻击者无法判断某个用户名是否真实存在。",
+     "密码在库里是密文（本例用简单摘要），比对时是「把明文按同样规则算一遍再比」，不是把库里的密文解出来。",
+     "登录成功后把 `id / username / name` 放进 claims —— 只放这几个，够用即可。",
+     "为什么不在 Session 里存登录态：前后端分离后跨域、多实例，Session 不好共享，JWT 天然无状态。",
+     "`LoginInfo` 是专门的出参对象：`{id, username, name, token}`，和 `Emp` 实体分开，避免把手机号、密码等字段顺手返回给前端。",
+   ]},
+
+  # ---------------------------------------------------------------- 签发令牌
+  {"label": "2.1 JWT 三段结构：header.payload.signature", "phase": 1,
+   "concepts": ["c.auth.jwt", "c.auth.sign"],
+   "details": [
+     "JWT 是一段「带签名的字符串」，形如 `xxx.yyy.zzz`，三段分别是 header、payload、signature，用 `.` 分隔。",
+     "header：声明算法，本项目固定 `HS256`（对称密钥，签发和校验用同一个 SECRET）。",
+     "payload：我们自己塞的数据 —— claims 里的 id / username / name，外加自动写入的过期时间 `exp`。",
+     "signature：用 SECRET 对「前两段」做 HMAC 计算的结果；改动 header 或 payload 任何一个字符，签名就对不上。",
+     "所以 JWT 保证的是**完整性（没被改）**，不是**保密性（看不到）**——这两件事经常被混为一谈。",
+     "对比 Session：Session 是「服务端存状态 + 客户端只拿一个 id」；JWT 是「状态全在客户端 + 服务端只验签」，服务端无状态、扩容不用同步。",
+   ]},
+  {"label": "2.2 签发：generate(claims) 做了什么", "phase": 1,
+   "concepts": ["c.auth.jwt", "c.auth.expire"],
+   "details": [
+     "`JwtUtils.generate(Map<String,Object> claims)` 用 `Jwts.builder()` 依次设置 claims、过期时间、签名算法，最后 `compact()` 成字符串。",
+     "过期时间写成 `System.currentTimeMillis() + EXPIRE_MS`，本项目 `EXPIRE_MS = 12 小时`。",
+     "签名用 `signWith(SignatureAlgorithm.HS256, SECRET)`；SECRET 是常量字符串，源码注释明确写了「真实项目应放配置/环境变量」。",
+     "HS256 要求密钥足够长（注释建议 ≥ 32 字节），密钥太短容易被暴力破解。",
+     "工具类设计成**私有构造 + 全静态方法**，不允许 new，避免无意义实例。",
+     "为什么把工具类放在 utils 而不是做成 Spring Bean：它没有依赖、无状态，静态调用最省事，拦截器和 Service 都能直接用。",
+   ]},
+  {"label": "2.3 payload 是 Base64 编码，不是加密", "phase": 1,
+   "concepts": ["c.auth.payload"],
+   "details": [
+     "把 JWT 中间那段拿去 Base64 解码，就能看到 `{\"id\":1,\"username\":\"shinaian\",\"name\":\"施耐庵\"}`——**谁都能解**。",
+     "所以 payload 里绝不能放密码、身份证号、手机号这类敏感信息；只放「用来标识身份」的字段。",
+     "签名只保证「这段内容没被改过」，不保证「别人看不见」。",
+     "想让人看不见，只能在上层自己再加密，或者干脆别放进去。",
+     "这也是为什么 claims 里放 id 就够：真正需要更多信息时，用 id 回查数据库。",
+     "面试常问：JWT 能不能防篡改？能。能不能防泄露？不能。",
+   ]},
+
+  # ---------------------------------------------------------------- 携带与粗过滤
+  {"label": "3.1 前端统一携带 token", "phase": 2,
+   "concepts": ["c.auth.token-header", "c.auth.whitelist"],
+   "details": [
+     "头名由 `LoginConstants.HEADER_TOKEN = \"token\"` 统一约定，前端 axios 请求拦截器里写的是同一个字符串。",
+     "源码注释点出了集中放常量的好处：改一处即全局生效，不会出现 Filter 写 `LOGIN_CLAIMS`、Interceptor 写 `loginClaims` 这种「看着一样实际不匹配」的 bug。",
+     "前端在 axios 请求拦截器里统一加，业务代码不用每个请求都写一遍。",
+     "token 放在请求头而不是 URL 参数：URL 会进浏览器历史、代理日志、Referer，泄露面大得多。",
+     "除了登录接口，其余接口一律带 token；不带就是未登录。",
+     "静态资源（图片、CSS）不带头也没关系，它们不在校验范围里。",
+   ]},
+  {"label": "3.2 Filter：只做「粗过滤」", "phase": 2,
+   "concepts": ["c.auth.filter-vs-interceptor", "c.auth.whitelist", "c.auth.registration"],
+   "details": [
+     "`LoginCheckFilter` 的职责被刻意压到最小：安全响应头、白名单判断、放行 OPTIONS 预检、检查请求头里**有没有 token**。",
+     "它**不做验签**：验签要算 HMAC-SHA256，属于业务鉴权，放在 MVC 层更合适。",
+     "白名单：/login 登录接口、静态资源、错误页必须放行，否则前端连登录都调不通。",
+     "OPTIONS 请求必须放行：跨域预检不带 token，拦掉会让所有跨域请求失败。",
+     "注册方式用 `FilterRegistrationBean` 而不是 `@WebFilter`：后者实例由 Servlet 容器创建、不在 Spring 容器里，`@Autowired` 会拿到 null。",
+     "`addUrlPatterns(\"/*\")` + `setOrder(1)`：拦所有请求，排在编码过滤器之后、业务过滤器之前；`setName` 让日志能看出是哪个 Filter。",
+   ]},
+  {"label": "3.3 为什么拦截器还要再判一次 token", "phase": 2,
+   "concepts": ["c.auth.filter-vs-interceptor"],
+   "details": [
+     "拦截器 `preHandle` 里取完 token 仍然判一次 `StringUtils.hasLength(token)`，源码注释说是**防御性写法**。",
+     "理由：万一以后有人改了 Filter 的 urlPatterns，或者新加了不经过 Filter 的路径，拦截器这一层还能兜住。",
+     "两层校验不是重复劳动：Filter 管「有没有」，Interceptor 管「对不对」。",
+     "这也解释了为什么两个类都要，而不是合并成一个。",
+     "从日志能看出分工：Filter 打「未带 token」，Interceptor 打「token 校验失败，原因: ExpiredJwtException」。",
+     "排错时先看是哪一条日志，就知道问题卡在哪一层。",
+   ]},
+
+  # ---------------------------------------------------------------- 精校验
+  {"label": "4.1 Interceptor 精校验：验签 + 过期", "phase": 3,
+   "concepts": ["c.auth.filter-vs-interceptor", "c.auth.expire", "c.auth.401"],
+   "details": [
+     "`LoginCheckInterceptor implements HandlerInterceptor`，重写 `preHandle`，在 Controller 方法执行**之前**调用。",
+     "核心一行：`claims = JwtUtils.parse(token)`——整个请求里**唯一一次**解析 token 的地方。",
+     "解析失败会抛三类异常：`ExpiredJwtException`（过期）、`SignatureException`（签名错，说明被改过）、`MalformedJwtException`（格式不对）。",
+     "catch 住后统一 `reject(response)`：直接写回未登录响应，`return false` 中断，不再进 Controller。",
+     "日志用 `e.getClass().getSimpleName()` 打出具体原因，排错时能立刻区分「过期」和「被篡改」。",
+     "为什么验签放 MVC 层：这里能拿到 `handler`（实际是 HandlerMethod），可以读方法、类、方法上的注解，后面做权限注解、记录操作人都方便。",
+   ]},
+  {"label": "4.2 验签通过：Claims 挂到 request 上", "phase": 3,
+   "concepts": ["c.auth.request-attr"],
+   "details": [
+     "`request.setAttribute(LoginConstants.ATTR_CLAIMS, claims)` 把解析结果挂到本次请求上。",
+     "下游（Controller、AOP 切面）随时 `(Claims) request.getAttribute(...)` 取当前登录人，不用重复解析 token。",
+     "生命周期正好是一次请求：请求结束自动丢弃，不占内存、不影响并发。",
+     "为什么不用 ThreadLocal：单机还行，但异步/线程池场景容易残留与串号；request attribute 天然隔离。",
+     "源码注释特意写了「AOP 记日志时会用到」——操作日志要记「谁干的」，就靠这个属性。",
+     "这也是「一次请求只解析一次 token」的实现方式：解析结果复用，而不是每个用到的地方都 parse 一遍。",
+   ]},
+  {"label": "4.3 放行与中断：return true / false", "phase": 3,
+   "concepts": ["c.auth.401", "c.http.status"],
+   "details": [
+     "`preHandle` 返回 `true` 放行，继续走 Controller；返回 `false` 中断，后面的拦截器和 Controller 都不执行。",
+     "中断时必须自己写响应体，否则前端拿到空响应，不知道发生了什么。",
+     "本项目返回的是统一结构 `Result`（`code=0` + 提示），而不是裸的 401 页面，前端拦截器据此跳登录页。",
+     "这里体现了「约定优于配置」：前后端对 `code` 的含义有约定，就不用猜 HTTP 状态码的语义。",
+     "拦截器里还能看到 `request.getMethod()` 和 `getRequestURI()`，日志打成「未登录拦截: GET /students（token 为空）」。",
+     "排错顺序：先看 Filter 日志有没有「未带 token」，再看 Interceptor 的「校验失败原因」。",
+   ]},
+
+  # ---------------------------------------------------------------- 放行之后
+  {"label": "5.1 全局异常兜底：@RestControllerAdvice", "phase": 4,
+   "concepts": ["c.exception.custom", "c.exception.handler"],
+   "details": [
+     "`GlobalExceptionHandler` 用 `@RestControllerAdvice`，集中处理各类异常，Controller 里不用写 try-catch。",
+     "`BusinessException`：业务规则不满足（如「该部门下有员工，不能删除」），转成可读提示而不是 500。",
+     "`DuplicateKeyException`：唯一约束冲突（用户名重复、班级名重复），提示「xx 已存在」。",
+     "`DataIntegrityViolationException`：外键/非空等数据完整性问题。",
+     "`MaxUploadSizeExceededException`：上传超限，对应 yml 里的 `max-file-size`。",
+     "`MethodArgumentTypeMismatchException`：路径参数类型不对（如 /depts/abc 传了非数字 id）。",
+   ]},
+  {"label": "5.2 放行之后：谁能拿到当前登录人", "phase": 4,
+   "concepts": ["c.auth.request-attr", "c.exception.handler"],
+   "details": [
+     "Controller 方法里加一个 `HttpServletRequest` 参数，就能 `getAttribute(ATTR_CLAIMS)` 拿到 Claims。",
+     "`EmpLog` / `EmpLogService` 是操作日志的落库结构：谁、什么时候、对哪个接口做了什么。",
+     "日志表与业务表分开写，主流程回滚时不至于把日志也回滚掉（除非特意要求强一致）。",
+     "AOP 切面拿登录人 → 组装日志 → 异步落库，这是这套结构最常见的用法。",
+     "注意：拦截器只负责「证明你是谁」，**不负责「你能不能干这件事」**——细粒度权限要另外做。",
+     "所以本项目是「认证已完成、授权未实现」，这也是后续可扩展的方向。",
+   ]},
+  {"label": "5.3 上传与静态映射：WebConfig 的另外两件事", "phase": 4,
+   "concepts": ["c.upload.oss", "c.file.oss"],
+   "details": [
+     "`WebConfig` 除了注册 Filter 和 Interceptor，还做了两件事：把上传目录映射成可访问 URL、注册资源处理器。",
+     "`@Value(\"${tlias.upload.dir:uploads}\")`：上传根目录默认 `uploads`（相对启动工作目录），可用配置覆盖。",
+     "`addResourceHandlers` 把 `uploads` 映射成 `/uploads/**`：文件落在 `<工作目录>/uploads/2026/10/27/xxx.png`，对外访问 `http://localhost:8080/uploads/2026/10/27/xxx.png`。",
+     "`Paths.get(...).toAbsolutePath().normalize().toUri()` 把 Windows 反斜杠路径转成合法的 `file:///D:/...` URI，资源处理器要求这种格式。",
+     "生产环境不该存本地盘：容器一重启、多实例部署就找不到文件，所以 `UploadController` 走阿里云 OSS。",
+     "`MultipartFile` 接文件，`AliyunOSSUtils` 上传拿到 URL，把 URL 存进员工表 —— 数据库里只存地址不存字节。",
+   ]},
+  {"label": "5.4 报表接口：后端只给数据，图表交给前端", "phase": 4,
+   "concepts": ["c.report.echarts"],
+   "details": [
+     "`ReportController` 四个接口：`/report/empJobData`（职位分布）、`/report/empGenderData`（性别分布）、`/report/studentCountData`（班级人数）、`/report/studentDegreeData`（学历分布）。",
+     "返回的是 `{name, value}` 这类数组，前端 ECharts 直接吃，后端不管画图。",
+     "所以「统计」在代码里就是几条 group by 查询，复杂度在 SQL 和字段映射，不在 Controller。",
+     "四个接口都带 `@GetMapping`，参数极少（多数无参），因为它们查的是全表聚合。",
+     "为什么不让后端直接出图：图表类型、配色、交互都在前端改，后端出图等于把展示逻辑焊死。",
+     "这也是前后端分离的一个典型分工点：后端负责「数据对不对」，前端负责「看起来怎么样」。",
+   ]},
+ ],
+}

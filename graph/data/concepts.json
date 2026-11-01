@@ -972,6 +972,105 @@
    "gloss": "计数、扣分这类累加交给数据库算，避免「先查后改」的并发覆盖",
    "learned": null,
    "ep": null
+  },
+  {
+   "id": "c.auth.jwt",
+   "label": "JWT 令牌",
+   "aka": "header.payload.signature",
+   "layer": "framework",
+   "gloss": "服务端不存 session：登录成功签发一段带签名的字符串，客户端每次带上，验签通过即视为已登录",
+   "learned": null,
+   "ep": 124
+  },
+  {
+   "id": "c.auth.payload",
+   "label": "payload 只编码不加密",
+   "aka": "Base64Edcode（非加密）",
+   "layer": "framework",
+   "gloss": "JWT 的 payload 谁都能解出来看，所以只放 id / username / name，绝不放密码",
+   "learned": null,
+   "ep": 124
+  },
+  {
+   "id": "c.auth.sign",
+   "label": "签名防篡改",
+   "aka": "HS256 + SECRET",
+   "layer": "framework",
+   "gloss": "用密钥对前两段做 HMAC 签名，改一个字符验签就失败；密钥泄露等于任何人都能伪造令牌",
+   "learned": null,
+   "ep": 125
+  },
+  {
+   "id": "c.auth.expire",
+   "label": "过期时间 exp",
+   "aka": "ExpiredJwtException",
+   "layer": "framework",
+   "gloss": "签发时写入过期时间，解析时过期会抛异常；本项目 12 小时，过期即要求重新登录",
+   "learned": null,
+   "ep": 125
+  },
+  {
+   "id": "c.auth.filter-vs-interceptor",
+   "label": "过滤器 vs 拦截器",
+   "aka": "Filter（粗）→ Interceptor（精）",
+   "layer": "framework",
+   "gloss": "Filter 在 Servlet 层拦所有请求，只做白名单和「有没有 token」；Interceptor 在 MVC 层做验签与过期判断",
+   "learned": null,
+   "ep": 130
+  },
+  {
+   "id": "c.auth.request-attr",
+   "label": "request attribute 传登录人",
+   "aka": "setAttribute / getAttribute",
+   "layer": "framework",
+   "gloss": "验签结果挂到本次请求属性上，Controller 与 AOP 直接取用，生命周期正好一次请求",
+   "learned": null,
+   "ep": 131
+  },
+  {
+   "id": "c.auth.whitelist",
+   "label": "白名单与 OPTIONS 放行",
+   "aka": "excludePathPatterns / 预检请求",
+   "layer": "framework",
+   "gloss": "登录接口、静态资源、跨域预检必须放行，否则前端连登录都调不通",
+   "learned": null,
+   "ep": 128
+  },
+  {
+   "id": "c.auth.token-header",
+   "label": "请求头携带 token",
+   "aka": "token: xxx",
+   "layer": "protocol",
+   "gloss": "前后端约定同一个头名，前端 axios 请求拦截器统一加，后端 request.getHeader 取",
+   "learned": null,
+   "ep": 129
+  },
+  {
+   "id": "c.auth.401",
+   "label": "统一未登录响应",
+   "aka": "code=0 + 提示文案",
+   "layer": "protocol",
+   "gloss": "校验失败直接写回统一结构、不进 Controller，前端据此跳登录页",
+   "learned": null,
+   "ep": 132
+  },
+  {
+   "id": "c.auth.registration",
+   "label": "Filter 用 Bean 注册",
+   "aka": "FilterRegistrationBean + order",
+   "layer": "framework",
+   "gloss": "不用 @WebFilter：那样实例由容器创建、不在 Spring 容器里，@Autowired 会拿到 null",
+   "learned": null,
+   "ep": 128
+  },
+  {
+   "id": "c.upload.oss",
+   "label": "上传到对象存储",
+   "aka": "MultipartFile → OSS → URL",
+   "layer": "framework",
+   "gloss": "浏览器 multipart/form-data 上传，后端 MultipartFile 接住转存 OSS，返回可访问 URL 存库",
+   "learned": null,
+   "ep": 133
   }
  ]
 }
