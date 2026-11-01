@@ -75,6 +75,16 @@ LOGIN = {
      "`LoginInfo` 是专门的出参对象：`{id, username, name, token}`，和 `Emp` 实体分开，避免把手机号、密码等字段顺手返回给前端。",
    ]},
 
+  {"label": "1.3 Service 层：查库 → 组 claims → 签 token", "phase": 0,
+   "concepts": ["c.auth.jwt", "c.auth.payload", "c.arch.three-layer"],
+   "details": [
+     "真正的登录逻辑在 `EmpServiceImpl.login(Emp emp)`，Controller 只负责转发——这就是三层架构的分工，Controller 不写业务。",
+     "第一步查库：`empMapper.getByUsernameAndPassword(emp.getUsername(), emp.getPassword())`，**账号和密码一起作为查询条件**。",
+     "查不到就 `log.warn` 并 `return null`；Controller 收到 null 才转成「用户名或密码错误」，所以失败文案只有一个。",
+     "第二步组 claims：`Map<String,Object>` 里只放三个字段 —— `id`、`username`、`name`，**不放密码**（payload 谁都能解开看）。",
+     "第三步签发：`String token = JwtUtils.generate(claims)`，过期时间、签名算法都在工具类里，Service 不关心细节。",
+     "第四步装出参：`new LoginInfo(id, username, name, token)` —— 用专门的出参对象而不是直接返回 Emp，避免把手机号、部门等字段顺手带给前端。",
+   ]},
   # ---------------------------------------------------------------- 签发令牌
   {"label": "2.1 JWT 三段结构：header.payload.signature", "phase": 1,
    "concepts": ["c.auth.jwt", "c.auth.sign"],

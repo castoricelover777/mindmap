@@ -1,12 +1,12 @@
 {
  "meta": {
-  "built": "2026-11-01 12:30",
+  "built": "2026-11-01 12:41",
   "layers": 7,
   "concepts": 115,
   "scenarios": 6,
-  "steps": 139,
-  "details": 817,
-  "edges": 251,
+  "steps": 140,
+  "details": 823,
+  "edges": 252,
   "themes": 4,
   "shared": 57
  },
@@ -611,10 +611,11 @@
     "s.dept",
     "s.emp",
     "s.clazz",
-    "s.ref"
+    "s.ref",
+    "s.login"
    ],
    "themes": [],
-   "weight": 5
+   "weight": 6
   },
   {
    "id": "c.arch.controller",
@@ -4514,6 +4515,25 @@
     },
     {
      "id": "st.login.2",
+     "label": "1.3 Service 层：查库 → 组 claims → 签 token",
+     "phase": 0,
+     "color": "#B91C1C",
+     "concepts": [
+      "c.auth.jwt",
+      "c.auth.payload",
+      "c.arch.three-layer"
+     ],
+     "details": [
+      "真正的登录逻辑在 `EmpServiceImpl.login(Emp emp)`，Controller 只负责转发——这就是三层架构的分工，Controller 不写业务。",
+      "第一步查库：`empMapper.getByUsernameAndPassword(emp.getUsername(), emp.getPassword())`，**账号和密码一起作为查询条件**。",
+      "查不到就 `log.warn` 并 `return null`；Controller 收到 null 才转成「用户名或密码错误」，所以失败文案只有一个。",
+      "第二步组 claims：`Map<String,Object>` 里只放三个字段 —— `id`、`username`、`name`，**不放密码**（payload 谁都能解开看）。",
+      "第三步签发：`String token = JwtUtils.generate(claims)`，过期时间、签名算法都在工具类里，Service 不关心细节。",
+      "第四步装出参：`new LoginInfo(id, username, name, token)` —— 用专门的出参对象而不是直接返回 Emp，避免把手机号、部门等字段顺手带给前端。"
+     ]
+    },
+    {
+     "id": "st.login.3",
      "label": "2.1 JWT 三段结构：header.payload.signature",
      "phase": 1,
      "color": "#C2410C",
@@ -4531,7 +4551,7 @@
      ]
     },
     {
-     "id": "st.login.3",
+     "id": "st.login.4",
      "label": "2.2 签发：generate(claims) 做了什么",
      "phase": 1,
      "color": "#C2410C",
@@ -4549,7 +4569,7 @@
      ]
     },
     {
-     "id": "st.login.4",
+     "id": "st.login.5",
      "label": "2.3 payload 是 Base64 编码，不是加密",
      "phase": 1,
      "color": "#C2410C",
@@ -4566,7 +4586,7 @@
      ]
     },
     {
-     "id": "st.login.5",
+     "id": "st.login.6",
      "label": "3.1 前端统一携带 token",
      "phase": 2,
      "color": "#0E7490",
@@ -4584,7 +4604,7 @@
      ]
     },
     {
-     "id": "st.login.6",
+     "id": "st.login.7",
      "label": "3.2 Filter：只做「粗过滤」",
      "phase": 2,
      "color": "#0E7490",
@@ -4603,7 +4623,7 @@
      ]
     },
     {
-     "id": "st.login.7",
+     "id": "st.login.8",
      "label": "3.3 为什么拦截器还要再判一次 token",
      "phase": 2,
      "color": "#0E7490",
@@ -4620,7 +4640,7 @@
      ]
     },
     {
-     "id": "st.login.8",
+     "id": "st.login.9",
      "label": "4.1 Interceptor 精校验：验签 + 过期",
      "phase": 3,
      "color": "#4F46E5",
@@ -4639,7 +4659,7 @@
      ]
     },
     {
-     "id": "st.login.9",
+     "id": "st.login.10",
      "label": "4.2 验签通过：Claims 挂到 request 上",
      "phase": 3,
      "color": "#4F46E5",
@@ -4656,7 +4676,7 @@
      ]
     },
     {
-     "id": "st.login.10",
+     "id": "st.login.11",
      "label": "4.3 放行与中断：return true / false",
      "phase": 3,
      "color": "#4F46E5",
@@ -4674,7 +4694,7 @@
      ]
     },
     {
-     "id": "st.login.11",
+     "id": "st.login.12",
      "label": "5.1 全局异常兜底：@RestControllerAdvice",
      "phase": 4,
      "color": "#047857",
@@ -4692,7 +4712,7 @@
      ]
     },
     {
-     "id": "st.login.12",
+     "id": "st.login.13",
      "label": "5.2 放行之后：谁能拿到当前登录人",
      "phase": 4,
      "color": "#047857",
@@ -4710,7 +4730,7 @@
      ]
     },
     {
-     "id": "st.login.13",
+     "id": "st.login.14",
      "label": "5.3 上传与静态映射：WebConfig 的另外两件事",
      "phase": 4,
      "color": "#047857",
@@ -4728,7 +4748,7 @@
      ]
     },
     {
-     "id": "st.login.14",
+     "id": "st.login.15",
      "label": "5.4 报表接口：后端只给数据，图表交给前端",
      "phase": 4,
      "color": "#047857",
@@ -5942,17 +5962,22 @@
   },
   {
    "s": "s.login",
+   "t": "c.auth.payload",
+   "type": "uses"
+  },
+  {
+   "s": "s.login",
+   "t": "c.arch.three-layer",
+   "type": "uses"
+  },
+  {
+   "s": "s.login",
    "t": "c.auth.sign",
    "type": "uses"
   },
   {
    "s": "s.login",
    "t": "c.auth.expire",
-   "type": "uses"
-  },
-  {
-   "s": "s.login",
-   "t": "c.auth.payload",
    "type": "uses"
   },
   {
