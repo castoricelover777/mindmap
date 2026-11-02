@@ -60,6 +60,12 @@ def layer_of(path, src):
         return "config"
     if "/utils/" in p or "/util/" in p:
         return "utils"
+    if "/filter/" in p:
+        return "filter"
+    if "/interceptor/" in p:
+        return "interceptor"
+    if "/constant/" in p:
+        return "constant"
     return "other"
 
 
@@ -72,6 +78,9 @@ LAYER_META = {
     "exception":  ("异常与兜底", "自定义异常 + 全局异常处理器"),
     "config":     ("配置类", "WebMvc / 对象存储参数绑定等"),
     "utils":      ("工具类", "与业务无关的通用能力"),
+    "filter":     ("Filter 过滤器", "Servlet 层粗过滤：白名单、OPTIONS、token 是否存在"),
+    "interceptor":("Interceptor 拦截器", "MVC 层精校验：验签、过期、把登录人挂到请求上"),
+    "constant":   ("常量", "认证相关的头名与属性键，前后端共用"),
 }
 
 files = {}
@@ -188,6 +197,29 @@ def main():
         ("pojo", ["pojo/User.java"]),
     ], note="注册链路用的是早期的三层示例工程：Controller → Service → Dao（当时还没上 MyBatis）。"
             "另有 UserController2/3、UserServiceImpl2、UserDaoImpl2 是课件里的变体写法，未列入。")
+
+    # 登录认证：入口 → 令牌 → 粗过滤 → 精校验 → 装配 → 兜底
+    S["s.login"] = scene("tlias", [
+        ("controller", ["controller/LoginController.java"]),
+        ("service", ["service/EmpService.java", "service/impl/EmpServiceImpl.java"]),
+        ("utils", ["utils/JwtUtils.java"]),
+        ("constant", ["constant/LoginConstants.java"]),
+        ("filter", ["filter/LoginCheckFilter.java"]),
+        ("interceptor", ["interceptor/LoginCheckInterceptor.java"]),
+        ("config", ["config/WebConfig.java"]),
+        ("exception", ["exception/GlobalExceptionHandler.java"]),
+    ], note="认证链路：LoginController 收参 → EmpServiceImpl 查库并组 claims → JwtUtils 签发 → "
+            "前端带 token → LoginCheckFilter 粗过滤 → LoginCheckInterceptor 验签 → claims 挂 request。")
+
+    # 业务规则守卫：违纪扣分 / 删除守卫 / 全局兜底
+    S["s.guard"] = scene("tlias", [
+        ("controller", ["controller/StudentController.java"]),
+        ("service", ["service/StudentService.java", "service/impl/StudentServiceImpl.java",
+                     "service/impl/ClazzServiceImpl.java"]),
+        ("mapper", ["mapper/StudentMapper.java", "mapper/ClazzMapper.java"]),
+        ("exception", ["exception/BusinessException.java", "exception/GlobalExceptionHandler.java"]),
+    ], note="守卫都在 Service：扣分前校验 score > 0、删班级前 count 学员；唯一约束交给数据库，"
+            "异常由 GlobalExceptionHandler 翻成可读提示。注意 DeptServiceImpl 目前没有删除守卫。")
 
     S["s.dept"] = scene("tlias", [
         ("controller", ["controller/DeptController.java"]),
