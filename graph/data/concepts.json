@@ -1125,6 +1125,96 @@
    "gloss": "删主表前先 count 子表；数字要带进提示语，让用户知道还有几条挂着",
    "learned": null,
    "ep": null
+  },
+  {
+   "id": "c.ai.proxy",
+   "label": "后端代理大模型",
+   "aka": "浏览器 → /ai/** → 模型服务",
+   "layer": "framework",
+   "gloss": "前端不直连模型，由后端转发：绕开跨域、隐藏地址、复用登录鉴权、换模型只改配置",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.ai.multimodal",
+   "label": "多模态问答",
+   "aka": "prompt + image_base64",
+   "layer": "framework",
+   "gloss": "qwen2.5vl 这类模型能同时吃文字和图片，图片以 Base64 随 JSON 一起发",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.ai.sse",
+   "label": "SSE 服务端推送",
+   "aka": "text/event-stream",
+   "layer": "protocol",
+   "gloss": "一次请求、服务端多次推：每段数据以 data: 开头，天然适合打字机式输出",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.ai.emitter",
+   "label": "SseEmitter",
+   "aka": "Spring MVC 流式返回值",
+   "layer": "framework",
+   "gloss": "Controller 返回它即声明流式响应；send 一次前端收一次，complete 结束",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.ai.http-client",
+   "label": "JDK HttpClient",
+   "aka": "java.net.http",
+   "layer": "framework",
+   "gloss": "JDK 11 起自带的 HTTP 客户端，不引第三方依赖；ofString 一次拿完，ofLines 逐行拿",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.ai.pool",
+   "label": "流式转发线程池",
+   "aka": "fixedPool(4) + daemon",
+   "layer": "framework",
+   "gloss": "阻塞读上游不能占 Tomcat 工作线程，放独立线程池；@PreDestroy 关闭",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.ai.timeout",
+   "label": "两级超时",
+   "aka": "connect 5s / read 120s",
+   "layer": "framework",
+   "gloss": "连不上要快快失败，模型推理要慢慢等；两个超时解决两个不同问题",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.ai.health",
+   "label": "探活接口",
+   "aka": "/ai/status → up",
+   "layer": "framework",
+   "gloss": "探活失败不当异常：返回 up=false，让界面自己显示未连接",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.ai.prompt-guard",
+   "label": "提示词校验",
+   "aka": "空 / 超长",
+   "layer": "framework",
+   "gloss": "空问题和超长问题在进模型前后都要拦，避免浪费一次推理",
+   "learned": null,
+   "ep": null
+  },
+  {
+   "id": "c.ai.fallback",
+   "label": "流式失败回落非流式",
+   "aka": "chat + stream 双通道",
+   "layer": "framework",
+   "gloss": "流式不稳定时前端可退回一次性问答；两条路径共用同一套上游协议",
+   "learned": null,
+   "ep": null
   }
  ]
 }

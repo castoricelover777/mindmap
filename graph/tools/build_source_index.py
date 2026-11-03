@@ -221,6 +221,15 @@ def main():
     ], note="守卫都在 Service：扣分前校验 score > 0、删班级前 count 学员；唯一约束交给数据库，"
             "异常由 GlobalExceptionHandler 翻成可读提示。注意 DeptServiceImpl 目前没有删除守卫。")
 
+    # AI 助手：控制器 → 服务与实现 → 出参对象 → 配置绑定
+    S["s.ai"] = scene("tlias", [
+        ("controller", ["controller/AiController.java"]),
+        ("service", ["service/AiService.java", "service/impl/AiServiceImpl.java"]),
+        ("pojo", ["pojo/AiChatRequest.java", "pojo/AiChatResult.java"]),
+        ("config", ["config/AiProperties.java"]),
+    ], note="AI 链路：浏览器 → /ai/**（同源 + token）→ AiController → AiServiceImpl 用 JDK HttpClient "
+            "转发到 http://10.200.102.82:8000 的本地模型；流式走 SSE（SseEmitter），在独立线程池里逐行转 upstream 的 data: 事件。")
+
     S["s.dept"] = scene("tlias", [
         ("controller", ["controller/DeptController.java"]),
         ("service", ["service/DeptService.java", "service/impl/DeptServiceImpl.java"]),

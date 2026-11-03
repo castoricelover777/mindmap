@@ -128,7 +128,18 @@ def main():
         "details": st["details"],
     } for i, st in enumerate(grd["steps"])]
 
-    scenarios = [reg, dept, emp, clz, ref, lgn, grd]
+    # ---- AI 智能助手接入场景（依据当前工程源码）----
+    ai = rd("scenario-ai.json")
+    ai["steps"] = [{
+        "id": "st.ai.%d" % i,
+        "label": st["label"],
+        "phase": st["phase"],
+        "color": ai["phases"][st["phase"]]["color"],
+        "concepts": st["concepts"],
+        "details": st["details"],
+    } for i, st in enumerate(ai["steps"])]
+
+    scenarios = [reg, dept, emp, clz, ref, lgn, grd, ai]
 
     # 链视图的「传递物」标签与回流文案：每个场景各不相同，不能写死
     reg["flow"] = ["JSON 字符串", "HTTP 请求报文", "User 对象", "insert(user)", "受影响行数 int"]

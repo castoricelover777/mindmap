@@ -1,0 +1,204 @@
+# -*- coding: utf-8 -*-
+"""AI 智能助手接入场景（依据 2026-11-01 新增的源码）。
+
+真实代码：
+  controller/AiController.java      /ai/status、/ai/chat、/ai/chat/stream
+  service/AiService.java            接口：chat / stream / isUp
+  service/impl/AiServiceImpl.java   312 行：JDK HttpClient、手拼 JSON、SSE 解析、固定线程池
+  config/AiProperties.java          base-url / timeout-seconds / model
+  pojo/AiChatRequest.java           前端请求体 prompt + imageBase64
+  pojo/AiChatResult.java            answer + model
+  application.yml                   ai.base-url = http://10.200.102.82:8000
+
+上游是另一台电脑上的 FastAPI + Ollama（qwen2.5vl:7b 多模态）。
+"""
+
+EXTRA_CONCEPTS_AI = [
+  ("c.ai.proxy", "后端代理大模型", "浏览器 → /ai/** → 模型服务", "framework",
+   "前端不直连模型，由后端转发：绕开跨域、隐藏地址、复用登录鉴权、换模型只改配置", None, None),
+  ("c.ai.multimodal", "多模态问答", "prompt + image_base64", "framework",
+   "qwen2.5vl 这类模型能同时吃文字和图片，图片以 Base64 随 JSON 一起发", None, None),
+  ("c.ai.sse", "SSE 服务端推送", "text/event-stream", "protocol",
+   "一次请求、服务端多次推：每段数据以 data: 开头，天然适合打字机式输出", None, None),
+  ("c.ai.emitter", "SseEmitter", "Spring MVC 流式返回值", "framework",
+   "Controller 返回它即声明流式响应；send 一次前端收一次，complete 结束", None, None),
+  ("c.ai.http-client", "JDK HttpClient", "java.net.http", "framework",
+   "JDK 11 起自带的 HTTP 客户端，不引第三方依赖；ofString 一次拿完，ofLines 逐行拿", None, None),
+  ("c.ai.pool", "流式转发线程池", "fixedPool(4) + daemon", "framework",
+   "阻塞读上游不能占 Tomcat 工作线程，放独立线程池；@PreDestroy 关闭", None, None),
+  ("c.ai.timeout", "两级超时", "connect 5s / read 120s", "framework",
+   "连不上要快快失败，模型推理要慢慢等；两个超时解决两个不同问题", None, None),
+  ("c.ai.health", "探活接口", "/ai/status → up", "framework",
+   "探活失败不当异常：返回 up=false，让界面自己显示未连接", None, None),
+  ("c.ai.prompt-guard", "提示词校验", "空 / 超长", "framework",
+   "空问题和超长问题在进模型前后都要拦，避免浪费一次推理", None, None),
+  ("c.ai.fallback", "流式失败回落非流式", "chat + stream 双通道", "framework",
+   "流式不稳定时前端可退回一次性问答；两条路径共用同一套上游协议", None, None),
+]
+
+
+AI = {
+ "id": "s.ai", "label": "AI 智能助手接入", "sub": "后端代理 + SSE 流式",
+ "color": "#DB2777",
+ "source": "当前工程源码：AiController / AiService / AiServiceImpl / AiProperties / application.yml",
+ "phases": [
+   {"label": "为什么要代理", "color": "#BE123C"},
+   {"label": "配置与探活", "color": "#C2410C"},
+   {"label": "一次性问答", "color": "#0E7490"},
+   {"label": "流式问答", "color": "#7C3AED"},
+   {"label": "兜底与体验", "color": "#047857"},
+ ],
+ "flow": ["点发送", "同源带 token", "后端转发上游", "模型逐段吐字", "SSE 推回前端"],
+ "returnNote": "模型在另一台电脑上，页面却能一个字一个字地出答案——靠的就是后端代理 + SSE 这条链路",
+ "steps": [
+  # ---------------------------------------------------------------- 为什么要代理
+  {"label": "1.1 前端直连模型服务会撞三堵墙", "phase": 0,
+   "concepts": ["c.ai.proxy", "c.cors", "c.auth.token-header"],
+   "details": [
+     "模型服务在 `http://10.200.102.82:8000`，页面在 `http://localhost:8080` —— 端口和主机都不同，属于跨源。",
+     "第一堵墙：**CORS**。模型服务没返回 CORS 响应头，浏览器预检直接失败，请求发不出去。",
+     "第二堵墙：**安全**。模型地址、密钥写在前端等于公开，任何人打开 F12 都能看到。",
+     "第三堵墙：**鉴权**。直连模型服务绕过了本项目的 Filter/Interceptor，谁都能白嫖推理算力。",
+     "所以由后端代理：浏览器只请求同源的 `/ai/**`，带上 token，后面的事服务器之间做（服务器请求不受同源策略限制）。",
+     "附带好处：以后换模型、换地址只改 `application.yml`，前端一行都不用动。",
+   ]},
+  {"label": "1.2 代理链路：浏览器 → /ai/** → 模型服务", "phase": 0,
+   "concepts": ["c.ai.proxy", "c.auth.filter-vs-interceptor"],
+   "details": [
+     "`AiController` 类级 `@RequestMapping(\"/ai\")`，所以三个接口都在 `/ai` 下。",
+     "这条路径**在 Filter 和 Interceptor 的保护范围内**：没登录直接 401，等于「登录后才能用 AI」。",
+     "`AiController` 自己不干活：注入 `AiService`，一行调用转出去，符合三层分工。",
+     "`AiProperties` 也注入到 Controller，只为在 `/ai/status` 里把 baseUrl、model 一起返回给前端展示。",
+     "为什么不让 Controller 直接发 HTTP：网络细节（超时、解析、线程）属于基础设施，应该沉在 Service。",
+     "这样 Controller 的测试也简单——mock 掉 AiService 就行，不用起真模型。",
+   ]},
+
+  # ---------------------------------------------------------------- 配置与探活
+  {"label": "2.1 三个接口各管一件事", "phase": 1,
+   "concepts": ["c.ai.health", "c.ai.fallback"],
+   "details": [
+     "`GET /ai/status`：探活，返回 `up`（是否可用）、`model`、`baseUrl`，前端右上角用它点亮「已连接」小圆点。",
+     "`POST /ai/chat`：一次性问答，请求体 `AiChatRequest{prompt, imageBase64?}`，返回 `AiChatResult{answer, model}`。",
+     "`POST /ai/chat/stream`：流式问答，返回 `SseEmitter`，响应类型 `text/event-stream`。",
+     "探活单独一个接口，是为了让界面在**发问题之前**就知道服务在不在，而不是等用户输了半天才报错。",
+     "两个问答接口并存：流式体验好但依赖长连接；非流式作为兜底，网络差时也能用。",
+     "三个接口都是 `Result` 包装（流式那条除外，SSE 不能包 Result）。",
+   ]},
+  {"label": "2.2 配置从 yml 来：AiProperties", "phase": 1,
+   "concepts": ["c.config.yml", "c.annotation.component"],
+   "details": [
+     "`AiProperties` 用 `@ConfigurationProperties` 绑定 `ai.*`，字段三个：`baseUrl`、`timeoutSeconds`、`model`。",
+     "yml 里实际是 `ai.base-url: http://10.200.102.82:8000`、`ai.timeout-seconds: 120`、`ai.model: qwen2.5vl:7b`。",
+     "注释写了「7B 模型在 CPU 上跑长回答会比较慢，给足超时」——这是实际情况，不是拍脑袋。",
+     "`model` 只用于界面展示，真实用哪个模型由上游服务决定。",
+     "地址写进配置而不是常量：换机器、换显卡、换端口时不用改代码、不用重新编译。",
+     "这也是「配置优于硬编码」在本项目里最典型的一处。",
+   ]},
+  {"label": "2.3 探活：失败也要体面", "phase": 1,
+   "concepts": ["c.ai.health", "c.ai.timeout"],
+   "details": [
+     "`isUp()` 请求上游 `/api/v1/health`，`timeout(Duration.ofSeconds(3))` —— 探活最多等 3 秒。",
+     "整个方法被 try-catch 包住，任何异常都 `return false`，**不往外抛**。",
+     "理由写在 Controller 注释里：连不上不是错误，返回 `up=false` 让界面自己展示提示。",
+     "如果这里抛异常，页面一打开就弹红框，体验很差；而用户可能只是想先看看界面。",
+     "探活超时 3 秒比问答超时 120 秒短得多：判断「活没活着」不需要等模型算完。",
+     "这也是超时要分场景设值的例子——同一套 HttpClient，不同请求不同超时。",
+   ]},
+
+  # ---------------------------------------------------------------- 一次性问答
+  {"label": "3.1 进模型前先过提示词校验", "phase": 2,
+   "concepts": ["c.ai.prompt-guard", "c.exception.custom"],
+   "details": [
+     "`checkPrompt()` 两道：`!StringUtils.hasLength(prompt) || prompt.trim().isEmpty()` → 「请输入问题」。",
+     "第二道：`prompt.length() > 8000` → 「问题太长了，请精简到 8000 字以内」。",
+     "为什么先 trim 再判空：只有空格的问题对模型没意义，还白跑一次推理。",
+     "为什么限长：图片 Base64 会随 JSON 一起发，太大既慢又占内存。",
+     "注意流式接口的校验方式不同：它不能抛异常（响应已经是流了），改用发 `error` 事件再 `complete()`。",
+     "同一套规则，两种失败表达方式——取决于该请求的响应形态。",
+   ]},
+  {"label": "3.2 手拼 JSON：为什么不直接序列化对象", "phase": 2,
+   "concepts": ["c.ai.multimodal", "c.json"],
+   "details": [
+     "`buildBody()` 用 `StringBuilder` 拼 `{\"prompt\":...,\"image_base64\":...}`，只带非空字段。",
+     "字符串一律过 `quote()` 转义——问题里出现引号、换行、反斜杠时不会把 JSON 拼坏。",
+     "图片可选：`imageBase64` 为空就完全不写这个键，上游按纯文本处理。",
+     "上游接受两种图片格式：纯 Base64，或带 `data:image/png;base64,` 前缀，两种都能识别。",
+     "为什么不用 `ObjectMapper.writeValueAsString`：这里只有两个字段，手拼更直观、少一层对象定义。",
+     "代价是转义必须自己保证——所以 `quote()` 是这套写法的安全底线。",
+   ]},
+  {"label": "3.3 非流式：一次拿完整答案", "phase": 2,
+   "concepts": ["c.ai.http-client", "c.ai.timeout"],
+   "details": [
+     "`HttpClient` 是字段级的，`connectTimeout(5秒)`，全局复用（线程安全）。",
+     "请求级超时用 `aiProperties.getTimeoutSeconds()`（120 秒），管的是「读」而不是「连」。",
+     "`BodyHandlers.ofString(UTF_8)` 一次拿完，中文不会乱码——编码必须显式指定。",
+     "非 200 直接 `throw new BusinessException(\"AI 服务返回异常：HTTP \" + status)`，由全局处理器转提示。",
+     "拿到 JSON 后取 `data.answer` 与 `data.model`，装进 `AiChatResult` 返回。",
+     "连接超时 5 秒 + 读超时 120 秒，解决的是两个不同问题，缺一个都会出现「页面一直转圈」。",
+   ]},
+
+  # ---------------------------------------------------------------- 流式问答
+  {"label": "4.1 为什么用 SSE 而不是 WebSocket", "phase": 3,
+   "concepts": ["c.ai.sse", "c.ai.emitter"],
+   "details": [
+     "场景是**单向**的：服务端一直吐，客户端只听。SSE 天然够用，WebSocket 属于杀鸡用牛刀。",
+     "SSE 走普通 HTTP，不需要额外协议升级，网关、鉴权、Cookie 全都照旧生效。",
+     "服务端每段数据以 `data: ` 开头；空行表示一条事件结束。",
+     "Spring MVC 里返回 `SseEmitter` 就声明了流式响应，`emitter.send(...)` 一次前端收一次。",
+     "`SseEmitter` 的超时设成和模型调用一致（默认 120 秒），源码注释特意说明**不用 0**：0 表示永不超时，连接会一直挂着。",
+     "断线由前端负责重连；服务端只保证「写了就尽力发出去」。",
+   ]},
+  {"label": "4.2 上游是 SSE，转发也是 SSE", "phase": 3,
+   "concepts": ["c.ai.sse", "c.ai.http-client"],
+   "details": [
+     "上游流式接口：`POST /api/v1/multimodal_chat/stream`，返回一行行 `data: {\"type\":\"delta\",\"content\":\"我\"}`。",
+     "本项目用 `BodyHandlers.ofLines()` 拿到 `Stream<String>`，**逐行**读，不攒完整响应。",
+     "每读到一行就解析出 `type`：`delta` 转发增量、`done` 发结束事件（带完整 answer 和 model）、其它丢弃。",
+     "转发时重新包一层自己的事件格式：`sendEvent(emitter, \"delta\", content)`。",
+     "为什么要重新包：前端只依赖本项目的事件名（delta/done/error），上游换协议时前端不用改。",
+     "这就是「适配层」的价值——把外部协议收敛成自己的契约。",
+   ]},
+  {"label": "4.3 流式必须放独立线程池", "phase": 3,
+   "concepts": ["c.ai.pool", "c.tomcat"],
+   "details": [
+     "`streamPool = Executors.newFixedThreadPool(4, ...)`，线程名 `ai-stream`，且 `setDaemon(true)`。",
+     "为什么不能直接在 Controller 线程里阻塞读：一个流式请求会占住一个 Tomcat 工作线程几十秒，几个人同时用就打满。",
+     "为什么是 4 个线程：本地 7B 模型推理本来就串行，开太多只会排队抢显存。",
+     "`daemon` 线程：JVM 退出时不阻止进程结束，避免「关了服务进程还赖着」。",
+     "`@PreDestroy shutdown()` 在 Bean 销毁时 `shutdownNow()`，把线程池收干净。",
+     "这套写法（固定池 + daemon + 销毁钩子）是自建线程池的最小安全模板。",
+   ]},
+
+  # ---------------------------------------------------------------- 兜底与体验
+  {"label": "5.1 断连不报错：前端点了停止怎么办", "phase": 4,
+   "concepts": ["c.ai.fallback", "c.ai.pool"],
+   "details": [
+     "`sendEvent()` 里 catch 了 `IOException | IllegalStateException`，只打 debug 日志、不再抛。",
+     "原因：用户点「停止」或关掉页面时连接已断，往一个死连接写数据必然抛异常。",
+     "这类异常属于**预期内**，当成错误往外抛只会污染日志，甚至把线程池任务搞崩。",
+     "日志用 `log.debug` 而不是 `log.error`：不算故障，没必要在默认级别刷屏。",
+     "写完之后仍要保证 `emitter.complete()`，否则连接一直被占着。",
+     "判断标准很简单：**用户主动造成的，就不是错误**。",
+   ]},
+  {"label": "5.2 连不上时给一句人话", "phase": 4,
+   "concepts": ["c.ai.fallback", "c.exception.handler"],
+   "details": [
+     "`unreachable(Exception e)` 把底层异常包成 `BusinessException`，提示语是：",
+     "「连不上本地大模型（http://10.200.102.82:8000），请确认那台电脑开着、IP 没变、服务已启动」。",
+     "一句话给出三个排查方向，比 `ConnectException: Connection refused` 有用一百倍。",
+     "原始异常仍用 `log.warn` 记下来（含 baseUrl 和异常类型），排错时看日志。",
+     "最终由 `GlobalExceptionHandler` 把 `BusinessException` 转成 `code=0` + 这句提示，前端直接展示。",
+     "这是「异常翻译」的典型：底层说机器话，出口说人话。",
+   ]},
+  {"label": "5.3 多模态：让模型看图回答", "phase": 4,
+   "concepts": ["c.ai.multimodal"],
+   "details": [
+     "`AiChatRequest.imageBase64` 是可选字段：不传就是纯文本问答，传了模型就能「看图回答」。",
+     "上游模型 `qwen2.5vl:7b` 是视觉语言模型，支持图像 + 文本输入。",
+     "图片以 Base64 塞进 JSON：好处是不用先上传再传 URL，一次请求搞定。",
+     "代价是请求体很大——这也正是 `checkPrompt` 要限长的原因之一（同一份 JSON 里还装着图）。",
+     "所以生产环境更常见的做法是「先上传拿 URL，再把 URL 传给模型」，本项目为了简单选了 Base64。",
+     "两种做法没有绝对优劣：Base64 少一次往返、URL 省带宽，取决于图片大小与调用频率。",
+   ]},
+ ],
+}
