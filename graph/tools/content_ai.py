@@ -8,7 +8,7 @@
   config/AiProperties.java          base-url / timeout-seconds / model
   pojo/AiChatRequest.java           前端请求体 prompt + imageBase64
   pojo/AiChatResult.java            answer + model
-  application.yml                   ai.base-url = http://10.200.102.82:8000
+  application.yml                   ai.base-url = http://10.200.102.34:8000
 
 上游是另一台电脑上的 FastAPI + Ollama（qwen2.5vl:7b 多模态）。
 """
@@ -55,7 +55,7 @@ AI = {
   {"label": "1.1 前端直连模型服务会撞三堵墙", "phase": 0,
    "concepts": ["c.ai.proxy", "c.cors", "c.auth.token-header"],
    "details": [
-     "模型服务在 `http://10.200.102.82:8000`，页面在 `http://localhost:8080` —— 端口和主机都不同，属于跨源。",
+     "模型服务在 `http://10.200.102.34:8000`，页面在 `http://localhost:8080` —— 端口和主机都不同，属于跨源。",
      "第一堵墙：**CORS**。模型服务没返回 CORS 响应头，浏览器预检直接失败，请求发不出去。",
      "第二堵墙：**安全**。模型地址、密钥写在前端等于公开，任何人打开 F12 都能看到。",
      "第三堵墙：**鉴权**。直连模型服务绕过了本项目的 Filter/Interceptor，谁都能白嫖推理算力。",
@@ -88,7 +88,7 @@ AI = {
    "concepts": ["c.config.yml", "c.annotation.component"],
    "details": [
      "`AiProperties` 用 `@ConfigurationProperties` 绑定 `ai.*`，字段三个：`baseUrl`、`timeoutSeconds`、`model`。",
-     "yml 里实际是 `ai.base-url: http://10.200.102.82:8000`、`ai.timeout-seconds: 120`、`ai.model: qwen2.5vl:7b`。",
+     "yml 里实际是 `ai.base-url: http://10.200.102.34:8000`、`ai.timeout-seconds: 120`、`ai.model: qwen2.5vl:7b`。",
      "注释写了「7B 模型在 CPU 上跑长回答会比较慢，给足超时」——这是实际情况，不是拍脑袋。",
      "`model` 只用于界面展示，真实用哪个模型由上游服务决定。",
      "地址写进配置而不是常量：换机器、换显卡、换端口时不用改代码、不用重新编译。",
@@ -184,7 +184,7 @@ AI = {
    "concepts": ["c.ai.fallback", "c.exception.handler"],
    "details": [
      "`unreachable(Exception e)` 把底层异常包成 `BusinessException`，提示语是：",
-     "「连不上本地大模型（http://10.200.102.82:8000），请确认那台电脑开着、IP 没变、服务已启动」。",
+     "「连不上本地大模型（http://10.200.102.34:8000），请确认那台电脑开着、IP 没变、服务已启动」。",
      "一句话给出三个排查方向，比 `ConnectException: Connection refused` 有用一百倍。",
      "原始异常仍用 `log.warn` 记下来（含 baseUrl 和异常类型），排错时看日志。",
      "最终由 `GlobalExceptionHandler` 把 `BusinessException` 转成 `code=0` + 这句提示，前端直接展示。",
