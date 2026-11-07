@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>FastAPI 后端 · 对照 JavaWeb · 思维导图</title>
+<style>
+  :root{
+    --bg:#faf9f6; --ink:#111827; --muted:#6b7280;
+    --font:"PingFang SC","Microsoft YaHei","Hiragino Sans GB","Noto Sans CJK SC",system-ui,-apple-system,"Segoe UI",sans-serif;
+    --shadow:0 1px 2px rgba(17,24,39,.05),0 10px 30px rgba(17,24,39,.07);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;overflow:hidden}
+  body{
+    background:var(--bg); color:var(--ink); font-family:var(--font);
+    background-image:radial-gradient(circle at 1px 1px,#e6e3dc 1px,transparent 0);
+    background-size:24px 24px;
+  }
+  #app{position:fixed;inset:0}
+
+  .topbar{
+    position:fixed;top:0;left:0;right:0;height:60px;z-index:20;
+    display:flex;align-items:center;gap:16px;padding:0 20px;
+    background:linear-gradient(180deg,rgba(250,249,246,.97),rgba(250,249,246,.80));
+    backdrop-filter:blur(10px); border-bottom:1px solid #e8e5de;
+  }
+  .brand{display:flex;align-items:baseline;gap:9px}
+  .brand h1{margin:0;font-size:15.5px;font-weight:800;letter-spacing:.3px}
+  .brand .sub{font-size:11px;color:var(--muted);letter-spacing:.4px}
+  .spacer{flex:1}
+  .btns{display:flex;gap:6px;flex-wrap:wrap}
+  button{
+    font-family:inherit;font-size:12px;font-weight:600;color:#374151;
+    background:#fff;border:1px solid #dedad2;padding:6px 10px;border-radius:7px;
+    cursor:pointer;transition:.14s;box-shadow:0 1px 1px rgba(17,24,39,.03);
+  }
+  button:hover{background:#f2efe9;border-color:#c9c4ba}
+  .zoom{display:flex;align-items:center;border:1px solid #dedad2;border-radius:7px;overflow:hidden;background:#fff}
+  .zoom button{border:0;border-radius:0;box-shadow:none;padding:6px 9px}
+  .zoom .val{font-size:11px;color:var(--muted);padding:0 7px;min-width:42px;text-align:center}
+
+  svg#map{width:100%;height:100%;display:block;cursor:grab}
+  svg#map.dragging{cursor:grabbing}
+  .node text{font-family:var(--font);dominant-baseline:middle;pointer-events:none}
+  .node{cursor:pointer}
+
+  .hint{
+    position:fixed;left:20px;bottom:14px;z-index:20;font-size:11px;color:var(--muted);
+    background:rgba(255,255,255,.88);border:1px solid #e8e5de;padding:6px 11px;
+    border-radius:8px;box-shadow:var(--shadow);
+  }
+  .hint b{color:#374151}
+  .legend{
+    position:fixed;right:20px;bottom:14px;z-index:20;display:flex;gap:11px;flex-wrap:wrap;
+    max-width:56vw;font-size:10.5px;color:var(--muted);background:rgba(255,255,255,.88);
+    border:1px solid #e8e5de;padding:6px 11px;border-radius:8px;box-shadow:var(--shadow);
+  }
+  .legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px;vertical-align:0}
+  /* 学习状态 */
+  .stats{display:flex;gap:11px;align-items:center;font-size:11.5px;color:var(--muted);white-space:nowrap}
+  .stats b{color:#374151;font-weight:700}
+  .stats .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
+  .mark{cursor:pointer}
+  .mark:hover circle{stroke-width:2.4}
+  /* 视图切换 */
+  .seg{display:flex;background:#efece6;border:1px solid #dedad2;border-radius:8px;padding:2px;gap:2px}
+  .seg a{font-size:12px;font-weight:600;color:#6b7280;text-decoration:none;padding:5px 11px;border-radius:6px;transition:.15s;white-space:nowrap}
+  .seg a:hover{color:#374151;background:rgba(255,255,255,.6)}
+  .seg a.on{background:#fff;color:#111827;box-shadow:0 1px 3px rgba(17,24,39,.14)}
+
+  /* ============ 响应式：窄屏工具栏 ============ */
+  @media (max-width: 900px){
+    .topbar{height:auto;min-height:52px;flex-wrap:wrap;gap:5px;padding:6px 8px}
+    .brand h1{font-size:13px;letter-spacing:0}
+    .brand .sub{display:none}
+    button{font-size:11px;padding:5px 8px;border-radius:6px}
+    .seg a{font-size:11px;padding:4px 8px}
+    .stats{order:9;width:100%;justify-content:center;font-size:10px;gap:8px}
+    .legend{display:none}
+    .hint{left:8px;bottom:8px;font-size:10px;padding:4px 8px}
+  }
+
+  /* ============ 手机端：竖排大纲模式 ============ */
+  body.mobile #map{display:none}
+  body.mobile .zoom{display:none}
+  body.mobile #btn-fit{display:none}
+  body.mobile .hint{display:none}
+  body.mobile .legend{display:none}
+  body.mobile .topbar{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;padding:6px 8px}
+  body.mobile .topbar::-webkit-scrollbar{display:none}
+  body.mobile .btns{flex-wrap:nowrap}
+  body.mobile .spacer{display:none}
+  body.mobile .brand{flex:none}
+  body.mobile .stats{display:none}
+  #outline{
+    display:none; position:fixed; left:0; right:0; bottom:0;
+    overflow-y:auto; -webkit-overflow-scrolling:touch;
+    background:#faf9f6; padding:10px 10px 70px;
+    background-image:radial-gradient(circle at 1px 1px,#e7e4dd 1px,transparent 0);
+    background-size:24px 24px;
+  }
+  body.mobile #outline{display:block}
+  .oln{margin:3px 0}
+  .olrow{display:flex;align-items:flex-start;gap:7px;padding:8px 9px;
+    border-radius:8px;background:#fff;border:1px solid #e5e2db;
+    font-size:13px;line-height:1.5;color:#1f2937;cursor:pointer}
+  .olrow.lv0{background:#111827;color:#fff;border-color:#111827;font-weight:800;font-size:14px}
+  .olrow.lv1{color:#fff;border:none;font-weight:700;font-size:13.5px}
+  .olrow.lv2{font-weight:600;background:#fff}
+  .olrow.lv3{font-weight:400;font-size:12px;background:#f4f2ee;color:#4b5563}
+  .oltog{flex:none;min-width:20px;height:20px;border-radius:5px;background:rgba(0,0,0,.07);
+    display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+  .oltext{flex:1;word-break:break-word;padding-top:1px}
+  .olmk{flex:none;width:20px;height:20px;border-radius:50%;border-width:1.3px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:10px;font-weight:800;color:#fff;margin-top:1px}
+  .olkids{margin-left:12px;border-left:2px solid rgba(0,0,0,.08);
+    padding-left:8px;margin-top:2px}
+/* === 移动端顶栏统一修复 v1 === */
+@media (max-width: 900px){
+  .topbar{height:auto !important;min-height:auto;flex-wrap:wrap;gap:5px;
+          padding:6px 8px;overflow-x:hidden}
+  .brand{flex:1 0 100%;gap:6px}
+  .brand h1{font-size:13.5px;letter-spacing:0}
+  .brand .sub{display:none}
+  .spacer{display:none}
+
+  /* 切换栏：独占一行，四项平分 */
+  .seg{order:1;flex:1 0 100%;display:flex;gap:4px;margin:0 0 3px}
+  .seg a{flex:1 1 0;text-align:center;font-size:11.5px;padding:6px 2px;
+         white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  /* 按钮：第二行，横向可滚 */
+  .btns{order:2;flex:1 1 auto;flex-wrap:nowrap;overflow-x:auto;gap:4px;
+        -webkit-overflow-scrolling:touch}
+  .btns::-webkit-scrollbar{display:none}
+  button{font-size:11px;padding:5px 8px;border-radius:6px;white-space:nowrap;flex:none}
+  .zoom{order:3;flex:none}
+  .zoom .val{min-width:34px;font-size:10px}
+
+  .stats{order:9;flex:1 0 100%;justify-content:center;font-size:9.5px;gap:8px}
+  .legend{display:none}
+  .hint{left:8px;bottom:8px;font-size:10px;padding:4px 8px;max-width:calc(100% - 16px)}
+}
+@media (max-width: 420px){
+  .seg a{font-size:10.5px;padding:6px 1px}
+  .brand h1{font-size:12.5px}
+}
+/* === 移动端切换栏 grid 修复 v2 === */
+@media (max-width: 900px){
+  .topbar{flex-wrap:wrap !important;height:auto !important;overflow:visible !important;
+          padding:6px 8px !important;gap:5px !important}
+  .brand{flex:1 0 100% !important;margin-bottom:2px}
+  .spacer{display:none !important}
+
+  .seg{display:grid !important;grid-template-columns:repeat(4,1fr) !important;
+       gap:4px !important;width:100% !important;flex:1 0 100% !important;
+       order:-1 !important;padding:3px !important;box-sizing:border-box}
+  .seg a{min-width:0 !important;width:auto !important;flex:none !important;
+         text-align:center !important;padding:7px 2px !important;
+         font-size:11.5px !important;line-height:1.2;
+         white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+         background:transparent;border-radius:6px}
+  .seg a.on{background:#fff;box-shadow:0 1px 3px rgba(17,24,39,.14)}
+
+  .btns{flex-wrap:nowrap !important;overflow-x:auto !important;width:100%;
+        -webkit-overflow-scrolling:touch}
+  .btns::-webkit-scrollbar{display:none}
+  button{flex:none;font-size:11px;padding:5px 8px;white-space:nowrap}
+  .zoom{flex:none}
+  .stats{flex:1 0 100% !important;justify-content:center !important;
+         font-size:9.5px !important;gap:8px !important}
+  .legend{display:none !important}
+  .hint{font-size:10px;left:8px;bottom:8px;padding:4px 8px;max-width:calc(100% - 16px)}
+}
+@media (max-width: 420px){
+  .seg a{font-size:10.5px !important;padding:7px 1px !important}
+}
+/* === 标记下拉（窄屏可见性修复）=== */
+.mkmenu{position:relative;flex:none}
+.mklist{position:absolute;right:0;top:calc(100% + 6px);display:none;flex-direction:column;gap:3px;
+  background:#fff;border:1px solid #dedad2;border-radius:9px;padding:5px;min-width:138px;
+  box-shadow:0 10px 26px rgba(17,24,39,.16);z-index:60}
+.mkmenu.open .mklist{display:flex}
+.mklist button{width:100%;text-align:left;border:0;background:#fff;border-radius:6px;
+  padding:7px 10px;font-size:11.5px;color:#374151}
+.mklist button:hover{background:#f2efe9}
+.mkmenu.open>#btn-mk{background:#e8f4f2;border-color:#9fd3cc;color:#0f766e}
+
+@media (max-width: 1280px){
+  .topbar{gap:8px;padding:0 10px;flex-wrap:nowrap}
+  .brand{flex:none}
+  .brand h1{font-size:13px;white-space:nowrap}
+  .brand .sub{display:none}
+  .seg{flex:none}
+  .seg a{padding:5px 7px;font-size:11px}
+  .btns{flex-wrap:nowrap;gap:4px;flex:none}
+  .btns button{padding:5px 7px;font-size:11px}
+  .stats{font-size:10px;gap:6px;flex:none}
+  #btn-mk{padding:5px 8px;font-size:11px}
+  .zoom{flex:none}
+}
+@media (max-width: 1080px){
+  .brand{display:none}
+  .seg a{padding:5px 6px;font-size:10.5px}
+  .btns button{padding:5px 6px;font-size:10.5px}
+  .stats{gap:5px;font-size:9.5px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="topbar">
+    <div class="brand">
+      <h1>FastAPI 后端</h1>
+      <span class="sub">7 阶段 · 47 环节 · 235 细节 · 每条标注 JavaWeb 对应物</span>
+    </div>
+    <div class="spacer"></div>
+    <div class="seg">
+      <a href="index.html">全链路图</a>
+      <a href="graph.html?tab=mysql" title="MySQL 知识栏目">MySQL</a>
+      <a href="https://castoricelover777.github.io/blog/" target="_blank" rel="noopener">博客源码</a>
+      <a href="llm.html">数据分析</a>
+      <a class="on">FastAPI</a>
+    </div>
+    <div class="btns">
+      <button id="btn-expand">全部展开</button>
+      <button id="btn-collapse">只看阶段</button>
+      <button id="btn-items">展开到环节</button>
+      <button id="btn-fit">适应窗口</button>
+    </div>
+    <div class="stats" id="stats"></div>
+      <div class="mkmenu" id="mkmenu">
+      <button id="btn-mk" title="标记：导出 / 导入 / 清空">标记 ▾</button>
+      <div class="mklist" id="mklist">
+        <button id="btn-export">导出标记</button>
+        <button id="btn-import">导入标记</button>
+        <button id="btn-mk-check">标记体检</button>
+        <button id="btn-mk-repair">修复旧标记</button>
+        <button id="btn-reset">清空标记</button>
+        <input type="file" id="file-import" accept=".json,application/json" style="display:none">
+      </div>
+    </div>
+    <div class="zoom">
+      <button id="btn-out">−</button><span class="val" id="zoomval">100%</span><button id="btn-in">+</button>
+    </div>
+  </div>
+  <svg id="map"><g id="scene"></g></svg>
+  <div class="hint"><b>点击节点</b>展开/折叠 · <b>滚轮</b>缩放 · <b>拖拽</b>平移</div>
+  <div class="legend" id="legend"></div>
+</div>
+
+<script>
+const DATA = {"t":"FastAPI 后端（7 阶段 / 47 环节）：对照 JavaWeb 学 Python Web","c":[{"t":"1. 入门与第一个程序","c":[{"t":"1.1 FastAPI 是什么：Starlette + Pydantic 拼出来的框架","c":[{"t":"定位：现代、高性能的 Python Web 框架，底层由两块拼成——Starlette 负责 ASGI/路由/中间件，Pydantic 负责数据校验与序列化。","c":[],"color":"#0EA5E9"},{"t":"三个卖点：性能高（原生 async）、开发快（少写样板代码）、接口文档白送（/docs 自动生成）。","c":[],"color":"#0EA5E9"},{"t":"对照 JavaWeb：SpringBoot = Spring MVC + Jackson + Validation + springdoc 的组合体，FastAPI 相当于「一个依赖把这些全带上」。","c":[],"color":"#0EA5E9"},{"t":"关键认知：类型注解在 FastAPI 里不是注释，是配置——写 int 就等于声明「必须能转成整数，否则 422」。","c":[],"color":"#0EA5E9"},{"t":"对照 JavaWeb：这相当于把 @RequestParam Integer id 的类型信息 + 校验注解 + 文档注解三件事合进一个类型标注。","c":[],"color":"#0EA5E9"}],"color":"#0EA5E9"},{"t":"1.2 和 Flask / Django 的差别：为什么又学一个框架","c":[{"t":"Flask：同步、极简，没有内置校验和文档，跨域/ORM 全靠插件自己拼。","c":[],"color":"#0EA5E9"},{"t":"Django：全家桶（Admin/ORM/模板/迁移），但要写 API 还得上 Django REST Framework。","c":[],"color":"#0EA5E9"},{"t":"FastAPI：介于两者之间——像 Flask 一样轻，但有 SpringBoot 式的约定（校验、文档、依赖注入）。","c":[],"color":"#0EA5E9"},{"t":"对照 JavaWeb：Flask ≈ 裸 Servlet + 手写 if 校验；Django ≈ 完整脚手架（RuoYi 那类）；FastAPI ≈ SpringBoot 的定位。","c":[],"color":"#0EA5E9"},{"t":"选型感受：已经会 SpringBoot 的人迁移最快，因为概念一一对应，缺的只是语法。","c":[],"color":"#0EA5E9"}],"color":"#0EA5E9"},{"t":"1.3 虚拟环境与依赖隔离","c":[{"t":"python -m venv .venv 建虚拟环境，激活后 pip install fastapi \"uvicorn[standard]\"。","c":[],"color":"#0EA5E9"},{"t":"导出一份 requirements.txt 锁版本，团队/换机时 pip install -r requirements.txt 即可。","c":[],"color":"#0EA5E9"},{"t":"对照 JavaWeb：venv 提供的是「项目级依赖隔离」，对应 Maven 的 per-project 仓库 + classpath 隔离。","c":[],"color":"#0EA5E9"},{"t":"对照 JavaWeb：requirements.txt ≈ pom.xml 的 <dependencies>；只锁版本没有传递依赖树，比 Maven 粗糙。","c":[],"color":"#0EA5E9"},{"t":"坑：不激活 venv 直接跑，装到全局环境，换机器立刻 ImportError。","c":[],"color":"#0EA5E9"}],"color":"#0EA5E9"},{"t":"1.4 最小程序：两行代码跑起来一个接口","c":[{"t":"app = FastAPI() 创建应用实例；@app.get(\"/\") 装饰器把函数注册成路由。","c":[],"color":"#0EA5E9"},{"t":"async def root(): return {\"message\": \"Hello World\"}——返回 dict 会自动被序列化成 JSON。","c":[],"color":"#0EA5E9"},{"t":"对照 JavaWeb：FastAPI() ≈ @SpringBootApplication 启动类；@app.get ≈ @GetMapping；return dict ≈ @ResponseBody + Jackson。","c":[],"color":"#0EA5E9"},{"t":"对照 JavaWeb：Spring 要写启动类 + Controller 类 + 方法三个结构体，FastAPI 三件事塞进一个文件。","c":[],"color":"#0EA5E9"},{"t":"注意：函数顺序无关，路由按装饰器注册顺序进表，冲突时先注册的生效。","c":[],"color":"#0EA5E9"}],"color":"#0EA5E9"},{"t":"1.5 启动：uvicorn main:app --reload","c":[{"t":"uvicorn 是 ASGI 服务器；main:app = 模块名:应用实例（去 main.py 找名叫 app 的对象）。","c":[],"color":"#0EA5E9"},{"t":"--reload 是热重载，改代码保存即生效，只能开发用；生产千万别加（内存泄漏 + 重复加载）。","c":[],"color":"#0EA5E9"},{"t":"默认端口 8000；文档在 http://127.0.0.1:8000/docs。","c":[],"color":"#0EA5E9"},{"t":"对照 JavaWeb：uvicorn ≈ 内嵌 Tomcat；--reload ≈ spring-boot-devtools；main:app 的冒号 ≈ 「启动类全限定名」的定位作用。","c":[],"color":"#0EA5E9"},{"t":"生产写法：gunicorn -k uvicorn.workers.UvicornWorker -w 4 main:app，多进程扛并发。","c":[],"color":"#0EA5E9"}],"color":"#0EA5E9"},{"t":"1.6 /docs：白送的接口文档","c":[{"t":"访问 /docs 得到 Swagger UI，可展开、可填参数、可直接发请求；/redoc 是另一种排版；/openapi.json 是原始契约。","c":[],"color":"#0EA5E9"},{"t":"文档内容由路由签名 + Pydantic 模型自动推导，不需要额外写注解。","c":[],"color":"#0EA5E9"},{"t":"对照 JavaWeb：相当于 knife4j / springdoc-openapi，但那边要加依赖、写 @Operation/@Schema/@ApiModelProperty。","c":[],"color":"#0EA5E9"},{"t":"对照 JavaWeb：FastAPI 的类型注解就是 Spring 里「参数类型 + @ApiModel + 校验注解」三者的合体。","c":[],"color":"#0EA5E9"},{"t":"这也意味着：改动函数签名等于改动 API 契约，前后端联调时文档永远是最新的。","c":[],"color":"#0EA5E9"}],"color":"#0EA5E9"}],"color":"#0EA5E9"},{"t":"2. 路由与三种参数","c":[{"t":"2.1 路由装饰器与方法对应","c":[{"t":"@app.get / @app.post / @app.put / @app.delete / @app.patch，一个函数对应一个 HTTP 方法。","c":[],"color":"#2563EB"},{"t":"路径里的 {name} 是占位符，函数同名参数接收。","c":[],"color":"#2563EB"},{"t":"对照 JavaWeb：@GetMapping(\"/users\") 一一对应；Spring 也可以用 @RequestMapping(method=RequestMethod.POST) 合并写法，FastAPI 不合并。","c":[],"color":"#2563EB"},{"t":"对照 JavaWeb：FastAPI 的路由表在启动时构建，行为类似 Spring 的 HandlerMapping。","c":[],"color":"#2563EB"},{"t":"同一路径不同方法可以共存，装饰器不同即可。","c":[],"color":"#2563EB"}],"color":"#2563EB"},{"t":"2.2 路径参数与自动类型转换","c":[{"t":"@app.get(\"/items/{item_id}\") def read(item_id: int)——标注 int 后会自动把字符串转成整数。","c":[],"color":"#2563EB"},{"t":"转换失败不会抛 500，而是返回 422 + 明确说明（loc 指到具体参数）。","c":[],"color":"#2563EB"},{"t":"对照 JavaWeb：@PathVariable Long itemId；Spring 类型转换失败抛 MethodArgumentTypeMismatchException，默认 400。","c":[],"color":"#2563EB"},{"t":"对照 JavaWeb：Spring 转换成功与否取决于有没有配 ConversionService，FastAPI 直接看注解。","c":[],"color":"#2563EB"},{"t":"路径参数是必填的，没有默认值这一说。","c":[],"color":"#2563EB"}],"color":"#2563EB"},{"t":"2.3 Path：给路径参数加约束","c":[{"t":"item_id: int = Path(..., ge=1, le=1000, description=\"商品 ID\")，省略号表示必填。","c":[],"color":"#2563EB"},{"t":"常用约束：gt/ge/lt/le（数值）、min_length/max_length（字符串）、regex（正则）、title/description（文档展示）。","c":[],"color":"#2563EB"},{"t":"对照 JavaWeb：@Min/@Max/@Positive + 类上 @Validated 才生效；FastAPI 写在参数声明里就地生效。","c":[],"color":"#2563EB"},{"t":"对照 JavaWeb：description 等价于 @Parameter(description=...)，但不用额外注解。","c":[],"color":"#2563EB"},{"t":"约束失败同样走 422，错误信息里带 constraint 类型。","c":[],"color":"#2563EB"}],"color":"#2563EB"},{"t":"2.4 查询参数：不是路径就是 query","c":[{"t":"函数参数里没出现在路径占位符中的，一律被当成查询参数：/items?q=abc&page=2。","c":[],"color":"#2563EB"},{"t":"给了默认值就是可选（q: str = None）；不给默认值就是必填。","c":[],"color":"#2563EB"},{"t":"对照 JavaWeb：@RequestParam(value=\"q\", required=false) String q；required 的语义靠「有没有默认值」表达。","c":[],"color":"#2563EB"},{"t":"对照 JavaWeb：Spring 的 @RequestParam 还能绑定 POJO（多参数聚成对象），FastAPI 用 Pydantic 模型 + Depends 也能做到。","c":[],"color":"#2563EB"},{"t":"布尔参数注意：?flag=false 传的是字符串 \"false\"，FastAPI 会按 bool 规则解析（true/1/yes 等）。","c":[],"color":"#2563EB"}],"color":"#2563EB"},{"t":"2.5 Query：给查询参数加约束与多值","c":[{"t":"q: str | None = Query(default=None, min_length=2, max_length=20)。","c":[],"color":"#2563EB"},{"t":"多值：tags: list[str] = Query(default=[])——?tags=a&tags=b 自动聚成列表。","c":[],"color":"#2563EB"},{"t":"对照 JavaWeb：@RequestParam List<String> tags + @Size；Spring 同样用重复 key 传数组。","c":[],"color":"#2563EB"},{"t":"对照 JavaWeb：@RequestParam(defaultValue=\"1\") 的分页参数，在 FastAPI 里就是 page: int = Query(1, ge=1)。","c":[],"color":"#2563EB"},{"t":"Query 与 Path 的区别只在「参数从哪来」，约束写法几乎一样。","c":[],"color":"#2563EB"}],"color":"#2563EB"},{"t":"2.6 请求体：Pydantic 模型接收 JSON","c":[{"t":"class Item(BaseModel): name: str; price: float; 然后 def create(item: Item) 直接拿到解析好的对象。","c":[],"color":"#2563EB"},{"t":"缺字段、类型不对都会自动 422，并指出哪个字段错；不用写一行校验代码。","c":[],"color":"#2563EB"},{"t":"对照 JavaWeb：@RequestBody ItemDTO + Jackson 反序列化；但 Spring 不加 @Valid 就不会校验，FastAPI 默认就校验。","c":[],"color":"#2563EB"},{"t":"对照 JavaWeb：Pydantic 模型 ≈ DTO + Lombok + 校验注解 + @JsonIgnore 的合体。","c":[],"color":"#2563EB"},{"t":"请求体只能是单个模型参数，多个模型要用嵌套模型或用 Body(...) 分别声明。","c":[],"color":"#2563EB"}],"color":"#2563EB"},{"t":"2.7 Field：给请求体字段加约束","c":[{"t":"name: str = Field(..., min_length=1, max_length=50, description=\"商品名\")。","c":[],"color":"#2563EB"},{"t":"支持嵌套模型（子模型也会被校验）、List[子模型]、枚举、EmailStr 等特殊类型。","c":[],"color":"#2563EB"},{"t":"对照 JavaWeb：@NotBlank/@Size/@Email + 类上 @Valid，嵌套时子对象字段加 @Valid 级联。","c":[],"color":"#2563EB"},{"t":"对照 JavaWeb：Field 的 description/example 直接进 OpenAPI 文档，相当于 @Schema。","c":[],"color":"#2563EB"},{"t":"自定义校验：@field_validator 装饰器，等价于 Spring 的自定义 ConstraintValidator。","c":[],"color":"#2563EB"}],"color":"#2563EB"},{"t":"2.8 校验失败长什么样：422","c":[{"t":"返回体形如 {\"detail\": [{\"loc\": [\"body\",\"price\"], \"msg\": \"Input should be greater than 0\", \"type\": \"greater_than\"}]}。","c":[],"color":"#2563EB"},{"t":"loc 是定位路径，能精确到「body 里的第 3 个字段」，前端可直接对着标红。","c":[],"color":"#2563EB"},{"t":"对照 JavaWeb：MethodArgumentNotValidException 默认返回 400，且结构是 Spring 自己的；要统一格式必须写 @RestControllerAdvice。","c":[],"color":"#2563EB"},{"t":"对照 JavaWeb：FastAPI 的 422 是框架默认行为，想改成自己的 code/msg 结构，同样要自定义异常处理器（见 4.2）。","c":[],"color":"#2563EB"},{"t":"注意：422 是「语义错误」，400 才是「语法错误」，两者别混。","c":[],"color":"#2563EB"}],"color":"#2563EB"}],"color":"#2563EB"},{"t":"3. 响应与统一格式","c":[{"t":"3.1 默认响应：返回 dict 就是 JSON","c":[{"t":"返回 dict / list / Pydantic 模型都可以，框架自动 jsonable_encoder 序列化（datetime、Decimal 都能处理）。","c":[],"color":"#7C3AED"},{"t":"默认状态码 200；POST 想返回 201 就写 @app.post(..., status_code=201)。","c":[],"color":"#7C3AED"},{"t":"对照 JavaWeb：@ResponseBody + Jackson 的 ObjectMapper；FastAPI 不需要注解，返回什么就是什么。","c":[],"color":"#7C3AED"},{"t":"对照 JavaWeb：ResponseEntity.status(HttpStatus.CREATED) 的作用，在 FastAPI 里是装饰器参数 status_code。","c":[],"color":"#7C3AED"},{"t":"不能直接返回 Pydantic 之外的自定义对象，否则会报序列化错误——要转 dict 或用 response_model。","c":[],"color":"#7C3AED"}],"color":"#7C3AED"},{"t":"3.2 response_model：输出过滤与脱敏","c":[{"t":"@app.get(\"/users/{id}\", response_model=UserOut)——返回值按 UserOut 裁剪，多余字段不输出。","c":[],"color":"#7C3AED"},{"t":"典型用途：数据库实体里有 password，输出模型里不写它，就不会泄露。","c":[],"color":"#7C3AED"},{"t":"对照 JavaWeb：VO/DTO 输出 + @JsonIgnore；或者用 Spring 的 projection / @JsonView。","c":[],"color":"#7C3AED"},{"t":"对照 JavaWeb：response_model 还负责把 ORM 对象转成可序列化结构，相当于 Jackson 的 getter 提取。","c":[],"color":"#7C3AED"},{"t":"注意：response_model 是「过滤 + 校验」，不是「改名」，字段名必须对得上。","c":[],"color":"#7C3AED"}],"color":"#7C3AED"},{"t":"3.3 响应类型类：不只是 JSON","c":[{"t":"HTMLResponse / PlainTextResponse / FileResponse / StreamingResponse / RedirectResponse，直接 return 对应对象即可。","c":[],"color":"#7C3AED"},{"t":"@app.get(\"/html\", response_class=HTMLResponse) 还能让文档标注正确的内容类型。","c":[],"color":"#7C3AED"},{"t":"对照 JavaWeb：produces=MediaType.TEXT_HTML_VALUE、ResponseEntity<Resource> 下载文件、response.sendRedirect。","c":[],"color":"#7C3AED"},{"t":"对照 JavaWeb：FileResponse ≈ ResponseEntity<InputStreamResource> + Content-Disposition 头。","c":[],"color":"#7C3AED"},{"t":"StreamingResponse 适合大文件/日志流，等价于 Spring 的 StreamingResponseBody。","c":[],"color":"#7C3AED"}],"color":"#7C3AED"},{"t":"3.4 自定义 JSONResponse：状态码与响应头","c":[{"t":"return JSONResponse(content={...}, status_code=201, headers={\"X-Trace\": \"...\"})。","c":[],"color":"#7C3AED"},{"t":"异常处理器里必须用它（不能 return dict），否则状态码不生效。","c":[],"color":"#7C3AED"},{"t":"对照 JavaWeb：ResponseEntity.status(201).header(\"X-Trace\", ...).body(...)。","c":[],"color":"#7C3AED"},{"t":"对照 JavaWeb：ResponseEntity 的链式写法 ≈ JSONResponse 的三个参数。","c":[],"color":"#7C3AED"},{"t":"注意中文：JSONResponse 默认 ensure_ascii，中文会变 \\uXXXX，需要自己设置 json.dumps 参数或交给 ORJSONResponse。","c":[],"color":"#7C3AED"}],"color":"#7C3AED"},{"t":"3.5 统一响应格式：Result{code, msg, data}","c":[{"t":"把成功/失败封装成统一函数或泛型模型，前端只认一种结构，少写一半判断。","c":[],"color":"#7C3AED"},{"t":"常见约定：code=0 成功、非 0 失败；msg 给人看；data 给程序用。","c":[],"color":"#7C3AED"},{"t":"对照 JavaWeb：Result<T> 泛型封装类 + 静态 success()/fail()，Tlias 项目里就是这么干的。","c":[],"color":"#7C3AED"},{"t":"对照 JavaWeb：Spring 还能用 ResponseBodyAdvice 自动包装，FastAPI 一般靠自己封装的 helper 函数。","c":[],"color":"#7C3AED"},{"t":"关键：统一响应和全局异常必须成对出现，否则成功走一种结构、失败走另一种，前端还是要分叉。","c":[],"color":"#7C3AED"}],"color":"#7C3AED"}],"color":"#7C3AED"},{"t":"4. 异常与中间件","c":[{"t":"4.1 HTTPException：主动抛标准错误","c":[{"t":"raise HTTPException(status_code=404, detail=\"商品不存在\")，框架自动转成 JSON 响应。","c":[],"color":"#B45309"},{"t":"还能带 headers（例如 401 带 WWW-Authenticate）。","c":[],"color":"#B45309"},{"t":"对照 JavaWeb：throw new ResponseStatusException(HttpStatus.NOT_FOUND, \"商品不存在\")。","c":[],"color":"#B45309"},{"t":"对照 JavaWeb：或自定义异常 + 类上 @ResponseStatus(NOT_FOUND)，效果一样但不够灵活。","c":[],"color":"#B45309"},{"t":"抛出点就是「业务判断点」，比 return 错误码清晰；同事一眼看出这是异常分支。","c":[],"color":"#B45309"}],"color":"#B45309"},{"t":"4.2 自定义异常处理器：统一错误结构","c":[{"t":"@app.exception_handler(MyError) async def handler(request, exc): return JSONResponse(...)。","c":[],"color":"#B45309"},{"t":"把业务异常统一映射成 {code, msg, data}，前端只处理一种错误格式。","c":[],"color":"#B45309"},{"t":"对照 JavaWeb：@RestControllerAdvice + @ExceptionHandler(MyError.class)，几乎一模一样。","c":[],"color":"#B45309"},{"t":"对照 JavaWeb：Spring 的处理器方法签名 (HttpServletRequest, Exception)，FastAPI 是 (Request, Exception)。","c":[],"color":"#B45309"},{"t":"差异：Spring 有 HandlerExceptionResolver 链，FastAPI 是按类型精确匹配 + 兜底 Exception。","c":[],"color":"#B45309"}],"color":"#B45309"},{"t":"4.3 注册顺序就是匹配优先级","c":[{"t":"从「具体」到「抽象」注册：先注册具体异常，最后注册 Exception 兜底。","c":[],"color":"#B45309"},{"t":"顺序反了会被兜底处理器抢先匹配，具体处理器永远不生效——这是最容易踩的坑。","c":[],"color":"#B45309"},{"t":"对照 JavaWeb：Spring 按异常类型的「最精确匹配」自动选，不看注册顺序，所以那边没这个坑。","c":[],"color":"#B45309"},{"t":"对照 JavaWeb：但 Spring 的 @ExceptionHandler 也有层级规则（同类优先、父类次之），本质一样是「越具体越优先」。","c":[],"color":"#B45309"},{"t":"建议：把兜底处理器单独放一个文件，避免后续追加时插错位置。","c":[],"color":"#B45309"}],"color":"#B45309"},{"t":"4.4 开发模式与生产模式的错误信息","c":[{"t":"开发时想看堆栈，生产绝不能把堆栈返回给前端（泄露表名、路径、依赖版本）。","c":[],"color":"#B45309"},{"t":"做法：按环境变量区分 detail 内容，生产只返回错误码 + 通用文案，堆栈写日志。","c":[],"color":"#B45309"},{"t":"对照 JavaWeb：server.error.include-stacktrace=never / include-message=never；日志用 logback 落盘。","c":[],"color":"#B45309"},{"t":"对照 JavaWeb：Spring 的 /error 默认返回 whitelabel 页，生产要自定义 ErrorController 或 @RestControllerAdvice 覆盖。","c":[],"color":"#B45309"},{"t":"FastAPI 的默认 500 是纯文本 Internal Server Error，比 Spring 的页面更安全但要自己补统一格式。","c":[],"color":"#B45309"}],"color":"#B45309"},{"t":"4.5 中间件：请求链上加一层","c":[{"t":"@app.middleware(\"http\") async def add_process_time(request, call_next): 在 call_next 前后各做点事。","c":[],"color":"#B45309"},{"t":"典型用途：耗时统计、请求 ID 注入、限流、统一日志、CORS（虽然 CORS 有现成中间件）。","c":[],"color":"#B45309"},{"t":"对照 JavaWeb：Servlet 层的 Filter（doFilter + chain.doFilter）语义几乎一致。","c":[],"color":"#B45309"},{"t":"对照 JavaWeb：Spring MVC 层的 HandlerInterceptor（preHandle/postHandle）也类似，但拿不到响应体。","c":[],"color":"#B45309"},{"t":"差异：FastAPI 中间件覆盖整个 ASGI 调用（含异常），比 Filter 更靠外。","c":[],"color":"#B45309"}],"color":"#B45309"},{"t":"4.6 洋葱模型：call_next 前后都有代码","c":[{"t":"请求先进第一层中间件的 call_next 之前，再进第二层……响应按相反顺序回来，像剥洋葱。","c":[],"color":"#B45309"},{"t":"所以计时要用 time.perf_counter() 在 call_next 两侧取差——这和 Filter 的写法完全一致。","c":[],"color":"#B45309"},{"t":"对照 JavaWeb：Filter 的 doFilter 前/后 = 洋葱的两层；afterCompletion 在 Spring 拦截器里对应「响应回来之后」。","c":[],"color":"#B45309"},{"t":"对照 JavaWeb：多个 Filter 的 order（@Order / FilterRegistrationBean）就是洋葱的层序。","c":[],"color":"#B45309"},{"t":"注意：中间件里读请求体要谨慎，body 被消费后下游可能读不到（需缓存）。","c":[],"color":"#B45309"}],"color":"#B45309"}],"color":"#B45309"},{"t":"5. 依赖注入与 ORM","c":[{"t":"5.1 依赖注入：把重复的取参逻辑抽出来","c":[{"t":"多个接口都要「取 token 拿当前用户」「取分页参数」「取数据库会话」，写成依赖后一句话复用。","c":[],"color":"#047857"},{"t":"写法：def current_user(token: str = Header(...)) -> User: ...，然后参数写 user: User = Depends(current_user)。","c":[],"color":"#047857"},{"t":"对照 JavaWeb：IoC 容器 + @Autowired —— 把创建/获取对象的责任交给框架，业务只声明「我需要什么」。","c":[],"color":"#047857"},{"t":"对照 JavaWeb：区别是 Spring 注入的是「单例 bean」，FastAPI 注入的是「每次请求算一次的函数结果」。","c":[],"color":"#047857"},{"t":"好处：可测试性（测试时覆盖依赖即可，不用起整个容器）、显式依赖（函数签名就是依赖清单）。","c":[],"color":"#047857"}],"color":"#047857"},{"t":"5.2 Depends 的四种形态","c":[{"t":"函数依赖：def get_db(): ...，最常用。","c":[],"color":"#047857"},{"t":"类依赖：class CommonParams: def __init__(self, q: str = None, page: int = 1)，实例即是聚合参数。","c":[],"color":"#047857"},{"t":"生成器依赖：def get_db(): db = SessionLocal(); try: yield db; finally: db.close()——yield 前初始化、后清理。","c":[],"color":"#047857"},{"t":"带参数的依赖工厂：def pagination(page: int = 1, size: int = 10) 再 Depends(pagination)。","c":[],"color":"#047857"},{"t":"对照 JavaWeb：生成器依赖 ≈ @Bean + 生命周期回调（@PostConstruct/@PreDestroy）、或 try-with-resources 的封装。","c":[],"color":"#047857"}],"color":"#047857"},{"t":"5.3 依赖缓存：同一请求只算一次","c":[{"t":"同一个依赖在一次请求内被多个函数引用时，默认只执行一次，结果复用（use_cache=True）。","c":[],"color":"#047857"},{"t":"想每次都重算，写 Depends(get_db, use_cache=False)。","c":[],"color":"#047857"},{"t":"对照 JavaWeb：相当于 bean 作用域——singleton（整个应用一份）vs request（每个请求一份）。","c":[],"color":"#047857"},{"t":"对照 JavaWeb：FastAPI 绝大多数依赖的效果接近 request 作用域，因此天然线程/请求隔离，不会像单例那样共享可变状态。","c":[],"color":"#047857"},{"t":"这也是为什么「当前登录用户」「数据库会话」适合做成依赖：每个请求独立。","c":[],"color":"#047857"}],"color":"#047857"},{"t":"5.4 ORM 是什么：模型类 ↔ 表","c":[{"t":"ORM 把「表」映射成「类」、「行」映射成「对象」，写 Python 对象就等于写 SQL。","c":[],"color":"#047857"},{"t":"SQLAlchemy 的两层：Core（SQL 表达式）+ ORM（模型/Session）。","c":[],"color":"#047857"},{"t":"对照 JavaWeb：MyBatis 是「SQL 映射」，你写 SQL、框架帮你转对象；JPA/Hibernate 是「对象映射」，框架帮你生成 SQL。","c":[],"color":"#047857"},{"t":"对照 JavaWeb：SQLAlchemy ORM 更接近 JPA/Hibernate；SQLAlchemy Core 更接近 MyBatis 的 XML + 动态 SQL。","c":[],"color":"#047857"},{"t":"优点：换数据库只改连接串；缺点：复杂 SQL 仍然要手写，性能问题不好排查。","c":[],"color":"#047857"}],"color":"#047857"},{"t":"5.5 声明式模型：Base + __tablename__ + Column","c":[{"t":"Base = declarative_base()；class User(Base): __tablename__ = \"user\"；id = Column(Integer, primary_key=True)。","c":[],"color":"#047857"},{"t":"常用列类型：Integer/String(50)/Text/Boolean/DateTime/Float/Numeric；约束：unique/index/nullable/default。","c":[],"color":"#047857"},{"t":"对照 JavaWeb：@Entity + @Table(name=\"user\") + @Id + @GeneratedValue(strategy=IDENTITY)。","c":[],"color":"#047857"},{"t":"对照 JavaWeb：Column(String(50), nullable=False) ≈ @Column(length=50, nullable=false)。","c":[],"color":"#047857"},{"t":"关系映射：relationship() 对应 @OneToMany/@ManyToOne，外键用 ForeignKey(\"user.id\")。","c":[],"color":"#047857"}],"color":"#047857"},{"t":"5.6 建表：create_all 与迁移","c":[{"t":"Base.metadata.create_all(bind=engine) 会「不存在才建」，不会改已有表结构。","c":[],"color":"#047857"},{"t":"开发够用，生产要用 Alembic 做迁移（增量脚本、可回滚、多人协作）。","c":[],"color":"#047857"},{"t":"对照 JavaWeb：spring.jpa.hibernate.ddl-auto=update 的自动建表，对应 create_all。","c":[],"color":"#047857"},{"t":"对照 JavaWeb：Alembic ≈ Flyway / Liquibase，都是「版本化 SQL 脚本 + 执行记录表」。","c":[],"color":"#047857"},{"t":"坑：改了字段类型，create_all 不会报错也不会改表，线上就会「字段还是旧的」——必须走迁移。","c":[],"color":"#047857"}],"color":"#047857"},{"t":"5.7 会话与事务：get_db 依赖","c":[{"t":"engine = create_engine(URL)；SessionLocal = sessionmaker(bind=engine)；每个请求开一个 Session。","c":[],"color":"#047857"},{"t":"def get_db(): db = SessionLocal(); try: yield db; finally: db.close()——请求结束自动关闭。","c":[],"color":"#047857"},{"t":"写操作必须显式 db.commit()，只 db.add() 不 commit 等于没保存。","c":[],"color":"#047857"},{"t":"对照 JavaWeb：engine ≈ DataSource（HikariCP），SessionLocal ≈ SqlSessionFactory，Session ≈ SqlSession。","c":[],"color":"#047857"},{"t":"对照 JavaWeb：Spring 的 @Transactional 是自动提交/回滚，FastAPI 没有内置声明式事务，要手动 commit/rollback 或用中间件封装。","c":[],"color":"#047857"}],"color":"#047857"},{"t":"5.8 查询：query / filter / first","c":[{"t":"db.query(User).filter(User.id == 1).first() 取单条；.all() 取列表；.count() 计数。","c":[],"color":"#047857"},{"t":"新式写法是 select(User).where(...) + db.scalars(...)，SQLAlchemy 2.0 推荐。","c":[],"color":"#047857"},{"t":"分页：.offset((page-1)*size).limit(size)，配合总数量查询。","c":[],"color":"#047857"},{"t":"对照 JavaWeb：Mapper 的 selectById / selectList 方法；JPA 的 findById / findAll(Pageable)。","c":[],"color":"#047857"},{"t":"对照 JavaWeb：PageHelper 自动拼 limit 的那套，在 SQLAlchemy 里要自己写 offset/limit + count。","c":[],"color":"#047857"}],"color":"#047857"}],"color":"#047857"},{"t":"6. 工程化与跨域","c":[{"t":"6.1 工程结构：从单文件到分层","c":[{"t":"典型结构：app/main.py（装配）、app/routers/（路由）、app/models/（ORM）、app/schemas/（Pydantic）、app/utils/、app/config.py。","c":[],"color":"#DB2777"},{"t":"main.py 只负责「创建 app + 注册路由 + 注册中间件」，业务逻辑全在 routers。","c":[],"color":"#DB2777"},{"t":"对照 JavaWeb：main.py ≈ 启动类 + 自动配置；routers ≈ Controller；models ≈ entity；schemas ≈ DTO/VO；utils ≈ utils。","c":[],"color":"#DB2777"},{"t":"对照 JavaWeb：区别是 Spring 靠包扫描自动装配，FastAPI 必须手写 include_router —— 显式但啰嗦。","c":[],"color":"#DB2777"},{"t":"判断标准：「能跑」和「结构对」是两回事，按职责切分才敢往上加功能。","c":[],"color":"#DB2777"}],"color":"#DB2777"},{"t":"6.2 APIRouter：把路由拆成模块","c":[{"t":"router = APIRouter(prefix=\"/news\", tags=[\"新闻\"])；然后 @router.get(\"/categories\") 就得到 /news/categories。","c":[],"color":"#DB2777"},{"t":"tags 会影响 /docs 的分组展示，纯文档用，不影响路由。","c":[],"color":"#DB2777"},{"t":"对照 JavaWeb：@RestController + 类级 @RequestMapping(\"/news\")，语义完全一致。","c":[],"color":"#DB2777"},{"t":"对照 JavaWeb：Spring 的 Controller 类天生自带前缀，FastAPI 要显式建 router。","c":[],"color":"#DB2777"},{"t":"依赖也能挂在 router 上：APIRouter(dependencies=[Depends(verify_token)])，等价于类级统一鉴权。","c":[],"color":"#DB2777"}],"color":"#DB2777"},{"t":"6.3 include_router：装配与前缀坑","c":[{"t":"app.include_router(news.router)；也可以 include 时再叠加 prefix。","c":[],"color":"#DB2777"},{"t":"最容易踩的坑：prefix 写重——router 里写了 /news，include 时又写 prefix=\"/news\"，最后变 /news/news。","c":[],"color":"#DB2777"},{"t":"对照 JavaWeb：相当于组件扫描 + @RequestMapping 前缀，但 Spring 是「扫到就注册」，不会重复。","c":[],"color":"#DB2777"},{"t":"对照 JavaWeb：include_router ≈ Spring Boot 的自动配置注册（@Import / AutoConfiguration），只是这里手动。","c":[],"color":"#DB2777"},{"t":"建议：prefix 只写在一处，要么 router 里、要么 include 里，别两边都写。","c":[],"color":"#DB2777"}],"color":"#DB2777"},{"t":"6.4 数据库与 ORM 配置集中","c":[{"t":"把 engine、SessionLocal、Base、get_db 统一放 app/db 或 database.py，路由只 from 不重复 create_engine。","c":[],"color":"#DB2777"},{"t":"连接池参数：pool_size、max_overflow、pool_pre_ping=True（断线重连）。","c":[],"color":"#DB2777"},{"t":"对照 JavaWeb：application.yml 的 spring.datasource.* + HikariCP 参数（maximum-pool-size / connection-timeout）。","c":[],"color":"#DB2777"},{"t":"对照 JavaWeb：配置集中化 ≈ @ConfigurationProperties 配置类，两边都忌「到处 new 连接」。","c":[],"color":"#DB2777"},{"t":"连接串别硬编码在代码里，走环境变量或 .env，避免提交泄露密码。","c":[],"color":"#DB2777"}],"color":"#DB2777"},{"t":"6.5 第一个完整业务接口：新闻分类列表","c":[{"t":"链路：schemas 定义输出模型 → routers 里查数据库 → 用 response_model 包装返回。","c":[],"color":"#DB2777"},{"t":"顺序很重要：先定「输出结构」，再写查询，最后补异常分支（查不到就返回空列表，不是 404）。","c":[],"color":"#DB2777"},{"t":"对照 JavaWeb：Controller → Service → Mapper 三段式；这里是 Controller + 直接查（小接口可以省 Service）。","c":[],"color":"#DB2777"},{"t":"对照 JavaWeb：项目变大后仍建议补 services 层，否则路由里会堆 SQL 和业务判断。","c":[],"color":"#DB2777"},{"t":"统一返回同一个 Result 结构，列表接口是 data=[]，单条接口是 data={}，前端只写一套解析。","c":[],"color":"#DB2777"}],"color":"#DB2777"},{"t":"6.6 跨域 CORS：浏览器同源策略拦住了","c":[{"t":"现象：前端 5173 调后端 8000，浏览器报 CORS 错误，但服务端日志显示请求其实到了。","c":[],"color":"#DB2777"},{"t":"方案：app.add_middleware(CORSMiddleware, allow_origins=[...], allow_methods=[\"*\"], allow_headers=[\"*\"], allow_credentials=True)。","c":[],"color":"#DB2777"},{"t":"注意：allow_credentials=True 时 allow_origins 不能写 \"*\"，必须列具体域名。","c":[],"color":"#DB2777"},{"t":"对照 JavaWeb：@CrossOrigin(origins=...) 单个接口 / WebMvcConfigurer.addCorsMappings 全局 / CorsFilter。","c":[],"color":"#DB2777"},{"t":"对照 JavaWeb：本质都是「服务端返回 Access-Control-Allow-* 响应头」，浏览器看到才放行。","c":[],"color":"#DB2777"}],"color":"#DB2777"},{"t":"6.7 CORS 与反向代理：两条路线别混用","c":[{"t":"路线一：后端开 CORS，前端直连不同端口/域名（开发期常用）。","c":[],"color":"#DB2777"},{"t":"路线二：Nginx 反向代理，前后端同源（生产常用），此时不需要 CORS。","c":[],"color":"#DB2777"},{"t":"混用的后果：既配了 CORS 又走代理，响应头重复，浏览器报「包含多个值」。","c":[],"color":"#DB2777"},{"t":"对照 JavaWeb：网关/反代让跨域消失，等价于 Spring Cloud Gateway 或 Nginx 统一入口。","c":[],"color":"#DB2777"},{"t":"判断标准：只要最终「浏览器的地址栏」和「接口地址」同源，就不存在跨域问题。","c":[],"color":"#DB2777"}],"color":"#DB2777"}],"color":"#DB2777"},{"t":"7. 注册链路与上线","c":[{"t":"7.1 注册接口：先通再填","c":[{"t":"先定契约：POST /users/register，请求体 RegisterIn(username, password)，返回统一 Result。","c":[],"color":"#BE123C"},{"t":"先返回固定成功（不落库），把路由、请求体校验、统一响应跑通，再往里填业务。","c":[],"color":"#BE123C"},{"t":"对照 JavaWeb：@PostMapping(\"/register\") + @RequestBody RegisterDTO + @Valid。","c":[],"color":"#BE123C"},{"t":"对照 JavaWeb：Tlias 的注册是全链路案例，链路顺序完全一致：校验 → 查重 → 加密 → 入库 → 返回。","c":[],"color":"#BE123C"},{"t":"好处：接口契约先定死，前端可以并行开发，联调时不会来回改字段。","c":[],"color":"#BE123C"}],"color":"#BE123C"},{"t":"7.2 创建用户：密码必须加密","c":[{"t":"密码只存哈希：passlib 的 CryptContext(schemes=[\"bcrypt\"]) 或 hashlib + 加盐。","c":[],"color":"#BE123C"},{"t":"两个致命错误：明文入库、把密码哈希返回给前端。","c":[],"color":"#BE123C"},{"t":"对照 JavaWeb：BCryptPasswordEncoder（Spring Security）的 encode/matches。","c":[],"color":"#BE123C"},{"t":"对照 JavaWeb：登录校验是「同一明文再哈希一次比对」，不是解密——哈希不可逆。","c":[],"color":"#BE123C"},{"t":"校验：注册时前端要二次确认密码；后端只校验强度与一致性，不信任前端。","c":[],"color":"#BE123C"}],"color":"#BE123C"},{"t":"7.3 Token 方案一：UUID + 数据库表","c":[{"t":"生成 uuid4 作 token，存表（user_id, token, expire_at, created_at），校验时查表。","c":[],"color":"#BE123C"},{"t":"优点：可主动失效（删行=踢人）、可记录多端登录、实现简单。","c":[],"color":"#BE123C"},{"t":"缺点：每次校验多一次数据库/缓存查询；token 表会膨胀需要清理。","c":[],"color":"#BE123C"},{"t":"对照 JavaWeb：传统 Session 换成「服务端 token 表」，或把 token 放 Redis 设 TTL。","c":[],"color":"#BE123C"},{"t":"对照 JavaWeb：这套就是「有状态会话」，只是把 JSESSIONID 换成了自定义 header。","c":[],"color":"#BE123C"}],"color":"#BE123C"},{"t":"7.4 Token 方案二：JWT","c":[{"t":"三段式 header.payload.signature，服务端用密钥签名，payload 里放 user_id/exp。","c":[],"color":"#BE123C"},{"t":"优点：无状态、校验不查库、适合多服务；缺点：签发后无法主动作废（除非加黑名单）。","c":[],"color":"#BE123C"},{"t":"对照 JavaWeb：JWT + Spring Security 的 JwtAuthenticationFilter，或 OAuth2 Resource Server。","c":[],"color":"#BE123C"},{"t":"对照 JavaWeb：安全性不在「加密」而在「签名」——payload 是明文可解的，别放敏感信息。","c":[],"color":"#BE123C"},{"t":"选型判断：要不要「立刻踢人」——要，选 UUID+表；不要，选 JWT。","c":[],"color":"#BE123C"}],"color":"#BE123C"},{"t":"7.5 统一响应 + 全局异常必须成对","c":[{"t":"成功路径走 success() 封装，失败路径走异常处理器，两条路输出同一个结构。","c":[],"color":"#BE123C"},{"t":"只做一半的典型症状：正常接口返回 {code,msg,data}，报错却返回 FastAPI 默认的 {detail}。","c":[],"color":"#BE123C"},{"t":"对照 JavaWeb：Result 封装 + @RestControllerAdvice 必须同时存在，Tlias 项目就是这么配的。","c":[],"color":"#BE123C"},{"t":"对照 JavaWeb：还能用 ResponseBodyAdvice 统一包装成功响应，减少手写 success()。","c":[],"color":"#BE123C"},{"t":"自检方法：故意触发 422 / 404 / 500，看三种错误是不是同一个结构。","c":[],"color":"#BE123C"}],"color":"#BE123C"},{"t":"7.6 部署：别把开发配置带上生产","c":[{"t":"生产不要 --reload；用 gunicorn/uvicorn 多 worker，或者 Docker 打包镜像。","c":[],"color":"#BE123C"},{"t":"环境变量注入配置（数据库地址、密钥），镜像里不写死；日志落盘/采集。","c":[],"color":"#BE123C"},{"t":"对照 JavaWeb：jar + Dockerfile + 多实例 + Nginx 反代，思路完全一样。","c":[],"color":"#BE123C"},{"t":"对照 JavaWeb：Java 有 JVM 参数调优，Python 侧对应 worker 数量与连接池大小。","c":[],"color":"#BE123C"},{"t":"健康检查：/api/health 之类的探针接口，配合容器编排做存活检测。","c":[],"color":"#BE123C"}],"color":"#BE123C"},{"t":"7.7 学习路线：按依赖关系排，不按集数排","c":[{"t":"先打通「路由 → 参数 → 响应」三件套，再学依赖注入与 ORM，最后工程化与认证。","c":[],"color":"#BE123C"},{"t":"跳着学无妨：21~29 集只做了解，等真正用到再回头补。","c":[],"color":"#BE123C"},{"t":"对照 JavaWeb：Servlet → Spring MVC → MyBatis → 项目实战，同样是「由窄到宽」。","c":[],"color":"#BE123C"},{"t":"对照 JavaWeb：两边最像的一点——框架在变，「分层 + 统一响应 + 全局异常 + 依赖注入」这套骨架不变。","c":[],"color":"#BE123C"},{"t":"落地建议：每学一个 FastAPI 特性，先在 Spring 里找对应物，理解速度会翻倍。","c":[],"color":"#BE123C"}],"color":"#BE123C"}],"color":"#BE123C"}],"color":"#0F172A"};
+
+const FS   = {0:17, 1:13.5, 2:12, 3:11};
+const PADX = {0:22, 1:15, 2:12, 3:10};
+const PADY = {0:15, 1:10, 2:7.5, 3:6.5};
+const GAPY = {0:22, 1:9, 2:5, 3:4};
+const GAPX = {0:78, 1:52, 2:40, 3:34};
+const MAXW = {0:360, 1:300, 2:300, 3:400};
+const MAXL = {0:99, 1:99, 2:99, 3:99};   // 不再截断：文字按需换行，全部显示（原来是 1/2/2/3 行，超出加省略号）
+
+function isCJK(ch){ return /[\u3000-\u303f\u4e00-\u9fff\uff00-\uffef]/.test(ch); }
+function textW(s, fs){ let w=0; for(const ch of s) w += isCJK(ch)?fs:fs*0.56; return w; }
+
+function wrap(text, level){
+  const fs = FS[level], budget = MAXW[level], maxL = MAXL[level];
+  const chars = [...text], lines = [];
+  let cur = "";
+  for (const ch of chars){
+    if (cur && textW(cur+ch, fs) > budget){
+      lines.push(cur); cur = ch;
+      if (lines.length >= maxL) break;
+    } else cur += ch;
+  }
+  if (lines.length < maxL && cur) lines.push(cur);
+  let used = lines.join("").length;
+  if (used < chars.length && lines.length){
+    let last = lines[lines.length-1];
+    while (last.length > 1 && textW(last+"…", fs) > budget) last = last.slice(0,-1);
+    lines[lines.length-1] = last + "…";
+  }
+  return lines;
+}
+
+const state = { collapsed:new Set(), scale:1, tx:0, ty:0, right:[], left:[], rootNode:null };
+
+/* ===== 学习状态标记：0=未标记 1=不会(红) 2=仅了解(黄) 3=理解(绿) ===== */
+const MARK_COLORS = ["#9ca3af", "#DC2626", "#F59E0B", "#16A34A"];
+const MARK_TINTS  = ["#ffffff", "#FEF2F2", "#FFFBEB", "#F0FDF4"];
+const MARK_NAMES  = ["未标记", "不会", "仅了解", "理解"];
+const LS_KEY = "mm-marks-fastapi-v1";
+/* ===== 作者内置标记：首次访问时作为初始状态，清空后不再自动恢复 ===== */
+const MARK_DEFAULTS = {};
+const LS_SEEDED = "mm-marks-fastapi-seeded-v1";
+function seedAuthorMarks(){
+  try{
+    if (localStorage.getItem(LS_SEEDED)) return 0;
+    if (Object.keys(state.marks).length){ localStorage.setItem(LS_SEEDED, "1"); return 0; }
+    const keys = Object.keys(MARK_DEFAULTS || {});
+    if (!keys.length){ localStorage.setItem(LS_SEEDED, "1"); return 0; }
+    state.marks = JSON.parse(JSON.stringify(MARK_DEFAULTS));
+    saveMarks();
+    localStorage.setItem(LS_SEEDED, "1");
+    return keys.length;
+  }catch(e){ return 0; }
+}
+function loadAuthorMarks(){
+  const keys = Object.keys(MARK_DEFAULTS || {});
+  if (!keys.length){ alert("这个页面没有内置标记数据。"); return; }
+  if (Object.keys(state.marks).length &&
+      !confirm("会用作者内置的 " + keys.length + " 条标记覆盖你当前的标记，继续？")) return;
+  state.marks = JSON.parse(JSON.stringify(MARK_DEFAULTS));
+  saveMarks();
+  localStorage.setItem(LS_SEEDED, "1");
+  render(true); updateStats();
+}
+try { state.marks = JSON.parse(localStorage.getItem(LS_KEY) || "{}") || {}; }
+catch (e) { state.marks = {}; }
+function saveMarks(){ try { localStorage.setItem(LS_KEY, JSON.stringify(state.marks)); } catch(e){} }
+let selPath = null;
+function markOf(n){ return state.marks[n._path] || 0; }
+function cycleMark(n){
+  const next = (markOf(n) + 1) % 4;
+  if (next === 0) delete state.marks[n._path];
+  else state.marks[n._path] = next;
+  saveMarks();
+  render(true);        // true = 保持当前缩放/平移，不重新适配
+  updateStats();
+}
+function findNodeByPath(n, p){
+  if (n._path === p) return n;
+  const cs = n.c || [];
+  for (let i = 0; i < cs.length; i++){
+    const r = findNodeByPath(cs[i], p);
+    if (r) return r;
+  }
+  return null;
+}
+function setMarkByKey(lv){
+  if (!selPath) return false;
+  const node = findNodeByPath(DATA, selPath);
+  if (!node) return false;
+  if (node.c && node.c.length) return false;   // 只有叶子节点可标记
+  if (state.marks[selPath] === lv) delete state.marks[selPath];
+  else state.marks[selPath] = lv;
+  saveMarks();
+  render(true);
+  updateStats();
+  return true;
+}
+document.addEventListener("keydown", function(e){
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const tag = (e.target && e.target.tagName || "").toLowerCase();
+  if (tag === "input" || tag === "textarea") return;
+  const k = (e.key || "").toLowerCase();
+  const map = { a: 1, s: 2, d: 3 };
+  if (!(k in map)) return;
+  if (!selPath) return;
+  e.preventDefault();
+  setMarkByKey(map[k]);
+});
+function updateStats(){
+  const c = [0,0,0,0];
+  const walk = (n) => { if (!(n.c && n.c.length)) c[markOf(n)]++; (n.c||[]).forEach(walk); };
+  walk(DATA);
+  const box = document.getElementById("stats");
+  if (!box) return;
+  box.innerHTML =
+      `<span><i class="dot" style="background:${MARK_COLORS[1]}"></i>不会 <b>${c[1]}</b></span>`
+    + `<span><i class="dot" style="background:${MARK_COLORS[2]}"></i>仅了解 <b>${c[2]}</b></span>`
+    + `<span><i class="dot" style="background:${MARK_COLORS[3]}"></i>理解 <b>${c[3]}</b></span>`
+    + `<span style="opacity:.65">未标记 <b>${c[0]}</b></span>`;
+}
+
+function measure(node, level, path){
+  node._level = level;
+  node._path = path;
+  node._lines = wrap(node.t, level);
+  node._w = Math.max(...node._lines.map(l => textW(l, FS[level]))) + PADX[level]*2;
+  node._h = node._lines.length * (FS[level]*1.4) + PADY[level]*2;
+  node._open = !state.collapsed.has(node) && node.c && node.c.length > 0;
+  if (node._open) node.c.forEach((ch,i) => measure(ch, level+1, path + "-" + i));
+}
+
+/* 一侧布局：dir=+1 向右，dir=-1 向左。返回该侧高度 */
+function layoutSide(nodes, dir, x0){
+  let cursor = 0;
+  function place(node, level, colX){
+    // colX: 该节点列的「锚点」：右向为左边缘，左向为右边缘
+    node._dir = dir;
+    if (dir > 0){ node._x = colX; }
+    else { node._x = colX - node._w; }
+    if (!node._open || !node.c || !node.c.length){
+      node._y = cursor;
+      cursor += node._h + GAPY[Math.min(level,3)];
+      return node._y + node._h/2;
+    }
+    const nextX = dir > 0
+      ? colX + node._w + GAPX[Math.min(level,3)]
+      : colX - node._w - GAPX[Math.min(level,3)];
+    const centers = node.c.map(ch => place(ch, level+1, nextX));
+    node._y = (Math.min(...centers) + Math.max(...centers))/2 - node._h/2;
+    return node._y + node._h/2;
+  }
+  nodes.forEach(st => place(st, 1, x0));
+  return { height: cursor };
+}
+
+function collect(node, out){
+  out.push(node);
+  if (node._open) node.c.forEach(ch => collect(ch, out));
+  return out;
+}
+
+function assignPaths(node, path){
+  node._path = path;
+  (node.c||[]).forEach((ch,i) => assignPaths(ch, path + "-" + i));
+}
+
+function build(){
+  // 0. 先给全部节点分配路径（折叠的也要有，否则标记会串号）
+  assignPaths(DATA, "r");
+  // 1. 测量
+  measure(DATA, 0, "r");
+  // 2. 分左右（交替）
+  const rightStages = [], leftStages = [];
+  DATA.c.forEach((st, i) => { (i % 2 === 0 ? rightStages : leftStages).push(st); });
+  // 3. 两侧布局（先在各自局部坐标）
+  const R = layoutSide(rightStages, +1, 0);
+  const L = layoutSide(leftStages, -1, 0);
+
+  // 左内侧的局部 x 范围：最右是 0，最左是负值
+  let leftMinX = 0, rightMaxX = 0;
+  const walkX = (n, pick) => { pick(n); if (n._open) n.c.forEach(ch => walkX(ch, pick)); };
+  leftStages.forEach(st => walkX(st, n => { leftMinX = Math.min(leftMinX, n._x); }));
+  rightStages.forEach(st => walkX(st, n => { rightMaxX = Math.max(rightMaxX, n._x + n._w); }));
+
+  const leftW = -leftMinX;
+  const gapR = GAPX[0], rootW = DATA._w;
+  // 水平位移：左侧整体平移到 0 起，根紧随其后
+  const shiftLeft = leftW;
+  const rootX = leftW + gapR;
+  const shiftRight = rootX + rootW + gapR;
+
+  const shiftSide = (stages, dx, dy) => {
+    stages.forEach(st => {
+      const walk = n => { n._x += dx; n._y += dy; if (n._open) n.c.forEach(walk); };
+      walk(st);
+    });
+  };
+
+  const H = Math.max(R.height, L.height);
+  // 垂直居中：两侧各自居中
+  const dyR = (H - R.height) / 2;
+  const dyL = (H - L.height) / 2;
+  shiftSide(rightStages, shiftRight, dyR);
+  shiftSide(leftStages, shiftLeft, dyL);
+
+  DATA._x = rootX;
+  DATA._y = H/2 - DATA._h/2;
+
+  // 收集所有可见节点
+  const nodes = [];
+  collect(DATA, nodes);
+
+  return { nodes, rootX, rootW, totalH: H };
+}
+
+/* ---------- 渲染 ---------- */
+const NS = "http://www.w3.org/2000/svg";
+const svg = document.getElementById("map");
+const scene = document.getElementById("scene");
+function el(tag, attrs){ const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; }
+
+function render(keepView){
+  const keep = keepView ? { s:state.scale, x:state.tx, y:state.ty } : null;
+  const { nodes } = build();
+  scene.innerHTML = "";
+
+  const gE = el("g", {});
+  const drawEdge = (p, c) => {
+    const px = p._dir > 0 ? p._x + p._w : p._x;
+    const py = p._y + p._h/2;
+    const cx = c._dir > 0 ? c._x : c._x + c._w;
+    const cy = c._y + c._h/2;
+    const mx = (px + cx) / 2;
+    gE.appendChild(el("path", {
+      d:`M ${px} ${py} C ${mx} ${py}, ${mx} ${cy}, ${cx} ${cy}`,
+      fill:"none", stroke:c.color || "#9ca3af",
+      "stroke-width": c._level === 1 ? 2 : 1.2,
+      "stroke-linecap":"round",
+      opacity: c._level === 1 ? .9 : .5
+    }));
+  };
+  nodes.forEach(n => { if (n._open && n.c) n.c.forEach(ch => drawEdge(n, ch)); });
+  scene.appendChild(gE);
+
+  const gN = el("g", {});
+  nodes.forEach(n => {
+    const lv = n._level;
+    const g = el("g", { class:"node", "data-p": n._path || "" });
+    const isRoot = lv === 0;
+    const isLeaf = !(n.c && n.c.length);
+    const mk = (!isRoot && isLeaf) ? markOf(n) : 0;
+    const fill0 = isRoot ? "#111827" : (lv === 1 ? (n.color || "#334155") : "#ffffff");
+    const stroke0 = isRoot ? "#111827" : (lv === 1 ? (n.color || "#334155")
+                   : (lv === 2 ? (n.color || "#d6d3ce") : (n.color || "#d6d3ce")));
+    const rect = el("rect", {
+      x:n._x, y:n._y, width:n._w, height:n._h,
+      rx: isRoot ? 12 : 8,
+      fill: mk ? MARK_TINTS[mk] : fill0,
+      stroke: mk ? MARK_COLORS[mk] : stroke0,
+      "stroke-width": mk ? 1.8 : (lv === 1 ? 0 : (lv === 2 ? 1.1 : 0.9)),
+      "stroke-opacity": mk ? 1 : (lv >= 3 ? .35 : 1)
+    });
+    if (lv === 2 && !mk) rect.setAttribute("stroke-opacity", ".55");
+    if (!isRoot && isLeaf && n._path && n._path === selPath){
+      rect.setAttribute("stroke", "#2563eb");
+      rect.setAttribute("stroke-width", "2.6");
+      rect.setAttribute("stroke-opacity", "1");
+    }
+    g.appendChild(rect);
+
+    const fs = FS[lv], lh = fs*1.4;
+    const totalH = n._lines.length * lh;
+    const startY = n._y + (n._h - totalH)/2 + lh/2;
+    n._lines.forEach((line, i) => {
+      const t = el("text", {
+        y: startY + i*lh,
+        "font-size": fs,
+        "font-weight": isRoot ? 800 : (lv === 1 ? 700 : (lv === 2 ? 600 : 400)),
+        fill: isRoot ? "#ffffff" : (lv === 1 ? "#ffffff" : (lv === 2 ? "#1f2937" : "#4b5563"))
+      });
+      if (n._dir > 0 && !isRoot){
+        t.setAttribute("x", n._x + PADX[lv]);
+        t.setAttribute("text-anchor", "start");
+      } else if (n._dir < 0 && !isRoot){
+        t.setAttribute("x", n._x + n._w - PADX[lv]);
+        t.setAttribute("text-anchor", "end");
+      } else {
+        t.setAttribute("x", n._x + PADX[lv]);
+        t.setAttribute("text-anchor", "start");
+      }
+      t.textContent = line;
+      g.appendChild(t);
+    });
+
+    if (n.c && n.c.length){
+      const cx = n._dir > 0 || isRoot ? n._x + n._w + 12 : n._x - 12;
+      const cy = n._y + n._h/2;
+      g.appendChild(el("circle", { cx, cy, r:7.5, fill:"#fff",
+        stroke:n.color || "#9ca3af", "stroke-width":1.2 }));
+      const tt = el("text", { x:cx, y:cy+0.5, "text-anchor":"middle",
+        "font-size":9.5, "font-weight":700, fill:n.color || "#9ca3af" });
+      tt.textContent = n._open ? "−" : String(n.c.length);
+      g.appendChild(tt);
+    } else {
+      /* ----- 叶子节点：学习状态小圆按钮 ----- */
+      const cx = (n._dir > 0 || isRoot) ? n._x + n._w + 12 : n._x - 12;
+      const cy = n._y + n._h/2;
+      const gm = el("g", { class:"mark" });
+      gm.appendChild(el("circle", {
+        cx, cy, r:8,
+        fill: mk ? MARK_COLORS[mk] : "#ffffff",
+        stroke: mk ? MARK_COLORS[mk] : "#c3c9d2",
+        "stroke-width": mk ? 1 : 1.3,
+        "stroke-dasharray": mk ? "0" : "2.2 2.2"
+      }));
+      if (mk){
+        const chk = el("text", {
+          x:cx, y:cy+0.6, "text-anchor":"middle",
+          "font-size":9, "font-weight":800, fill:"#ffffff"
+        });
+        chk.textContent = mk === 3 ? "✓" : (mk === 2 ? "~" : "✕");
+        gm.appendChild(chk);
+      }
+      const ttl = el("title", {});
+      ttl.textContent = `【${MARK_NAMES[mk]}】点击切换：不会 → 仅了解 → 理解 → 取消`;
+      gm.appendChild(ttl);
+      gm.addEventListener("click", ev => { ev.stopPropagation(); cycleMark(n); });
+      g.appendChild(gm);
+    }
+
+    const title = el("title", {}); title.textContent = n.t; g.appendChild(title);
+    g.addEventListener("click", ev => {
+      ev.stopPropagation();
+      selPath = (!isRoot && isLeaf && n._path) ? n._path : null;
+      if (n.c && n.c.length){
+        if (state.collapsed.has(n)) state.collapsed.delete(n); else state.collapsed.add(n);
+        renderKeepNode(n);
+      }
+    });
+    gN.appendChild(g);
+  });
+  scene.appendChild(gN);
+  if (keep){ state.scale = keep.s; state.tx = keep.x; state.ty = keep.y; apply(); }
+  else fit();
+  buildLegend();
+  updateStats();
+}
+
+/* 展开/折叠后保持视图：以被点击节点为锚点，缩放与位置都不重置 */
+function renderKeepNode(n){
+  if (!n || n._x == null || n._y == null){ render(true); return; }
+  const ax = state.tx + n._x * state.scale;     // 点击节点在屏幕上的位置（渲染前）
+  const ay = state.ty + n._y * state.scale;
+  render(true);                                  // true = 沿用当前缩放/平移
+  if (n._x == null || n._y == null) return;
+  state.tx += ax - (state.tx + n._x * state.scale);   // 把同一个节点挪回原处
+  state.ty += ay - (state.ty + n._y * state.scale);
+  apply();
+}
+
+/* ---------- 缩放/平移 ---------- */
+function apply(){
+  scene.setAttribute("transform", `translate(${state.tx},${state.ty}) scale(${state.scale})`);
+  document.getElementById("zoomval").textContent = Math.round(state.scale*100) + "%";
+}
+function fit(){
+  const bb = scene.getBBox();
+  if (!bb.width) return;
+  const W = svg.clientWidth, H = svg.clientHeight;
+  const padX = 70, padTop = 86, padBottom = 62;
+  const s = Math.min((W - padX*2)/bb.width, (H - padTop - padBottom)/bb.height, 1.25);
+  state.scale = Math.max(s, 0.1);
+  state.tx = (W - bb.width*state.scale)/2 - bb.x*state.scale;
+  state.ty = padTop + (H - padTop - padBottom - bb.height*state.scale)/2 - bb.y*state.scale;
+  apply();
+}
+
+svg.addEventListener("wheel", e => {
+  e.preventDefault();
+  const r = svg.getBoundingClientRect();
+  const mx = e.clientX - r.left, my = e.clientY - r.top;
+  const k = e.deltaY < 0 ? 1.12 : 1/1.12;
+  const ns = Math.min(Math.max(state.scale*k, 0.06), 3);
+  const q = ns/state.scale;
+  state.tx = mx - (mx-state.tx)*q;
+  state.ty = my - (my-state.ty)*q;
+  state.scale = ns; apply();
+}, { passive:false });
+
+let drag=false, lx=0, ly=0;
+svg.addEventListener("mousedown", e => { drag=true; lx=e.clientX; ly=e.clientY; svg.classList.add("dragging"); });
+window.addEventListener("mousemove", e => {
+  if(!drag) return;
+  state.tx += e.clientX-lx; state.ty += e.clientY-ly; lx=e.clientX; ly=e.clientY; apply();
+});
+window.addEventListener("mouseup", () => { drag=false; svg.classList.remove("dragging"); });
+
+function buildLegend(){
+  const box = document.getElementById("legend"); box.innerHTML = "";
+  DATA.c.forEach(st => {
+    const s = document.createElement("span");
+    s.innerHTML = `<i style="background:${st.color}"></i>${st.t.split("：")[0]}`;
+    box.appendChild(s);
+  });
+}
+
+function setAll(fn){
+  const walk = (n, d) => { if (fn(n, d)) state.collapsed.add(n); else state.collapsed.delete(n);
+                           (n.c||[]).forEach(ch => walk(ch, d+1)); };
+  walk(DATA, 0);
+  state.collapsed.delete(DATA);
+  render();
+}
+document.getElementById("btn-expand").onclick = () => setAll(() => false);
+document.getElementById("btn-collapse").onclick = () => setAll((n,d) => d >= 1);
+document.getElementById("btn-items").onclick = () => setAll((n,d) => d >= 2);
+document.getElementById("btn-fit").onclick = () => render();
+document.getElementById("btn-in").onclick = () => { state.scale = Math.min(state.scale*1.18,3); apply(); };
+document.getElementById("btn-out").onclick = () => { state.scale = Math.max(state.scale/1.18,0.06); apply(); };
+document.getElementById("btn-reset").onclick = () => {
+  if (!confirm("确定清空所有学习状态标记？")) return;
+  state.marks = {}; saveMarks();
+  try { localStorage.setItem(LS_SEEDED, "1"); } catch(e){}
+  render(true); updateStats();
+};
+
+/* ===== 标记导出 / 导入：用于同步到 U 盘 ===== */
+function exportMarks(){
+  const keys = Object.keys(state.marks);
+  const payload = {
+    app: "前后端数据沟通全链路-学习标记",
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    total: keys.length,
+    marks: state.marks
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const d = new Date();
+  const ymd = d.getFullYear() + "-" +
+              String(d.getMonth()+1).padStart(2,"0") + "-" +
+              String(d.getDate()).padStart(2,"0");
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "学习标记-" + ymd + ".json";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+  alert("已导出 " + keys.length + " 条标记\n\n文件名：学习标记-" + ymd + ".json\n（在浏览器下载目录里）\n\n把它拷到 U 盘，换电脑时用「导入标记」恢复。");
+}
+
+function importMarks(file){
+  const fr = new FileReader();
+  fr.onload = () => {
+    try {
+      const obj = JSON.parse(fr.result);
+      const marks = obj.marks || obj;
+      if (typeof marks !== "object" || marks === null || Array.isArray(marks)) throw new Error("不是有效的标记文件");
+      const keys = Object.keys(marks).filter(k => /^r(-\d+)+$/.test(k) && marks[k] >= 1 && marks[k] <= 3);
+      if (!keys.length) throw new Error("文件里没有可用的标记");
+      if (!confirm("将导入 " + keys.length + " 条标记。\n\n规则：同一知识点以导入文件为准，其余保留你当前的标记。\n\n继续？")) return;
+      keys.forEach(k => { state.marks[k] = marks[k]; });
+      saveMarks(); render(true); updateStats();
+      alert("导入完成。\n当前共 " + Object.keys(state.marks).length + " 条标记。");
+    } catch (e) {
+      alert("导入失败：" + e.message + "\n\n请确认选的是「导出标记」生成的 json 文件。");
+    }
+  };
+  fr.readAsText(file, "utf-8");
+}
+
+const _authorBtn = document.getElementById("btn-author");
+if (_authorBtn) _authorBtn.onclick = loadAuthorMarks;
+document.getElementById("btn-export").onclick = exportMarks;
+document.getElementById("btn-import").onclick = () => document.getElementById("file-import").click();
+document.getElementById("file-import").addEventListener("change", ev => {
+  const f = ev.target.files && ev.target.files[0];
+  if (f) importMarks(f);
+  ev.target.value = "";
+});
+
+
+/* 初始视图：默认「展开到环节」；可用 ?view=all|collapse|items 指定 */
+(function(){
+  state.collapsed.clear();
+  const v = (new URLSearchParams(location.search)).get("view") || "items";
+  const walk = (n, d) => { if (d >= 2) state.collapsed.add(n); (n.c||[]).forEach(ch => walk(ch, d+1)); };
+  if (v === "items"){
+    DATA.c.forEach(st => walk(st, 1));
+  } else if (v === "all"){
+    /* 什么都不折叠 */
+  } else if (v === "collapse"){
+    DATA.c.forEach(st => state.collapsed.add(st));
+  }
+})();
+/* 首次访问：把作者标记作为初始状态 */
+const _seeded = seedAuthorMarks();
+if (_seeded){
+  const _h = document.querySelector(".hint");
+  if (_h) _h.innerHTML += ' · <b>已载入作者 ' + _seeded + ' 条标记</b>';
+}
+render();
+window.addEventListener("resize", () => { clearTimeout(window._t); window._t = setTimeout(apply, 120); });
+</script>
+
+<script>
+/* ============ 手机端：竖排大纲模式（原生滚动，不缩放画布） ============ */
+(function(){
+  if (window.innerWidth > 900) return;
+
+  document.body.classList.add("mobile");
+  const bar  = document.querySelector(".topbar");
+  const hint = document.querySelector(".hint");
+
+  const box = document.createElement("div");
+  box.id = "outline";
+  document.body.appendChild(box);
+
+  function fitBox(){
+    const h = bar.getBoundingClientRect().height;
+    box.style.top = h + "px";
+  }
+  fitBox();
+
+  /* 路径 -> 节点 索引 */
+  const P2N = {};
+  (function index(n){
+    if (n._path) P2N[n._path] = n;
+    (n.c || []).forEach(index);
+  })(DATA);
+
+  const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+  /* 默认展开到「环节」，细节先收起 */
+  state.collapsed.clear();
+  (function init(n, d){
+    if (d >= 2) state.collapsed.add(n);
+    (n.c || []).forEach(ch => init(ch, d + 1));
+  })(DATA, 0);
+
+  function draw(){
+    const out = [];
+    (function walk(n, d){
+      const lv = Math.min(d, 3);
+      const hasKids = n.c && n.c.length;
+      const open = hasKids && !state.collapsed.has(n);
+      const mk = state.marks[n._path] || 0;
+      const color = n.color || "#475569";
+
+      let bg = "#fff", border = "#e5e2db";
+      if (lv === 0){ bg = "#111827"; border = "#111827"; }
+      else if (lv === 1){ bg = color; border = color; }
+      else if (mk){ bg = MARK_TINTS[mk]; border = MARK_COLORS[mk]; }
+
+      out.push('<div class="oln">');
+      out.push('<div class="olrow lv' + lv + '" data-p="' + n._path +
+               '" style="background:' + bg + ';border-color:' + border + '">');
+      if (hasKids){
+        out.push('<span class="oltog">' + (open ? "−" : n.c.length) + '</span>');
+      } else {
+        out.push('<span class="oltog" style="visibility:hidden"></span>');
+      }
+      out.push('<span class="oltext">' + esc(n.t) + '</span>');
+      if (!hasKids){
+        const sym = mk === 3 ? "✓" : mk === 2 ? "~" : mk === 1 ? "✕" : "";
+        out.push('<span class="olmk" data-mark="' + n._path + '" style="border-style:' +
+                 (mk ? "solid" : "dashed") + ';border-color:' + (mk ? MARK_COLORS[mk] : "#c3c9d2") +
+                 ';background:' + (mk ? MARK_COLORS[mk] : "#fff") + '">' + sym + '</span>');
+      }
+      out.push('</div>');
+      if (open){
+        out.push('<div class="olkids">');
+        n.c.forEach(ch => walk(ch, d + 1));
+        out.push('</div>');
+      }
+      out.push('</div>');
+    })(DATA, 0);
+    box.innerHTML = out.join("");
+  }
+
+  /* 让 cycleMark / setAll 等既有逻辑都走大纲渲染 */
+  window.render = function(){ draw(); updateStats(); };
+
+  function cyclePath(p){
+    const next = ((state.marks[p] || 0) + 1) % 4;
+    if (next === 0) delete state.marks[p];
+    else state.marks[p] = next;
+    saveMarks();
+    draw();
+    updateStats();
+  }
+
+  box.addEventListener("click", ev => {
+    const mk = ev.target.closest("[data-mark]");
+    if (mk){ ev.stopPropagation(); cyclePath(mk.getAttribute("data-mark")); return; }
+
+    const row = ev.target.closest(".olrow");
+    if (!row) return;
+    const n = P2N[row.getAttribute("data-p")];
+    if (!n || !(n.c && n.c.length)) return;
+    if (state.collapsed.has(n)) state.collapsed.delete(n);
+    else state.collapsed.add(n);
+    draw();
+  });
+
+  if (hint) hint.textContent = "点节点展开/折叠 · 点小圆标掌握度 · 上下滑动";
+
+  draw();
+  window.addEventListener("resize", () => {
+    fitBox();
+    if (window.innerWidth > 900) location.reload();
+  });
+  window.addEventListener("orientationchange", () => setTimeout(fitBox, 300));
+})();
+</script>
+
+
+<script>
+/* 标记下拉：点按钮开合，点别处 / 选完自动收起 */
+(function(){
+  const menu = document.getElementById("mkmenu");
+  const btn  = document.getElementById("btn-mk");
+  if (!menu || !btn) return;
+  const close = () => menu.classList.remove("open");
+  btn.addEventListener("click", ev => {
+    ev.stopPropagation();
+    menu.classList.toggle("open");
+  });
+  document.addEventListener("click", ev => {
+    if (!menu.contains(ev.target)) close();
+  }, true);
+  // 点击下拉里的任意一项（导出/导入/清空）后收起
+  menu.querySelector(".mklist").addEventListener("click", ev => {
+    if (ev.target.tagName === "BUTTON") setTimeout(close, 0);
+  });
+  document.addEventListener("keydown", ev => { if (ev.key === "Escape") close(); });
+})();
+</script>
+
+<script>
+/* === 孤立标记修复（结构改版后老标记上推）=== */
+(function(){
+  function nodePaths(){
+    const set = new Set();
+    (function walk(n){ if (n && n._path) set.add(n._path); (n && n.c || []).forEach(walk); })(DATA);
+    return set;
+  }
+  function split(path){
+    // "r-0-1-2" → ["r","0","1","2"]
+    const i = path.indexOf("-");
+    return i < 0 ? [path] : [path.slice(0, i)].concat(path.slice(i + 1).split("-"));
+  }
+  function report(){
+    const valid = nodePaths();
+    const keys = Object.keys(state.marks);
+    const bad = keys.filter(k => !valid.has(k));
+    return { total: keys.length, ok: keys.length - bad.length, bad };
+  }
+  function mkCheck(){
+    const r = report();
+    let msg = "节点数：" + nodePaths().size + "\n"
+            + "本地标记：" + r.total + " 条\n"
+            + "  对得上节点：" + r.ok + " 条\n"
+            + "  孤立（对不上）：" + r.bad.length + " 条";
+    if (r.bad.length){
+      msg += "\n\n孤立键示例：\n  " + r.bad.slice(0, 6).join("\n  ");
+      msg += "\n\n说明：孤立标记是页面结构改版前留下的，可点「修复旧标记」上推到最近的现存父节点。";
+    }
+    alert(msg);
+  }
+  function mkRepair(){
+    const r = report();
+    if (!r.bad.length){ alert("很好：没有孤立标记，不需要修复。\n\n当前 " + r.total + " 条标记全部对得上节点。"); return; }
+    const valid = nodePaths();
+    const targets = {};
+    let moved = 0, dropped = 0;
+    r.bad.forEach(k => {
+      const v = +state.marks[k];
+      const parts = split(k);
+      let hit = null;
+      // 至少落到「阶段-环节」这一层，不要把标记推到根节点 r（根不参与统计、没有意义）
+      for (let n = parts.length - 1; n >= 2; n--){
+        const cand = parts.slice(0, n).join("-");
+        if (valid.has(cand)){ hit = cand; break; }
+      }
+      if (!hit || !(v >= 1 && v <= 3)){ dropped++; return; }
+      targets[hit] = targets[hit] ? Math.min(targets[hit], v) : v;  // 同节点取最保守等级
+      moved++;
+    });
+    const tk = Object.keys(targets);
+    if (!tk.length){
+      alert("发现 " + r.bad.length + " 条孤立标记，但都无法对应到现存节点（层级完全不匹配）。\n\n建议：在曾经标记过的那台设备/浏览器上打开本页「导出标记」，再用「导入标记」导入。");
+      return;
+    }
+    if (!confirm("发现 " + r.bad.length + " 条孤立标记（页面结构改过，对不上节点）。\n\n"
+      + "可以把它们「上推」到最近的现存父节点：\n  " + tk.length + " 个节点将获得标记（同节点取最保守等级）\n"
+      + "  " + dropped + " 条会被丢弃（找不到对应父节点）\n\n"
+      + "修复前会自动备份当前标记。原有能对上的标记不受影响。\n\n继续？")) return;
+    try { localStorage.setItem("mm-marks-fastapi-backup-v1", JSON.stringify(state.marks)); } catch(e){}
+    tk.forEach(k => {
+      const cur = state.marks[k] || 0;
+      state.marks[k] = cur ? Math.min(cur, targets[k]) : targets[k];
+    });
+    r.bad.forEach(k => { delete state.marks[k]; });
+    saveMarks();
+    render(true); updateStats();
+    alert("完成\n  上推 " + moved + " 条 → " + tk.length + " 个节点\n  丢弃 " + dropped + " 条\n"
+      + "  当前标记共 " + Object.keys(state.marks).length + " 条\n\n"
+      + "（修复前的状态已备份，需要回退请删掉 localStorage 的 mm-marks-fastapi-backup-v1 后重新导入）");
+  }
+  const c = document.getElementById("btn-mk-check");
+  const rp = document.getElementById("btn-mk-repair");
+  if (c) c.onclick = mkCheck;
+  if (rp) rp.onclick = mkRepair;
+})();
+</script>
+</body>
+</html>
