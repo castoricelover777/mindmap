@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>机器学习（吴恩达 2025 前 32 集）· 大白话思维导图</title>
+<style>
+  :root{
+    --bg:#faf9f6; --ink:#111827; --muted:#6b7280;
+    --font:"PingFang SC","Microsoft YaHei","Hiragino Sans GB","Noto Sans CJK SC",system-ui,-apple-system,"Segoe UI",sans-serif;
+    --shadow:0 1px 2px rgba(17,24,39,.05),0 10px 30px rgba(17,24,39,.07);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;overflow:hidden}
+  body{
+    background:var(--bg); color:var(--ink); font-family:var(--font);
+    background-image:radial-gradient(circle at 1px 1px,#e6e3dc 1px,transparent 0);
+    background-size:24px 24px;
+  }
+  #app{position:fixed;inset:0}
+
+  .topbar{
+    position:fixed;top:0;left:0;right:0;height:60px;z-index:20;
+    display:flex;align-items:center;gap:16px;padding:0 20px;
+    background:linear-gradient(180deg,rgba(250,249,246,.97),rgba(250,249,246,.80));
+    backdrop-filter:blur(10px); border-bottom:1px solid #e8e5de;
+  }
+  .brand{display:flex;align-items:baseline;gap:9px}
+  .brand h1{margin:0;font-size:15.5px;font-weight:800;letter-spacing:.3px}
+  .brand .sub{font-size:11px;color:var(--muted);letter-spacing:.4px}
+  .spacer{flex:1}
+  .btns{display:flex;gap:6px;flex-wrap:wrap}
+  button{
+    font-family:inherit;font-size:12px;font-weight:600;color:#374151;
+    background:#fff;border:1px solid #dedad2;padding:6px 10px;border-radius:7px;
+    cursor:pointer;transition:.14s;box-shadow:0 1px 1px rgba(17,24,39,.03);
+  }
+  button:hover{background:#f2efe9;border-color:#c9c4ba}
+  .zoom{display:flex;align-items:center;border:1px solid #dedad2;border-radius:7px;overflow:hidden;background:#fff}
+  .zoom button{border:0;border-radius:0;box-shadow:none;padding:6px 9px}
+  .zoom .val{font-size:11px;color:var(--muted);padding:0 7px;min-width:42px;text-align:center}
+
+  svg#map{width:100%;height:100%;display:block;cursor:grab}
+  svg#map.dragging{cursor:grabbing}
+  .node text{font-family:var(--font);dominant-baseline:middle;pointer-events:none}
+  .node{cursor:pointer}
+
+  .hint{
+    position:fixed;left:20px;bottom:14px;z-index:20;font-size:11px;color:var(--muted);
+    background:rgba(255,255,255,.88);border:1px solid #e8e5de;padding:6px 11px;
+    border-radius:8px;box-shadow:var(--shadow);
+  }
+  .hint b{color:#374151}
+  .legend{
+    position:fixed;right:20px;bottom:14px;z-index:20;display:flex;gap:11px;flex-wrap:wrap;
+    max-width:56vw;font-size:10.5px;color:var(--muted);background:rgba(255,255,255,.88);
+    border:1px solid #e8e5de;padding:6px 11px;border-radius:8px;box-shadow:var(--shadow);
+  }
+  .legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px;vertical-align:0}
+  /* 学习状态 */
+  .stats{display:flex;gap:11px;align-items:center;font-size:11.5px;color:var(--muted);white-space:nowrap}
+  .stats b{color:#374151;font-weight:700}
+  .stats .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
+  .mark{cursor:pointer}
+  .mark:hover circle{stroke-width:2.4}
+  /* 视图切换 */
+  .seg{display:flex;background:#efece6;border:1px solid #dedad2;border-radius:8px;padding:2px;gap:2px}
+  .seg a{font-size:12px;font-weight:600;color:#6b7280;text-decoration:none;padding:5px 11px;border-radius:6px;transition:.15s;white-space:nowrap}
+  .seg a:hover{color:#374151;background:rgba(255,255,255,.6)}
+  .seg a.on{background:#fff;color:#111827;box-shadow:0 1px 3px rgba(17,24,39,.14)}
+
+  /* ============ 响应式：窄屏工具栏 ============ */
+  @media (max-width: 900px){
+    .topbar{height:auto;min-height:52px;flex-wrap:wrap;gap:5px;padding:6px 8px}
+    .brand h1{font-size:13px;letter-spacing:0}
+    .brand .sub{display:none}
+    button{font-size:11px;padding:5px 8px;border-radius:6px}
+    .seg a{font-size:11px;padding:4px 8px}
+    .stats{order:9;width:100%;justify-content:center;font-size:10px;gap:8px}
+    .legend{display:none}
+    .hint{left:8px;bottom:8px;font-size:10px;padding:4px 8px}
+  }
+
+  /* ============ 手机端：竖排大纲模式 ============ */
+  body.mobile #map{display:none}
+  body.mobile .zoom{display:none}
+  body.mobile #btn-fit{display:none}
+  body.mobile .hint{display:none}
+  body.mobile .legend{display:none}
+  body.mobile .topbar{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;padding:6px 8px}
+  body.mobile .topbar::-webkit-scrollbar{display:none}
+  body.mobile .btns{flex-wrap:nowrap}
+  body.mobile .spacer{display:none}
+  body.mobile .brand{flex:none}
+  body.mobile .stats{display:none}
+  #outline{
+    display:none; position:fixed; left:0; right:0; bottom:0;
+    overflow-y:auto; -webkit-overflow-scrolling:touch;
+    background:#faf9f6; padding:10px 10px 70px;
+    background-image:radial-gradient(circle at 1px 1px,#e7e4dd 1px,transparent 0);
+    background-size:24px 24px;
+  }
+  body.mobile #outline{display:block}
+  .oln{margin:3px 0}
+  .olrow{display:flex;align-items:flex-start;gap:7px;padding:8px 9px;
+    border-radius:8px;background:#fff;border:1px solid #e5e2db;
+    font-size:13px;line-height:1.5;color:#1f2937;cursor:pointer}
+  .olrow.lv0{background:#111827;color:#fff;border-color:#111827;font-weight:800;font-size:14px}
+  .olrow.lv1{color:#fff;border:none;font-weight:700;font-size:13.5px}
+  .olrow.lv2{font-weight:600;background:#fff}
+  .olrow.lv3{font-weight:400;font-size:12px;background:#f4f2ee;color:#4b5563}
+  .oltog{flex:none;min-width:20px;height:20px;border-radius:5px;background:rgba(0,0,0,.07);
+    display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+  .oltext{flex:1;word-break:break-word;padding-top:1px}
+  .olmk{flex:none;width:20px;height:20px;border-radius:50%;border-width:1.3px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:10px;font-weight:800;color:#fff;margin-top:1px}
+  .olkids{margin-left:12px;border-left:2px solid rgba(0,0,0,.08);
+    padding-left:8px;margin-top:2px}
+/* === 移动端顶栏统一修复 v1 === */
+@media (max-width: 900px){
+  .topbar{height:auto !important;min-height:auto;flex-wrap:wrap;gap:5px;
+          padding:6px 8px;overflow-x:hidden}
+  .brand{flex:1 0 100%;gap:6px}
+  .brand h1{font-size:13.5px;letter-spacing:0}
+  .brand .sub{display:none}
+  .spacer{display:none}
+
+  /* 切换栏：独占一行，四项平分 */
+  .seg{order:1;flex:1 0 100%;display:flex;gap:4px;margin:0 0 3px}
+  .seg a{flex:1 1 0;text-align:center;font-size:11.5px;padding:6px 2px;
+         white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  /* 按钮：第二行，横向可滚 */
+  .btns{order:2;flex:1 1 auto;flex-wrap:nowrap;overflow-x:auto;gap:4px;
+        -webkit-overflow-scrolling:touch}
+  .btns::-webkit-scrollbar{display:none}
+  button{font-size:11px;padding:5px 8px;border-radius:6px;white-space:nowrap;flex:none}
+  .zoom{order:3;flex:none}
+  .zoom .val{min-width:34px;font-size:10px}
+
+  .stats{order:9;flex:1 0 100%;justify-content:center;font-size:9.5px;gap:8px}
+  .legend{display:none}
+  .hint{left:8px;bottom:8px;font-size:10px;padding:4px 8px;max-width:calc(100% - 16px)}
+}
+@media (max-width: 420px){
+  .seg a{font-size:10.5px;padding:6px 1px}
+  .brand h1{font-size:12.5px}
+}
+/* === 移动端切换栏 grid 修复 v2 === */
+@media (max-width: 900px){
+  .topbar{flex-wrap:wrap !important;height:auto !important;overflow:visible !important;
+          padding:6px 8px !important;gap:5px !important}
+  .brand{flex:1 0 100% !important;margin-bottom:2px}
+  .spacer{display:none !important}
+
+  .seg{display:grid !important;grid-template-columns:repeat(4,1fr) !important;
+       gap:4px !important;width:100% !important;flex:1 0 100% !important;
+       order:-1 !important;padding:3px !important;box-sizing:border-box}
+  .seg a{min-width:0 !important;width:auto !important;flex:none !important;
+         text-align:center !important;padding:7px 2px !important;
+         font-size:11.5px !important;line-height:1.2;
+         white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+         background:transparent;border-radius:6px}
+  .seg a.on{background:#fff;box-shadow:0 1px 3px rgba(17,24,39,.14)}
+
+  .btns{flex-wrap:nowrap !important;overflow-x:auto !important;width:100%;
+        -webkit-overflow-scrolling:touch}
+  .btns::-webkit-scrollbar{display:none}
+  button{flex:none;font-size:11px;padding:5px 8px;white-space:nowrap}
+  .zoom{flex:none}
+  .stats{flex:1 0 100% !important;justify-content:center !important;
+         font-size:9.5px !important;gap:8px !important}
+  .legend{display:none !important}
+  .hint{font-size:10px;left:8px;bottom:8px;padding:4px 8px;max-width:calc(100% - 16px)}
+}
+@media (max-width: 420px){
+  .seg a{font-size:10.5px !important;padding:7px 1px !important}
+}
+/* === 标记下拉（窄屏可见性修复）=== */
+.mkmenu{position:relative;flex:none}
+.mklist{position:absolute;right:0;top:calc(100% + 6px);display:none;flex-direction:column;gap:3px;
+  background:#fff;border:1px solid #dedad2;border-radius:9px;padding:5px;min-width:138px;
+  box-shadow:0 10px 26px rgba(17,24,39,.16);z-index:60}
+.mkmenu.open .mklist{display:flex}
+.mklist button{width:100%;text-align:left;border:0;background:#fff;border-radius:6px;
+  padding:7px 10px;font-size:11.5px;color:#374151}
+.mklist button:hover{background:#f2efe9}
+.mkmenu.open>#btn-mk{background:#e8f4f2;border-color:#9fd3cc;color:#0f766e}
+
+@media (max-width: 1280px){
+  .topbar{gap:8px;padding:0 10px;flex-wrap:nowrap}
+  .brand{flex:none}
+  .brand h1{font-size:13px;white-space:nowrap}
+  .brand .sub{display:none}
+  .seg{flex:none}
+  .seg a{padding:5px 7px;font-size:11px}
+  .btns{flex-wrap:nowrap;gap:4px;flex:none}
+  .btns button{padding:5px 7px;font-size:11px}
+  .stats{font-size:10px;gap:6px;flex:none}
+  #btn-mk{padding:5px 8px;font-size:11px}
+  .zoom{flex:none}
+}
+@media (max-width: 1080px){
+  .brand{display:none}
+  .seg a{padding:5px 6px;font-size:10.5px}
+  .btns button{padding:5px 6px;font-size:10.5px}
+  .stats{gap:5px;font-size:9.5px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="topbar">
+    <div class="brand">
+      <h1>机器学习</h1>
+      <span class="sub">5 分支 · 26 环节 · 104 细节 · 每个概念都有生活类比</span>
+    </div>
+    <div class="spacer"></div>
+    <div class="seg">
+      <a href="index.html">全链路图</a>
+      <a href="graph.html?tab=mysql" title="MySQL 知识栏目">MySQL</a>
+      <a href="https://castoricelover777.github.io/blog/" target="_blank" rel="noopener">博客源码</a>
+      <a href="llm.html">数据分析</a>
+      <a href="fastapi.html">FastAPI</a>
+      <a class="on">机器学习</a>
+    </div>
+    <div class="btns">
+      <button id="btn-expand">全部展开</button>
+      <button id="btn-collapse">只看阶段</button>
+      <button id="btn-items">展开到环节</button>
+      <button id="btn-fit">适应窗口</button>
+    </div>
+    <div class="stats" id="stats"></div>
+      <div class="mkmenu" id="mkmenu">
+      <button id="btn-mk" title="标记：导出 / 导入 / 清空">标记 ▾</button>
+      <div class="mklist" id="mklist">
+        <button id="btn-export">导出标记</button>
+        <button id="btn-import">导入标记</button>
+        <button id="btn-mk-check">标记体检</button>
+        <button id="btn-mk-repair">修复旧标记</button>
+        <button id="btn-reset">清空标记</button>
+        <input type="file" id="file-import" accept=".json,application/json" style="display:none">
+      </div>
+    </div>
+    <div class="zoom">
+      <button id="btn-out">−</button><span class="val" id="zoomval">100%</span><button id="btn-in">+</button>
+    </div>
+  </div>
+  <svg id="map"><g id="scene"></g></svg>
+  <div class="hint"><b>点击节点</b>展开/折叠 · <b>滚轮</b>缩放 · <b>拖拽</b>平移</div>
+  <div class="legend" id="legend"></div>
+</div>
+
+<script>
+const DATA = {"t":"机器学习（吴恩达 2025 前 32 集）：用大白话讲懂","c":[{"t":"1. 总览：机器学习到底在干嘛","c":[{"t":"1.1 监督学习：有老师批改的刷题","c":[{"t":"数据带标签 = 每道题后面都有标准答案，模型的任务是学会「看到题就能写出答案」的映射。","c":[],"color":"#0EA5E9"},{"t":"类比：做完一本题库，老师批改，你根据批改结果调整思路；改得越多，新题越准。","c":[],"color":"#0EA5E9"},{"t":"训练完可以拿去预测没见过的新题（泛化），这才是有用的标志。","c":[],"color":"#0EA5E9"},{"t":"科研提示：多模态抑郁检测里，PHQ-9 打分就是标签——专家给多少分，模型就学多少分。","c":[],"color":"#0EA5E9"}],"color":"#0EA5E9"},{"t":"1.2 回归 vs 分类：预测「多少」还是「是哪类」","c":[{"t":"回归输出连续数值：这道菜多少卡路里、这个人抑郁分数多少。","c":[],"color":"#0EA5E9"},{"t":"分类输出离散类别：这张脸是猫还是狗、这条语音是抑郁还是正常。","c":[],"color":"#0EA5E9"},{"t":"类比：回归是「秤体重」，分类是「分左右两筐」。","c":[],"color":"#0EA5E9"},{"t":"科研提示：抑郁严重度打分（0~27 分）是回归；抑郁 / 非抑郁二分类是分类；两个任务可共享骨干网络。","c":[],"color":"#0EA5E9"}],"color":"#0EA5E9"},{"t":"1.3 无监督学习：没答案，自己找规律","c":[{"t":"给一堆没有标注的数据，让模型自己发现结构：聚类（谁跟谁像）、降维（把复杂信息压扁）、异常检测（谁不像正常人）。","c":[],"color":"#0EA5E9"},{"t":"类比：把一筐水果按大小颜色自己分组，没人告诉你该分几组、按什么分。","c":[],"color":"#0EA5E9"},{"t":"常用来做数据探索、找隐藏亚型，而不是直接产出结论。","c":[],"color":"#0EA5E9"},{"t":"科研提示：患者数据里做聚类可发现抑郁亚型；异常检测能挑出「标签可疑」的样本。","c":[],"color":"#0EA5E9"}],"color":"#0EA5E9"},{"t":"1.4 训练集 / 验证集 / 测试集：刷题、模拟考、高考","c":[{"t":"训练集学参数，验证集调超参和挑模型，测试集只在最后考一次、绝不参与调参。","c":[],"color":"#0EA5E9"},{"t":"类比：平时刷题（训练）→ 模拟考挑复习策略（验证）→ 高考只考一次（测试）。","c":[],"color":"#0EA5E9"},{"t":"用测试集调过参，成绩就虚高——这叫数据泄漏，是新手最常见的假进度。","c":[],"color":"#0EA5E9"},{"t":"科研提示：抑郁数据集必须按「被试」划分，不能让同一个人的不同片段同时进训练和测试。","c":[],"color":"#0EA5E9"}],"color":"#0EA5E9"},{"t":"1.5 评估标准：别只看准确率","c":[{"t":"回归看误差（MSE/MAE），分类看精确率、召回率、F1、AUC。","c":[],"color":"#0EA5E9"},{"t":"类别不平衡时准确率会骗人：99% 都是正常样本，全猜「正常」也有 99% 准确率，等于没学。","c":[],"color":"#0EA5E9"},{"t":"类比：一百道判断题九十九道是「对」，全填「对」也能得高分，但你什么都不会。","c":[],"color":"#0EA5E9"},{"t":"科研提示：抑郁样本远少于正常样本，论文里报 F1 / AUC / 敏感度，可别只报 accuracy。","c":[],"color":"#0EA5E9"}],"color":"#0EA5E9"}],"color":"#0EA5E9"},{"t":"2. 线性回归：从画一条直线开始","c":[{"t":"2.1 模型 f = wx + b：单价×数量 + 底价","c":[{"t":"w 是「每个特征值多少钱」，b 是「什么都不买也要付的起步价」；模型就是拿特征乘权重再加底价。","c":[],"color":"#2563EB"},{"t":"多变量版本 = 多个单价分别乘各自的量，再全部加起来加底价；每个特征一个 w。","c":[],"color":"#2563EB"},{"t":"类比：打车费 = 里程单价 × 公里数 + 起步价。","c":[],"color":"#2563EB"},{"t":"科研提示：多模态最朴素的融合就是「各模态特征加权求和」（early fusion），w 就是各模态的权重。","c":[],"color":"#2563EB"}],"color":"#2563EB"},{"t":"2.2 代价函数 J：猜错后的罚款单","c":[{"t":"把每次猜错的差距平方再累加，得到一张总罚款单；训练的目标就是让罚款总额最小。","c":[],"color":"#2563EB"},{"t":"为什么平方：正负误差不会互相抵消，错得越离谱罚得越狠。","c":[],"color":"#2563EB"},{"t":"类比：考试错题按错误严重程度罚钱，错得越狠罚得越多。","c":[],"color":"#2563EB"},{"t":"科研提示：DQN 的 MSE Loss 就是这张罚款单——预测 Q 值与目标 Q 值的差平方。","c":[],"color":"#2563EB"}],"color":"#2563EB"},{"t":"2.3 梯度下降：蒙着眼下山","c":[{"t":"站在山腰看不见全局，只能感受脚下坡度（偏导数），朝最陡的下坡方向迈一步，反复走就能到谷底。","c":[],"color":"#2563EB"},{"t":"所谓「训练」，就是不断算坡度 → 迈一步 → 再算坡度的循环。","c":[],"color":"#2563EB"},{"t":"类比：蒙着眼下山，用脚探哪边更低，就朝那边挪一小步。","c":[],"color":"#2563EB"},{"t":"科研提示：代码里就是 optimizer.step()——网络参数沿梯度反方向更新一次。","c":[],"color":"#2563EB"}],"color":"#2563EB"},{"t":"2.4 学习率 α：步子大小","c":[{"t":"步子太小：挪半天还在半山腰（收敛慢、训练久）。","c":[],"color":"#2563EB"},{"t":"步子太大：一脚跨过谷底，在两侧来回震荡，甚至直接飞出去（loss 变 NaN / 爆炸）。","c":[],"color":"#2563EB"},{"t":"调参口诀：从 1e-3 试起，loss 不降就调小一个数量级。","c":[],"color":"#2563EB"},{"t":"科研提示：DQN 常设 1e-4 ~ 1e-5；训练不稳、Q 值爆炸时先怀疑学习率。","c":[],"color":"#2563EB"}],"color":"#2563EB"},{"t":"2.5 特征缩放 / 归一化：大象和蚂蚁上同一台秤","c":[{"t":"特征量纲差太多时，梯度会被数值大的特征支配，下山路线歪歪扭扭走之字形。","c":[],"color":"#2563EB"},{"t":"标准化（减均值除标准差）或归一化（压到 0~1）把各特征拉到同一量级，训练快很多。","c":[],"color":"#2563EB"},{"t":"类比：一只大象和一只蚂蚁一起称重，不换算单位就没法比较。","c":[],"color":"#2563EB"},{"t":"科研提示：音频能量、视频像素、文本 embedding 量纲差好几个数量级，融合前必须 Z-Score。","c":[],"color":"#2563EB"}],"color":"#2563EB"},{"t":"2.6 正规方程：一步算到底的上帝视角","c":[{"t":"不迭代，直接用矩阵运算一步解出最优参数，像开了上帝视角。","c":[],"color":"#2563EB"},{"t":"代价：特征一多，矩阵求逆就变得极慢甚至爆内存，所以实战几乎都用梯度下降。","c":[],"color":"#2563EB"},{"t":"类比：别人一步步试错下山，你直接坐直升机到谷底——但飞机票价随山的大小指数上涨。","c":[],"color":"#2563EB"},{"t":"科研提示：特征上千就别用；小规模时可以用它验证自己写的梯度下降对不对。","c":[],"color":"#2563EB"}],"color":"#2563EB"}],"color":"#2563EB"},{"t":"3. 逻辑回归：名字叫回归，干的是分类","c":[{"t":"3.1 为什么叫回归，干的却是分类","c":[{"t":"它先算一个线性分数，再把分数压成「属于正类的概率」，最后用阈值判定类别。","c":[],"color":"#7C3AED"},{"t":"所以底层还是线性回归那套加权求和，只是出口多了一个概率转换。","c":[],"color":"#7C3AED"},{"t":"类比：先给候选人打分（回归），再按及格线决定录不录用（分类）。","c":[],"color":"#7C3AED"},{"t":"科研提示：输出概率比硬标签有用——可做风险分级，也能配合阈值调召回率。","c":[],"color":"#7C3AED"}],"color":"#7C3AED"},{"t":"3.2 Sigmoid：把任何分数压成 0~1 的概率","c":[{"t":"把负无穷到正无穷的分数压进 0~1，中间 0 分对应 0.5，越正越接近 1，越负越接近 0。","c":[],"color":"#7C3AED"},{"t":"类比：把「体温多少度」换算成「发烧的概率」，再离谱的温度也能变成 0~1 之间的数。","c":[],"color":"#7C3AED"},{"t":"好处是输出可解释成概率，坏处是两头太平——梯度会消失。","c":[],"color":"#7C3AED"},{"t":"科研提示：多标签抑郁维度（情绪、睡眠、食欲）每个维度挂一个 sigmoid 输出头。","c":[],"color":"#7C3AED"}],"color":"#7C3AED"},{"t":"3.3 决策边界：划一条线，左边否、右边是","c":[{"t":"概率 ≥ 0.5 判为正类，等价于「线性分数 ≥ 0」，几何上就是在特征空间里划一条线（高维是面）。","c":[],"color":"#7C3AED"},{"t":"线性边界切不开的数据，就加多项式特征或换成神经网络。","c":[],"color":"#7C3AED"},{"t":"类比：在操场上画一条线，站在左边算「否」，右边算「是」。","c":[],"color":"#7C3AED"},{"t":"科研提示：需要可解释性时，线性边界 + 权重符号能说清「哪个模态在推高抑郁风险」。","c":[],"color":"#7C3AED"}],"color":"#7C3AED"},{"t":"3.4 交叉熵损失：分类不能用平方误差","c":[{"t":"平方误差配 sigmoid 会让损失函数变得坑坑洼洼（非凸），还容易梯度消失；交叉熵专为概率设计。","c":[],"color":"#7C3AED"},{"t":"它的脾气是：你越自信地答错，罚得越狠——逼模型别瞎自信。","c":[],"color":"#7C3AED"},{"t":"类比：考试蒙对不扣分，但自信满满写错答案要重罚，这样才逼你「不确定就说不确定」。","c":[],"color":"#7C3AED"},{"t":"科研提示：抑郁二分类用 BCE、多分类用 CE，这是分类任务的默认答案。","c":[],"color":"#7C3AED"}],"color":"#7C3AED"},{"t":"3.5 Softmax：多分类的投票归一化","c":[{"t":"把 K 个分数变成 K 个概率，加起来正好 1，谁最大判给谁。","c":[],"color":"#7C3AED"},{"t":"类比：K 个候选人得票数换算成支持率，支持率最高的当选。","c":[],"color":"#7C3AED"},{"t":"和 sigmoid 的关系：二分类时 softmax 退化成 sigmoid。","c":[],"color":"#7C3AED"},{"t":"科研提示：抑郁严重程度分四级（无/轻/中/重）就是四类 softmax，输出还能当严重度排序。","c":[],"color":"#7C3AED"}],"color":"#7C3AED"}],"color":"#7C3AED"},{"t":"4. 过拟合与正则化：别让学生死记硬背","c":[{"t":"4.1 过拟合：死记硬背的书呆子","c":[{"t":"训练集考满分、新题立刻崩盘——模型把噪声和偶然细节也背下来了，没学会规律。","c":[],"color":"#B45309"},{"t":"信号很明确：训练损失一路往下，验证损失先降后升，两条线开始分叉。","c":[],"color":"#B45309"},{"t":"类比：把练习册答案全背下来的学生，换一套题就废了。","c":[],"color":"#B45309"},{"t":"科研提示：被试少、片段多时最容易过拟合；按被试划分能立刻把它暴露出来。","c":[],"color":"#B45309"}],"color":"#B45309"},{"t":"4.2 欠拟合：连公式都没背的学渣","c":[{"t":"训练集都考不好——模型太简单、训练不够，或特征里根本没信息。","c":[],"color":"#B45309"},{"t":"对策：加特征、换更强模型、减小正则化、多训练几轮。","c":[],"color":"#B45309"},{"t":"类比：连课本都没翻，练习题当然也做不对。","c":[],"color":"#B45309"},{"t":"科研提示：多模态早期融合欠拟合时，先试 late fusion 或加交叉注意力，别急着加正则。","c":[],"color":"#B45309"}],"color":"#B45309"},{"t":"4.3 正则化：给大参数开罚款单","c":[{"t":"在损失里加一项「参数越大罚越多」，逼模型用更小的权重、更平滑的边界。","c":[],"color":"#B45309"},{"t":"效果：模型不敢把某个特征的作用放大到极致，泛化更稳。","c":[],"color":"#B45309"},{"t":"类比：考试不许押题押太狠，押得越极端扣分越多。","c":[],"color":"#B45309"},{"t":"科研提示：DQN 里 optimizer 的 weight_decay 就是 L2 正则，稳定训练必备。","c":[],"color":"#B45309"}],"color":"#B45309"},{"t":"4.4 L1 vs L2：暴力裁员 vs 温和缩水","c":[{"t":"L1 会把没用的特征权重直接压成 0，产生稀疏解，相当于自动裁员。","c":[],"color":"#B45309"},{"t":"L2 把所有权重一起按比例缩小但不会归零，相当于全体温和降薪，防止数值爆炸。","c":[],"color":"#B45309"},{"t":"类比：L1 是「没业绩的直接开除」，L2 是「所有人按比例降薪」。","c":[],"color":"#B45309"},{"t":"科研提示：要做模态/特征筛选用 L1；DQN 与多数深度模型默认 L2（weight_decay=1e-5）。","c":[],"color":"#B45309"}],"color":"#B45309"},{"t":"4.5 其它防过拟合手段：多、杂、早、简","c":[{"t":"更多数据、数据增强、早停（验证损失一涨就停）、Dropout（随机丢神经元）、简化模型。","c":[],"color":"#B45309"},{"t":"类比：题目多刷几套（更多数据）、换着花样练（增强）、感觉越练越差就停（早停）。","c":[],"color":"#B45309"},{"t":"这些手段常常组合使用，单靠一个往往不够。","c":[],"color":"#B45309"},{"t":"科研提示：多模态抑郁检测的标配三件套——Dropout + 早停 + 被试级划分。","c":[],"color":"#B45309"}],"color":"#B45309"}],"color":"#B45309"},{"t":"5. 工程化与向量化：AI 工程师的效率底线","c":[{"t":"5.1 向量化 / 点积：一行代码秒杀一百个 for","c":[{"t":"点积 = 对应位置相乘再相加，一次就能算完整个样本的加权求和。","c":[],"color":"#047857"},{"t":"NumPy 底层是 C/Fortran 并行实现，比 Python 原生 for 快几十到几百倍。","c":[],"color":"#047857"},{"t":"类比：一个人对着名单逐个打电话（for），和群发短信一次性发完（向量化）。","c":[],"color":"#047857"},{"t":"科研提示：特征矩阵、注意力打分、DQN 的 Q 值计算全部必须向量化，禁止原生 for。","c":[],"color":"#047857"}],"color":"#047857"},{"t":"5.2 广播：形状自动对齐","c":[{"t":"不同形状的数组按规则自动扩展成能运算的形状，省掉手写循环。","c":[],"color":"#047857"},{"t":"类比：Excel 里一整列同时加同一个数，不用一格一格改。","c":[],"color":"#047857"},{"t":"用错形状会静默报错或算出错结果，调试时先 print 形状。","c":[],"color":"#047857"},{"t":"科研提示：batch 内归一化、mask 计算、多模态对齐都靠广播实现。","c":[],"color":"#047857"}],"color":"#047857"},{"t":"5.3 梯度检查：别信感觉，信数字","c":[{"t":"用数值方法近似算梯度，和自己写的解析梯度对比，验证反向传播没写错。","c":[],"color":"#047857"},{"t":"还有一个土办法：先让模型过拟合 10 个样本，如果能到接近 0 损失，说明代码基本没 bug。","c":[],"color":"#047857"},{"t":"类比：先用小样本验算公式对不对，再拿去做大题。","c":[],"color":"#047857"},{"t":"科研提示：DQN 不收敛时，先拿 32 条 transition 让它过拟合，快速排除实现错误。","c":[],"color":"#047857"}],"color":"#047857"},{"t":"5.4 实验管理与复现：科研的底线","c":[{"t":"固定随机种子、记录超参、保存配置文件和数据划分文件。","c":[],"color":"#047857"},{"t":"同一份代码跑出不同结果，八成是种子没固定或数据顺序变了。","c":[],"color":"#047857"},{"t":"类比：菜谱写清楚火候和克数，别人才能复现同一道菜。","c":[],"color":"#047857"},{"t":"科研提示：抑郁检测论文要能复现，seed / 依赖版本 / 划分文件必须进仓库。","c":[],"color":"#047857"}],"color":"#047857"},{"t":"5.5 从实验到部署的检查清单","c":[{"t":"训练和推理的预处理必须完全一致：同一套均值方差、同一套重采样、同一套切窗。","c":[],"color":"#047857"},{"t":"推理时关掉梯度（节省显存）、批处理形状对齐、异常输入兜底。","c":[],"color":"#047857"},{"t":"类比：出厂设置和说明书要对得上，否则用户按说明书操作就出错。","c":[],"color":"#047857"},{"t":"科研提示：训练用的 Z-Score 均值方差要存成文件，推理时加载同一份，否则线上精度会掉。","c":[],"color":"#047857"}],"color":"#047857"}],"color":"#047857"}],"color":"#0F172A"};
+
+const FS   = {0:17, 1:13.5, 2:12, 3:11};
+const PADX = {0:22, 1:15, 2:12, 3:10};
+const PADY = {0:15, 1:10, 2:7.5, 3:6.5};
+const GAPY = {0:22, 1:9, 2:5, 3:4};
+const GAPX = {0:78, 1:52, 2:40, 3:34};
+const MAXW = {0:360, 1:300, 2:300, 3:400};
+const MAXL = {0:99, 1:99, 2:99, 3:99};   // 不再截断：文字按需换行，全部显示（原来是 1/2/2/3 行，超出加省略号）
+
+function isCJK(ch){ return /[\u3000-\u303f\u4e00-\u9fff\uff00-\uffef]/.test(ch); }
+function textW(s, fs){ let w=0; for(const ch of s) w += isCJK(ch)?fs:fs*0.56; return w; }
+
+function wrap(text, level){
+  const fs = FS[level], budget = MAXW[level], maxL = MAXL[level];
+  const chars = [...text], lines = [];
+  let cur = "";
+  for (const ch of chars){
+    if (cur && textW(cur+ch, fs) > budget){
+      lines.push(cur); cur = ch;
+      if (lines.length >= maxL) break;
+    } else cur += ch;
+  }
+  if (lines.length < maxL && cur) lines.push(cur);
+  let used = lines.join("").length;
+  if (used < chars.length && lines.length){
+    let last = lines[lines.length-1];
+    while (last.length > 1 && textW(last+"…", fs) > budget) last = last.slice(0,-1);
+    lines[lines.length-1] = last + "…";
+  }
+  return lines;
+}
+
+const state = { collapsed:new Set(), scale:1, tx:0, ty:0, right:[], left:[], rootNode:null };
+
+/* ===== 学习状态标记：0=未标记 1=不会(红) 2=仅了解(黄) 3=理解(绿) ===== */
+const MARK_COLORS = ["#9ca3af", "#DC2626", "#F59E0B", "#16A34A"];
+const MARK_TINTS  = ["#ffffff", "#FEF2F2", "#FFFBEB", "#F0FDF4"];
+const MARK_NAMES  = ["未标记", "不会", "仅了解", "理解"];
+const LS_KEY = "mm-marks-ml-v1";
+/* ===== 作者内置标记：首次访问时作为初始状态，清空后不再自动恢复 ===== */
+const MARK_DEFAULTS = {};
+const LS_SEEDED = "mm-marks-ml-seeded-v1";
+function seedAuthorMarks(){
+  try{
+    if (localStorage.getItem(LS_SEEDED)) return 0;
+    if (Object.keys(state.marks).length){ localStorage.setItem(LS_SEEDED, "1"); return 0; }
+    const keys = Object.keys(MARK_DEFAULTS || {});
+    if (!keys.length){ localStorage.setItem(LS_SEEDED, "1"); return 0; }
+    state.marks = JSON.parse(JSON.stringify(MARK_DEFAULTS));
+    saveMarks();
+    localStorage.setItem(LS_SEEDED, "1");
+    return keys.length;
+  }catch(e){ return 0; }
+}
+function loadAuthorMarks(){
+  const keys = Object.keys(MARK_DEFAULTS || {});
+  if (!keys.length){ alert("这个页面没有内置标记数据。"); return; }
+  if (Object.keys(state.marks).length &&
+      !confirm("会用作者内置的 " + keys.length + " 条标记覆盖你当前的标记，继续？")) return;
+  state.marks = JSON.parse(JSON.stringify(MARK_DEFAULTS));
+  saveMarks();
+  localStorage.setItem(LS_SEEDED, "1");
+  render(true); updateStats();
+}
+try { state.marks = JSON.parse(localStorage.getItem(LS_KEY) || "{}") || {}; }
+catch (e) { state.marks = {}; }
+function saveMarks(){ try { localStorage.setItem(LS_KEY, JSON.stringify(state.marks)); } catch(e){} }
+let selPath = null;
+function markOf(n){ return state.marks[n._path] || 0; }
+function cycleMark(n){
+  const next = (markOf(n) + 1) % 4;
+  if (next === 0) delete state.marks[n._path];
+  else state.marks[n._path] = next;
+  saveMarks();
+  render(true);        // true = 保持当前缩放/平移，不重新适配
+  updateStats();
+}
+function findNodeByPath(n, p){
+  if (n._path === p) return n;
+  const cs = n.c || [];
+  for (let i = 0; i < cs.length; i++){
+    const r = findNodeByPath(cs[i], p);
+    if (r) return r;
+  }
+  return null;
+}
+function setMarkByKey(lv){
+  if (!selPath) return false;
+  const node = findNodeByPath(DATA, selPath);
+  if (!node) return false;
+  if (node.c && node.c.length) return false;   // 只有叶子节点可标记
+  if (state.marks[selPath] === lv) delete state.marks[selPath];
+  else state.marks[selPath] = lv;
+  saveMarks();
+  render(true);
+  updateStats();
+  return true;
+}
+document.addEventListener("keydown", function(e){
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const tag = (e.target && e.target.tagName || "").toLowerCase();
+  if (tag === "input" || tag === "textarea") return;
+  const k = (e.key || "").toLowerCase();
+  const map = { a: 1, s: 2, d: 3 };
+  if (!(k in map)) return;
+  if (!selPath) return;
+  e.preventDefault();
+  setMarkByKey(map[k]);
+});
+function updateStats(){
+  const c = [0,0,0,0];
+  const walk = (n) => { if (!(n.c && n.c.length)) c[markOf(n)]++; (n.c||[]).forEach(walk); };
+  walk(DATA);
+  const box = document.getElementById("stats");
+  if (!box) return;
+  box.innerHTML =
+      `<span><i class="dot" style="background:${MARK_COLORS[1]}"></i>不会 <b>${c[1]}</b></span>`
+    + `<span><i class="dot" style="background:${MARK_COLORS[2]}"></i>仅了解 <b>${c[2]}</b></span>`
+    + `<span><i class="dot" style="background:${MARK_COLORS[3]}"></i>理解 <b>${c[3]}</b></span>`
+    + `<span style="opacity:.65">未标记 <b>${c[0]}</b></span>`;
+}
+
+function measure(node, level, path){
+  node._level = level;
+  node._path = path;
+  node._lines = wrap(node.t, level);
+  node._w = Math.max(...node._lines.map(l => textW(l, FS[level]))) + PADX[level]*2;
+  node._h = node._lines.length * (FS[level]*1.4) + PADY[level]*2;
+  node._open = !state.collapsed.has(node) && node.c && node.c.length > 0;
+  if (node._open) node.c.forEach((ch,i) => measure(ch, level+1, path + "-" + i));
+}
+
+/* 一侧布局：dir=+1 向右，dir=-1 向左。返回该侧高度 */
+function layoutSide(nodes, dir, x0){
+  let cursor = 0;
+  function place(node, level, colX){
+    // colX: 该节点列的「锚点」：右向为左边缘，左向为右边缘
+    node._dir = dir;
+    if (dir > 0){ node._x = colX; }
+    else { node._x = colX - node._w; }
+    if (!node._open || !node.c || !node.c.length){
+      node._y = cursor;
+      cursor += node._h + GAPY[Math.min(level,3)];
+      return node._y + node._h/2;
+    }
+    const nextX = dir > 0
+      ? colX + node._w + GAPX[Math.min(level,3)]
+      : colX - node._w - GAPX[Math.min(level,3)];
+    const centers = node.c.map(ch => place(ch, level+1, nextX));
+    node._y = (Math.min(...centers) + Math.max(...centers))/2 - node._h/2;
+    return node._y + node._h/2;
+  }
+  nodes.forEach(st => place(st, 1, x0));
+  return { height: cursor };
+}
+
+function collect(node, out){
+  out.push(node);
+  if (node._open) node.c.forEach(ch => collect(ch, out));
+  return out;
+}
+
+function assignPaths(node, path){
+  node._path = path;
+  (node.c||[]).forEach((ch,i) => assignPaths(ch, path + "-" + i));
+}
+
+function build(){
+  // 0. 先给全部节点分配路径（折叠的也要有，否则标记会串号）
+  assignPaths(DATA, "r");
+  // 1. 测量
+  measure(DATA, 0, "r");
+  // 2. 分左右（交替）
+  const rightStages = [], leftStages = [];
+  DATA.c.forEach((st, i) => { (i % 2 === 0 ? rightStages : leftStages).push(st); });
+  // 3. 两侧布局（先在各自局部坐标）
+  const R = layoutSide(rightStages, +1, 0);
+  const L = layoutSide(leftStages, -1, 0);
+
+  // 左内侧的局部 x 范围：最右是 0，最左是负值
+  let leftMinX = 0, rightMaxX = 0;
+  const walkX = (n, pick) => { pick(n); if (n._open) n.c.forEach(ch => walkX(ch, pick)); };
+  leftStages.forEach(st => walkX(st, n => { leftMinX = Math.min(leftMinX, n._x); }));
+  rightStages.forEach(st => walkX(st, n => { rightMaxX = Math.max(rightMaxX, n._x + n._w); }));
+
+  const leftW = -leftMinX;
+  const gapR = GAPX[0], rootW = DATA._w;
+  // 水平位移：左侧整体平移到 0 起，根紧随其后
+  const shiftLeft = leftW;
+  const rootX = leftW + gapR;
+  const shiftRight = rootX + rootW + gapR;
+
+  const shiftSide = (stages, dx, dy) => {
+    stages.forEach(st => {
+      const walk = n => { n._x += dx; n._y += dy; if (n._open) n.c.forEach(walk); };
+      walk(st);
+    });
+  };
+
+  const H = Math.max(R.height, L.height);
+  // 垂直居中：两侧各自居中
+  const dyR = (H - R.height) / 2;
+  const dyL = (H - L.height) / 2;
+  shiftSide(rightStages, shiftRight, dyR);
+  shiftSide(leftStages, shiftLeft, dyL);
+
+  DATA._x = rootX;
+  DATA._y = H/2 - DATA._h/2;
+
+  // 收集所有可见节点
+  const nodes = [];
+  collect(DATA, nodes);
+
+  return { nodes, rootX, rootW, totalH: H };
+}
+
+/* ---------- 渲染 ---------- */
+const NS = "http://www.w3.org/2000/svg";
+const svg = document.getElementById("map");
+const scene = document.getElementById("scene");
+function el(tag, attrs){ const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; }
+
+function render(keepView){
+  const keep = keepView ? { s:state.scale, x:state.tx, y:state.ty } : null;
+  const { nodes } = build();
+  scene.innerHTML = "";
+
+  const gE = el("g", {});
+  const drawEdge = (p, c) => {
+    const px = p._dir > 0 ? p._x + p._w : p._x;
+    const py = p._y + p._h/2;
+    const cx = c._dir > 0 ? c._x : c._x + c._w;
+    const cy = c._y + c._h/2;
+    const mx = (px + cx) / 2;
+    gE.appendChild(el("path", {
+      d:`M ${px} ${py} C ${mx} ${py}, ${mx} ${cy}, ${cx} ${cy}`,
+      fill:"none", stroke:c.color || "#9ca3af",
+      "stroke-width": c._level === 1 ? 2 : 1.2,
+      "stroke-linecap":"round",
+      opacity: c._level === 1 ? .9 : .5
+    }));
+  };
+  nodes.forEach(n => { if (n._open && n.c) n.c.forEach(ch => drawEdge(n, ch)); });
+  scene.appendChild(gE);
+
+  const gN = el("g", {});
+  nodes.forEach(n => {
+    const lv = n._level;
+    const g = el("g", { class:"node", "data-p": n._path || "" });
+    const isRoot = lv === 0;
+    const isLeaf = !(n.c && n.c.length);
+    const mk = (!isRoot && isLeaf) ? markOf(n) : 0;
+    const fill0 = isRoot ? "#111827" : (lv === 1 ? (n.color || "#334155") : "#ffffff");
+    const stroke0 = isRoot ? "#111827" : (lv === 1 ? (n.color || "#334155")
+                   : (lv === 2 ? (n.color || "#d6d3ce") : (n.color || "#d6d3ce")));
+    const rect = el("rect", {
+      x:n._x, y:n._y, width:n._w, height:n._h,
+      rx: isRoot ? 12 : 8,
+      fill: mk ? MARK_TINTS[mk] : fill0,
+      stroke: mk ? MARK_COLORS[mk] : stroke0,
+      "stroke-width": mk ? 1.8 : (lv === 1 ? 0 : (lv === 2 ? 1.1 : 0.9)),
+      "stroke-opacity": mk ? 1 : (lv >= 3 ? .35 : 1)
+    });
+    if (lv === 2 && !mk) rect.setAttribute("stroke-opacity", ".55");
+    if (!isRoot && isLeaf && n._path && n._path === selPath){
+      rect.setAttribute("stroke", "#2563eb");
+      rect.setAttribute("stroke-width", "2.6");
+      rect.setAttribute("stroke-opacity", "1");
+    }
+    g.appendChild(rect);
+
+    const fs = FS[lv], lh = fs*1.4;
+    const totalH = n._lines.length * lh;
+    const startY = n._y + (n._h - totalH)/2 + lh/2;
+    n._lines.forEach((line, i) => {
+      const t = el("text", {
+        y: startY + i*lh,
+        "font-size": fs,
+        "font-weight": isRoot ? 800 : (lv === 1 ? 700 : (lv === 2 ? 600 : 400)),
+        fill: isRoot ? "#ffffff" : (lv === 1 ? "#ffffff" : (lv === 2 ? "#1f2937" : "#4b5563"))
+      });
+      if (n._dir > 0 && !isRoot){
+        t.setAttribute("x", n._x + PADX[lv]);
+        t.setAttribute("text-anchor", "start");
+      } else if (n._dir < 0 && !isRoot){
+        t.setAttribute("x", n._x + n._w - PADX[lv]);
+        t.setAttribute("text-anchor", "end");
+      } else {
+        t.setAttribute("x", n._x + PADX[lv]);
+        t.setAttribute("text-anchor", "start");
+      }
+      t.textContent = line;
+      g.appendChild(t);
+    });
+
+    if (n.c && n.c.length){
+      const cx = n._dir > 0 || isRoot ? n._x + n._w + 12 : n._x - 12;
+      const cy = n._y + n._h/2;
+      g.appendChild(el("circle", { cx, cy, r:7.5, fill:"#fff",
+        stroke:n.color || "#9ca3af", "stroke-width":1.2 }));
+      const tt = el("text", { x:cx, y:cy+0.5, "text-anchor":"middle",
+        "font-size":9.5, "font-weight":700, fill:n.color || "#9ca3af" });
+      tt.textContent = n._open ? "−" : String(n.c.length);
+      g.appendChild(tt);
+    } else {
+      /* ----- 叶子节点：学习状态小圆按钮 ----- */
+      const cx = (n._dir > 0 || isRoot) ? n._x + n._w + 12 : n._x - 12;
+      const cy = n._y + n._h/2;
+      const gm = el("g", { class:"mark" });
+      gm.appendChild(el("circle", {
+        cx, cy, r:8,
+        fill: mk ? MARK_COLORS[mk] : "#ffffff",
+        stroke: mk ? MARK_COLORS[mk] : "#c3c9d2",
+        "stroke-width": mk ? 1 : 1.3,
+        "stroke-dasharray": mk ? "0" : "2.2 2.2"
+      }));
+      if (mk){
+        const chk = el("text", {
+          x:cx, y:cy+0.6, "text-anchor":"middle",
+          "font-size":9, "font-weight":800, fill:"#ffffff"
+        });
+        chk.textContent = mk === 3 ? "✓" : (mk === 2 ? "~" : "✕");
+        gm.appendChild(chk);
+      }
+      const ttl = el("title", {});
+      ttl.textContent = `【${MARK_NAMES[mk]}】点击切换：不会 → 仅了解 → 理解 → 取消`;
+      gm.appendChild(ttl);
+      gm.addEventListener("click", ev => { ev.stopPropagation(); cycleMark(n); });
+      g.appendChild(gm);
+    }
+
+    const title = el("title", {}); title.textContent = n.t; g.appendChild(title);
+    g.addEventListener("click", ev => {
+      ev.stopPropagation();
+      selPath = (!isRoot && isLeaf && n._path) ? n._path : null;
+      if (n.c && n.c.length){
+        if (state.collapsed.has(n)) state.collapsed.delete(n); else state.collapsed.add(n);
+        renderKeepNode(n);
+      }
+    });
+    gN.appendChild(g);
+  });
+  scene.appendChild(gN);
+  if (keep){ state.scale = keep.s; state.tx = keep.x; state.ty = keep.y; apply(); }
+  else fit();
+  buildLegend();
+  updateStats();
+}
+
+/* 展开/折叠后保持视图：以被点击节点为锚点，缩放与位置都不重置 */
+function renderKeepNode(n){
+  if (!n || n._x == null || n._y == null){ render(true); return; }
+  const ax = state.tx + n._x * state.scale;     // 点击节点在屏幕上的位置（渲染前）
+  const ay = state.ty + n._y * state.scale;
+  render(true);                                  // true = 沿用当前缩放/平移
+  if (n._x == null || n._y == null) return;
+  state.tx += ax - (state.tx + n._x * state.scale);   // 把同一个节点挪回原处
+  state.ty += ay - (state.ty + n._y * state.scale);
+  apply();
+}
+
+/* ---------- 缩放/平移 ---------- */
+function apply(){
+  scene.setAttribute("transform", `translate(${state.tx},${state.ty}) scale(${state.scale})`);
+  document.getElementById("zoomval").textContent = Math.round(state.scale*100) + "%";
+}
+function fit(){
+  const bb = scene.getBBox();
+  if (!bb.width) return;
+  const W = svg.clientWidth, H = svg.clientHeight;
+  const padX = 70, padTop = 86, padBottom = 62;
+  const s = Math.min((W - padX*2)/bb.width, (H - padTop - padBottom)/bb.height, 1.25);
+  state.scale = Math.max(s, 0.1);
+  state.tx = (W - bb.width*state.scale)/2 - bb.x*state.scale;
+  state.ty = padTop + (H - padTop - padBottom - bb.height*state.scale)/2 - bb.y*state.scale;
+  apply();
+}
+
+svg.addEventListener("wheel", e => {
+  e.preventDefault();
+  const r = svg.getBoundingClientRect();
+  const mx = e.clientX - r.left, my = e.clientY - r.top;
+  const k = e.deltaY < 0 ? 1.12 : 1/1.12;
+  const ns = Math.min(Math.max(state.scale*k, 0.06), 3);
+  const q = ns/state.scale;
+  state.tx = mx - (mx-state.tx)*q;
+  state.ty = my - (my-state.ty)*q;
+  state.scale = ns; apply();
+}, { passive:false });
+
+let drag=false, lx=0, ly=0;
+svg.addEventListener("mousedown", e => { drag=true; lx=e.clientX; ly=e.clientY; svg.classList.add("dragging"); });
+window.addEventListener("mousemove", e => {
+  if(!drag) return;
+  state.tx += e.clientX-lx; state.ty += e.clientY-ly; lx=e.clientX; ly=e.clientY; apply();
+});
+window.addEventListener("mouseup", () => { drag=false; svg.classList.remove("dragging"); });
+
+function buildLegend(){
+  const box = document.getElementById("legend"); box.innerHTML = "";
+  DATA.c.forEach(st => {
+    const s = document.createElement("span");
+    s.innerHTML = `<i style="background:${st.color}"></i>${st.t.split("：")[0]}`;
+    box.appendChild(s);
+  });
+}
+
+function setAll(fn){
+  const walk = (n, d) => { if (fn(n, d)) state.collapsed.add(n); else state.collapsed.delete(n);
+                           (n.c||[]).forEach(ch => walk(ch, d+1)); };
+  walk(DATA, 0);
+  state.collapsed.delete(DATA);
+  render();
+}
+document.getElementById("btn-expand").onclick = () => setAll(() => false);
+document.getElementById("btn-collapse").onclick = () => setAll((n,d) => d >= 1);
+document.getElementById("btn-items").onclick = () => setAll((n,d) => d >= 2);
+document.getElementById("btn-fit").onclick = () => render();
+document.getElementById("btn-in").onclick = () => { state.scale = Math.min(state.scale*1.18,3); apply(); };
+document.getElementById("btn-out").onclick = () => { state.scale = Math.max(state.scale/1.18,0.06); apply(); };
+document.getElementById("btn-reset").onclick = () => {
+  if (!confirm("确定清空所有学习状态标记？")) return;
+  state.marks = {}; saveMarks();
+  try { localStorage.setItem(LS_SEEDED, "1"); } catch(e){}
+  render(true); updateStats();
+};
+
+/* ===== 标记导出 / 导入：用于同步到 U 盘 ===== */
+function exportMarks(){
+  const keys = Object.keys(state.marks);
+  const payload = {
+    app: "前后端数据沟通全链路-学习标记",
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    total: keys.length,
+    marks: state.marks
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const d = new Date();
+  const ymd = d.getFullYear() + "-" +
+              String(d.getMonth()+1).padStart(2,"0") + "-" +
+              String(d.getDate()).padStart(2,"0");
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "学习标记-" + ymd + ".json";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+  alert("已导出 " + keys.length + " 条标记\n\n文件名：学习标记-" + ymd + ".json\n（在浏览器下载目录里）\n\n把它拷到 U 盘，换电脑时用「导入标记」恢复。");
+}
+
+function importMarks(file){
+  const fr = new FileReader();
+  fr.onload = () => {
+    try {
+      const obj = JSON.parse(fr.result);
+      const marks = obj.marks || obj;
+      if (typeof marks !== "object" || marks === null || Array.isArray(marks)) throw new Error("不是有效的标记文件");
+      const keys = Object.keys(marks).filter(k => /^r(-\d+)+$/.test(k) && marks[k] >= 1 && marks[k] <= 3);
+      if (!keys.length) throw new Error("文件里没有可用的标记");
+      if (!confirm("将导入 " + keys.length + " 条标记。\n\n规则：同一知识点以导入文件为准，其余保留你当前的标记。\n\n继续？")) return;
+      keys.forEach(k => { state.marks[k] = marks[k]; });
+      saveMarks(); render(true); updateStats();
+      alert("导入完成。\n当前共 " + Object.keys(state.marks).length + " 条标记。");
+    } catch (e) {
+      alert("导入失败：" + e.message + "\n\n请确认选的是「导出标记」生成的 json 文件。");
+    }
+  };
+  fr.readAsText(file, "utf-8");
+}
+
+const _authorBtn = document.getElementById("btn-author");
+if (_authorBtn) _authorBtn.onclick = loadAuthorMarks;
+document.getElementById("btn-export").onclick = exportMarks;
+document.getElementById("btn-import").onclick = () => document.getElementById("file-import").click();
+document.getElementById("file-import").addEventListener("change", ev => {
+  const f = ev.target.files && ev.target.files[0];
+  if (f) importMarks(f);
+  ev.target.value = "";
+});
+
+
+/* 初始视图：默认「展开到环节」；可用 ?view=all|collapse|items 指定 */
+(function(){
+  state.collapsed.clear();
+  const v = (new URLSearchParams(location.search)).get("view") || "items";
+  const walk = (n, d) => { if (d >= 2) state.collapsed.add(n); (n.c||[]).forEach(ch => walk(ch, d+1)); };
+  if (v === "items"){
+    DATA.c.forEach(st => walk(st, 1));
+  } else if (v === "all"){
+    /* 什么都不折叠 */
+  } else if (v === "collapse"){
+    DATA.c.forEach(st => state.collapsed.add(st));
+  }
+})();
+/* 首次访问：把作者标记作为初始状态 */
+const _seeded = seedAuthorMarks();
+if (_seeded){
+  const _h = document.querySelector(".hint");
+  if (_h) _h.innerHTML += ' · <b>已载入作者 ' + _seeded + ' 条标记</b>';
+}
+render();
+window.addEventListener("resize", () => { clearTimeout(window._t); window._t = setTimeout(apply, 120); });
+</script>
+
+<script>
+/* ============ 手机端：竖排大纲模式（原生滚动，不缩放画布） ============ */
+(function(){
+  if (window.innerWidth > 900) return;
+
+  document.body.classList.add("mobile");
+  const bar  = document.querySelector(".topbar");
+  const hint = document.querySelector(".hint");
+
+  const box = document.createElement("div");
+  box.id = "outline";
+  document.body.appendChild(box);
+
+  function fitBox(){
+    const h = bar.getBoundingClientRect().height;
+    box.style.top = h + "px";
+  }
+  fitBox();
+
+  /* 路径 -> 节点 索引 */
+  const P2N = {};
+  (function index(n){
+    if (n._path) P2N[n._path] = n;
+    (n.c || []).forEach(index);
+  })(DATA);
+
+  const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+  /* 默认展开到「环节」，细节先收起 */
+  state.collapsed.clear();
+  (function init(n, d){
+    if (d >= 2) state.collapsed.add(n);
+    (n.c || []).forEach(ch => init(ch, d + 1));
+  })(DATA, 0);
+
+  function draw(){
+    const out = [];
+    (function walk(n, d){
+      const lv = Math.min(d, 3);
+      const hasKids = n.c && n.c.length;
+      const open = hasKids && !state.collapsed.has(n);
+      const mk = state.marks[n._path] || 0;
+      const color = n.color || "#475569";
+
+      let bg = "#fff", border = "#e5e2db";
+      if (lv === 0){ bg = "#111827"; border = "#111827"; }
+      else if (lv === 1){ bg = color; border = color; }
+      else if (mk){ bg = MARK_TINTS[mk]; border = MARK_COLORS[mk]; }
+
+      out.push('<div class="oln">');
+      out.push('<div class="olrow lv' + lv + '" data-p="' + n._path +
+               '" style="background:' + bg + ';border-color:' + border + '">');
+      if (hasKids){
+        out.push('<span class="oltog">' + (open ? "−" : n.c.length) + '</span>');
+      } else {
+        out.push('<span class="oltog" style="visibility:hidden"></span>');
+      }
+      out.push('<span class="oltext">' + esc(n.t) + '</span>');
+      if (!hasKids){
+        const sym = mk === 3 ? "✓" : mk === 2 ? "~" : mk === 1 ? "✕" : "";
+        out.push('<span class="olmk" data-mark="' + n._path + '" style="border-style:' +
+                 (mk ? "solid" : "dashed") + ';border-color:' + (mk ? MARK_COLORS[mk] : "#c3c9d2") +
+                 ';background:' + (mk ? MARK_COLORS[mk] : "#fff") + '">' + sym + '</span>');
+      }
+      out.push('</div>');
+      if (open){
+        out.push('<div class="olkids">');
+        n.c.forEach(ch => walk(ch, d + 1));
+        out.push('</div>');
+      }
+      out.push('</div>');
+    })(DATA, 0);
+    box.innerHTML = out.join("");
+  }
+
+  /* 让 cycleMark / setAll 等既有逻辑都走大纲渲染 */
+  window.render = function(){ draw(); updateStats(); };
+
+  function cyclePath(p){
+    const next = ((state.marks[p] || 0) + 1) % 4;
+    if (next === 0) delete state.marks[p];
+    else state.marks[p] = next;
+    saveMarks();
+    draw();
+    updateStats();
+  }
+
+  box.addEventListener("click", ev => {
+    const mk = ev.target.closest("[data-mark]");
+    if (mk){ ev.stopPropagation(); cyclePath(mk.getAttribute("data-mark")); return; }
+
+    const row = ev.target.closest(".olrow");
+    if (!row) return;
+    const n = P2N[row.getAttribute("data-p")];
+    if (!n || !(n.c && n.c.length)) return;
+    if (state.collapsed.has(n)) state.collapsed.delete(n);
+    else state.collapsed.add(n);
+    draw();
+  });
+
+  if (hint) hint.textContent = "点节点展开/折叠 · 点小圆标掌握度 · 上下滑动";
+
+  draw();
+  window.addEventListener("resize", () => {
+    fitBox();
+    if (window.innerWidth > 900) location.reload();
+  });
+  window.addEventListener("orientationchange", () => setTimeout(fitBox, 300));
+})();
+</script>
+
+
+<script>
+/* 标记下拉：点按钮开合，点别处 / 选完自动收起 */
+(function(){
+  const menu = document.getElementById("mkmenu");
+  const btn  = document.getElementById("btn-mk");
+  if (!menu || !btn) return;
+  const close = () => menu.classList.remove("open");
+  btn.addEventListener("click", ev => {
+    ev.stopPropagation();
+    menu.classList.toggle("open");
+  });
+  document.addEventListener("click", ev => {
+    if (!menu.contains(ev.target)) close();
+  }, true);
+  // 点击下拉里的任意一项（导出/导入/清空）后收起
+  menu.querySelector(".mklist").addEventListener("click", ev => {
+    if (ev.target.tagName === "BUTTON") setTimeout(close, 0);
+  });
+  document.addEventListener("keydown", ev => { if (ev.key === "Escape") close(); });
+})();
+</script>
+
+<script>
+/* === 孤立标记修复（结构改版后老标记上推）=== */
+(function(){
+  function nodePaths(){
+    const set = new Set();
+    (function walk(n){ if (n && n._path) set.add(n._path); (n && n.c || []).forEach(walk); })(DATA);
+    return set;
+  }
+  function split(path){
+    // "r-0-1-2" → ["r","0","1","2"]
+    const i = path.indexOf("-");
+    return i < 0 ? [path] : [path.slice(0, i)].concat(path.slice(i + 1).split("-"));
+  }
+  function report(){
+    const valid = nodePaths();
+    const keys = Object.keys(state.marks);
+    const bad = keys.filter(k => !valid.has(k));
+    return { total: keys.length, ok: keys.length - bad.length, bad };
+  }
+  function mkCheck(){
+    const r = report();
+    let msg = "节点数：" + nodePaths().size + "\n"
+            + "本地标记：" + r.total + " 条\n"
+            + "  对得上节点：" + r.ok + " 条\n"
+            + "  孤立（对不上）：" + r.bad.length + " 条";
+    if (r.bad.length){
+      msg += "\n\n孤立键示例：\n  " + r.bad.slice(0, 6).join("\n  ");
+      msg += "\n\n说明：孤立标记是页面结构改版前留下的，可点「修复旧标记」上推到最近的现存父节点。";
+    }
+    alert(msg);
+  }
+  function mkRepair(){
+    const r = report();
+    if (!r.bad.length){ alert("很好：没有孤立标记，不需要修复。\n\n当前 " + r.total + " 条标记全部对得上节点。"); return; }
+    const valid = nodePaths();
+    const targets = {};
+    let moved = 0, dropped = 0;
+    r.bad.forEach(k => {
+      const v = +state.marks[k];
+      const parts = split(k);
+      let hit = null;
+      // 至少落到「阶段-环节」这一层，不要把标记推到根节点 r（根不参与统计、没有意义）
+      for (let n = parts.length - 1; n >= 2; n--){
+        const cand = parts.slice(0, n).join("-");
+        if (valid.has(cand)){ hit = cand; break; }
+      }
+      if (!hit || !(v >= 1 && v <= 3)){ dropped++; return; }
+      targets[hit] = targets[hit] ? Math.min(targets[hit], v) : v;  // 同节点取最保守等级
+      moved++;
+    });
+    const tk = Object.keys(targets);
+    if (!tk.length){
+      alert("发现 " + r.bad.length + " 条孤立标记，但都无法对应到现存节点（层级完全不匹配）。\n\n建议：在曾经标记过的那台设备/浏览器上打开本页「导出标记」，再用「导入标记」导入。");
+      return;
+    }
+    if (!confirm("发现 " + r.bad.length + " 条孤立标记（页面结构改过，对不上节点）。\n\n"
+      + "可以把它们「上推」到最近的现存父节点：\n  " + tk.length + " 个节点将获得标记（同节点取最保守等级）\n"
+      + "  " + dropped + " 条会被丢弃（找不到对应父节点）\n\n"
+      + "修复前会自动备份当前标记。原有能对上的标记不受影响。\n\n继续？")) return;
+    try { localStorage.setItem("mm-marks-ml-backup-v1", JSON.stringify(state.marks)); } catch(e){}
+    tk.forEach(k => {
+      const cur = state.marks[k] || 0;
+      state.marks[k] = cur ? Math.min(cur, targets[k]) : targets[k];
+    });
+    r.bad.forEach(k => { delete state.marks[k]; });
+    saveMarks();
+    render(true); updateStats();
+    alert("完成\n  上推 " + moved + " 条 → " + tk.length + " 个节点\n  丢弃 " + dropped + " 条\n"
+      + "  当前标记共 " + Object.keys(state.marks).length + " 条\n\n"
+      + "（修复前的状态已备份，需要回退请删掉 localStorage 的 mm-marks-ml-backup-v1 后重新导入）");
+  }
+  const c = document.getElementById("btn-mk-check");
+  const rp = document.getElementById("btn-mk-repair");
+  if (c) c.onclick = mkCheck;
+  if (rp) rp.onclick = mkRepair;
+})();
+</script>
+</body>
+</html>

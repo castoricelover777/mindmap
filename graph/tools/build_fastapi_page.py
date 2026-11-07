@@ -63,20 +63,21 @@ rep('<span class="sub">第 1~20 节 · 概述 + NumPy</span>',
     % (len(sc["phases"]), len(sc["steps"]), n_det), "sub")
 
 # 导航：数据分析变成链接，FastAPI 高亮
-seg_old = """<div class="seg">
-      <a href="index.html">全链路图</a>
-      <a href="graph.html?tab=mysql" title="MySQL 知识栏目">MySQL</a>
-      <a href="https://castoricelover777.github.io/blog/" target="_blank" rel="noopener">博客源码</a>
-      <a class="on">数据分析</a>
-    </div>"""
-seg_new = """<div class="seg">
+NAV = """<div class="seg">
       <a href="index.html">全链路图</a>
       <a href="graph.html?tab=mysql" title="MySQL 知识栏目">MySQL</a>
       <a href="https://castoricelover777.github.io/blog/" target="_blank" rel="noopener">博客源码</a>
       <a href="llm.html">数据分析</a>
       <a class="on">FastAPI</a>
+      <a href="ml.html">机器学习</a>
     </div>"""
-rep(seg_old, seg_new, "导航")
+t2, _n = re.subn(r'(?s)<div class="seg">.*?</div>', NAV, t, count=1)
+if _n == 0:
+    print("  FAIL 导航")
+    ok = False
+else:
+    t = t2
+    print("  OK 导航")
 
 # DATA 整行替换
 line = json.dumps(root, ensure_ascii=False, separators=(",", ":"))
