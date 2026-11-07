@@ -365,7 +365,13 @@ function srcFit(reserve){
 /* ---------- 打开 / 收起 ---------- */
 function openSrcTree(sid){
   const sc = SRC.scenes[sid];
-  if (!sc){ alert("这个场景还没有关联源码。"); return; }
+  if (!sc){
+    /* 这个场景没有关联源码（例如 FastAPI 模块来自博客笔记）：
+       给一条轻提示，别用 alert 打断，用户双击还能正常看长链 */
+    const nm = (scById[sid] || {}).label || sid;
+    if (window.seedToast) seedToast("「" + nm + "」没有关联源码 · 双击卡片可看长链");
+    return;
+  }
   SRCV.sid = sid; SRCV.active = true; SRCV.key = null;
   SRCV.savedView = { s: state.scale, x: state.tx, y: state.ty };   // 关闭时还原
   SRCV.expanded = new Set();
