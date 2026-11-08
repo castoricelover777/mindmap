@@ -10,10 +10,17 @@ sys.stdout.reconfigure(encoding="utf-8")
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DATA = os.path.join(ROOT, "graph", "data", "dqn-tree.json")
 TPL = os.path.join(ROOT, "llm.html")
+MARKS = os.path.join(ROOT, "graph", "data", "dqn-marks.json")
 OUT = os.path.join(ROOT, "dqn.html")
 
 sc = json.load(io.open(DATA, encoding="utf-8"))
 n_det = sum(len(st["details"]) for st in sc["steps"])
+_marks = {}
+try:
+    _mk = json.load(io.open(MARKS, encoding="utf-8"))
+    _marks = _mk.get("marks", _mk) if isinstance(_mk, dict) else {}
+except Exception:
+    _marks = {}
 
 root = {"t": "二阶魔方 DQN：从 3,674,160 个状态到 93.5% 端到端", "c": [], "color": "#0F172A"}
 for pi, ph in enumerate(sc["phases"]):
@@ -80,6 +87,55 @@ rep('const LS_KEY = "mm-marks-llm-v1";', 'const LS_KEY = "mm-marks-dqn-v1";', "L
 rep('const LS_SEEDED = "mm-marks-seeded-v1";',
     'const LS_SEEDED = "mm-marks-dqn-seeded-v1";', "LS_SEEDED")
 t = t.replace("mm-marks-llm-backup-v1", "mm-marks-dqn-backup-v1")
+
+# 内置标记：把导出快照内联成 MARK_DEFAULTS
+if _marks:
+    _mk_line = json.dumps(_marks, ensure_ascii=False, separators=(",", ":"))
+    _hit = re.search(r"^const MARK_DEFAULTS = \{\};$", t, re.M)
+    if _hit:
+        t = t[:_hit.start()] + "const MARK_DEFAULTS = " + _mk_line + ";" + t[_hit.end():]
+        print("  OK MARK_DEFAULTS（%d 条）" % len(_marks))
+    else:
+        print("  FAIL 找不到空的 MARK_DEFAULTS")
+        ok = False
+
+NEW_SEED = '''function seedAuthorMarks(){
+  try{
+    if (localStorage.getItem(LS_SEEDED)) return 0;
+    const defaults = MARK_DEFAULTS || {};
+    const keys = Object.keys(defaults);
+    if (!keys.length){ localStorage.setItem(LS_SEEDED, "1"); return 0; }
+    let n = 0;
+    keys.forEach(k => {
+      const v = defaults[k];
+      if (!state.marks[k] && v >= 1 && v <= 3){ state.marks[k] = v; n++; }
+    });
+    if (n) saveMarks();
+    localStorage.setItem(LS_SEEDED, "1");
+    return n;
+  }catch(e){ return 0; }
+}'''
+_i = t.find("function seedAuthorMarks(){")
+if _i < 0:
+    print("  FAIL 找不到 seedAuthorMarks")
+    ok = False
+else:
+    _depth = 0
+    _j = _i
+    while _j < len(t):
+        if t[_j] == "{":
+            _depth += 1
+        elif t[_j] == "}":
+            _depth -= 1
+            if _depth == 0:
+                _j += 1
+                break
+        _j += 1
+    t = t[:_i] + NEW_SEED + t[_j:]
+    print("  OK seedAuthorMarks 改为补齐空缺")
+
+rep('const LS_SEEDED = "mm-marks-dqn-seeded-v1";',
+    'const LS_SEEDED = "mm-marks-dqn-seeded-v2";', "LS_SEEDED 升 v2")
 
 if not ok:
     print("  !! 有失败项，未写出")
