@@ -63,6 +63,7 @@ NAV = """<div class="seg">
       <a href="llm.html">数据分析</a>
       <a href="fastapi.html">FastAPI</a>
       <a class="on">机器学习</a>
+      <a href="dqn.html">魔方DQN</a>
     </div>"""
 t2, n = re.subn(r'(?s)<div class="seg">.*?</div>', NAV, t, count=1)
 if n == 0:

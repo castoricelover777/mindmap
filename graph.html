@@ -376,7 +376,8 @@
     
       <a href="llm.html" style="margin-left:6px">数据分析</a>
       <a href="fastapi.html" style="margin-left:6px">FastAPI</a>
-      <a href="ml.html" style="margin-left:6px">机器学习</a></div>
+      <a href="ml.html" style="margin-left:6px">机器学习</a>
+      <a href="dqn.html" style="margin-left:6px">魔方DQN</a></div>
     <div class="chips" id="chips"></div>
     <div class="stats" id="stats"></div>
     <button id="btn-src">源码</button>
@@ -667,494 +668,742 @@ function chainData(sc){
 
 const ChainView = (function(){
 
+
 let DATA = { main: [], flow: [], returnNote: "" };
 function setData(x){ DATA = { main: x.main || x, flow: x.flow || [], returnNote: x.returnNote || "" }; }
 
 
 
+
+
 function markOf(p){ return markGet(p); }
+
 
 function cycleMark(p){ markCyclePath(p); }
 
 
 
+
+
 const FLOW = [
+
 
   "JSON 字符串",
 
+
   "HTTP 请求报文",
+
 
   "User 对象",
 
+
   "insert(user)",
+
 
   "受影响行数 int"
 
+
 ];
+
 
 const FS_STAGE = 13.5, FS_ITEM = 12, FS_DETAIL = 10.5;
 
+
 const CARD_W = 280, CARD_H = 88;
+
 
 const COL_GAP = 98;
 
+
 const ITEM_W = 252, ITEM_GAP = 7;
 
+
 const DETAIL_W = 330, DETAIL_GAP = 5;
+
 
 const HEAD_GAP = 26;
 
 
 
+
+
 const CONTENT = { w:0, h:0, y0:0 };
+
 
 const state = { scale:1, tx:0, ty:0, collapsedStage:new Set(), collapsedItem:new Set() };
 
 
 
+
+
 function markBtn(parent, px, py, path, r){
+
 
   const mk = markOf(path);
 
+
   const g = el("g", { class:"mk" });
+
 
   g.appendChild(el("circle", {
 
+
     cx:px, cy:py, r:r || 7,
+
 
     fill: mk ? MARK_COLORS[mk] : "#ffffff",
 
+
     stroke: mk ? MARK_COLORS[mk] : "#c3c9d2",
+
 
     "stroke-width": mk ? 1 : 1.2,
 
+
     "stroke-dasharray": mk ? "0" : "2 2"
+
 
   }));
 
+
   if (mk){
+
 
     const t = el("text", { x:px, y:py+0.4, "text-anchor":"middle",
 
+
       "font-size":8.5, "font-weight":800, fill:"#ffffff" });
+
 
     t.textContent = mk === 3 ? "✓" : (mk === 2 ? "~" : "✕");
 
+
     g.appendChild(t);
+
 
   }
 
+
   const ttl = el("title", {});
+
 
   ttl.textContent = `【${MARK_NAMES[mk]}】点击切换：不会 → 仅了解 → 理解 → 取消`;
 
+
   g.appendChild(ttl);
+
 
   g.addEventListener("click", ev => { ev.stopPropagation(); cycleMark(path); });
 
+
   parent.appendChild(g);
 
+
 }
+
+
 
 
 
 function txt(x, y, s, size, fill, weight, anchor){
 
+
   const t = el("text", { x, y, "font-size":size, fill, "font-weight":weight||400 });
+
 
   if (anchor) t.setAttribute("text-anchor", anchor);
 
+
   t.textContent = s; return t;
 
+
 }
+
+
 
 
 
 function render(keepView){
 
+
   const keep = keepView ? { s:state.scale, x:state.tx, y:state.ty } : null;
 
+
   scene.innerHTML = "";
+
 
   const main = DATA.main;
 
 
 
+
+
   // ---------- 计算每列高度 ----------
+
 
   const cols = main.map((st, i) => {
 
+
     const stageCollapsed = state.collapsedStage.has(i);
+
 
     let y = CARD_H + HEAD_GAP;
 
+
     const items = [];
+
 
     if (!stageCollapsed){
 
+
       st.items.forEach((it, j) => {
+
 
         const key = i + "-" + j;
 
+
         const itemOpen = !state.collapsedItem.has(key) && it.details.length > 0;
+
 
         const itemLines = wrap2(it.t, FS_ITEM, ITEM_W - 36, 99, 600);   // 不再截断
 
+
         const itemH = itemLines.length * (FS_ITEM*1.32) + 13;
+
 
         const itemY = y;
 
+
         y += itemH + ITEM_GAP;
+
 
         const dets = [];
 
+
         if (itemOpen){
+
 
           it.details.forEach((d, k) => {
 
+
             const dl = wrap2(d.t, FS_DETAIL, DETAIL_W - 42, 99, 400);       // 不再截断
+
 
             const dh = dl.length * (FS_DETAIL*1.3) + 9;
 
+
             dets.push({ y, lines:dl, h:dh, p:d.p });
+
 
             y += dh + DETAIL_GAP;
 
+
           });
+
 
         }
 
+
         items.push({ it, j, key, y:itemY, h:itemH, lines:itemLines, open:itemOpen, dets });
+
 
       });
 
+
     }
+
 
     return { st, i, items, height: Math.max(y, CARD_H + HEAD_GAP) };
 
+
   });
+
+
 
 
 
   const maxH = Math.max(...cols.map(c => c.height));
 
+
   const topPad = 42;
 
+
   const chainY = topPad;
+
 
   const colX = (i) => i * (CARD_W + COL_GAP);
 
 
 
+
+
   // ---------- 阶段之间的箭头（先画，压在卡片下面）----------
+
 
   const gE = el("g", {});
 
+
   for (let i = 0; i < main.length - 1; i++){
+
 
     const x1 = colX(i) + CARD_W + 6;
 
+
     const x2 = colX(i+1) - 6;
+
 
     const y = chainY + CARD_H/2;
 
+
     gE.appendChild(el("line", {
+
 
       x1, y1:y, x2, y2:y, stroke:"#94a3b8", "stroke-width":1.8,
 
+
       "marker-end":"url(#arw)"
+
 
     }));
 
+
     gE.appendChild(txt((x1+x2)/2, topPad - 15, (DATA.flow[i] || ""), 10.5, "#7c8798", 700, "middle"));
+
 
   }
 
+
   // 回流箭头：阶段六 -> 前端（下方虚线）
+
 
   const retY = topPad + maxH + 34;
 
+
   const rx1 = colX(main.length-1) + CARD_W/2;
+
 
   const rx2 = colX(0) + CARD_W/2;
 
+
   gE.appendChild(el("path", {
+
 
     d:`M ${rx1} ${topPad+maxH+6} L ${rx1} ${retY} L ${rx2} ${retY} L ${rx2} ${topPad+maxH+18}`,
 
+
     fill:"none", stroke:"#cbb8a6", "stroke-width":1.6, "stroke-dasharray":"5 4",
+
 
     "marker-end":"url(#arwR)"
 
+
   }));
 
+
   gE.appendChild(txt((rx1+rx2)/2, retY - 10, (DATA.returnNote || ""), 10.5, "#a08b76", 600, "middle"));
+
 
   scene.appendChild(gE);
 
 
 
+
+
   // ---------- 每列 ----------
+
 
   const gN = el("g", {});
 
+
   cols.forEach((col, i) => {
+
 
     const x = colX(i);
 
+
     const st = col.st;
+
 
     const stageCollapsed = state.collapsedStage.has(i);
 
 
 
+
+
     // 阶段卡
+
 
     const g = el("g", { });
 
+
     g.appendChild(el("rect", {
+
 
       x, y:chainY, width:CARD_W, height:CARD_H, rx:12,
 
+
       fill:CAPTION_BG(i, st.color), stroke:st.color, "stroke-width":0
+
 
     }));
 
+
     // 序号徽章
+
 
     g.appendChild(el("circle", { cx:x+22, cy:chainY+CARD_H/2, r:11, fill:"rgba(255,255,255,.22)" }));
 
+
     g.appendChild(txt(x+22, chainY+CARD_H/2+0.5, String(i+1), 11.5, "#fff", 800, "middle"));
+
 
     // 标题（最多 2 行）
 
+
     const lines = wrap2(st.title.replace(/^阶段[一二三四五六七八九十]+：/, ""), FS_STAGE, CARD_W-80, 3, 700);
+
 
     const lh = FS_STAGE*1.26;
 
+
     const sy = chainY + CARD_H/2 - (lines.length-1)*lh/2;
+
 
     lines.forEach((ln, k) => {
 
+
       g.appendChild(txt(x+42, sy + k*lh, ln, FS_STAGE, "#fff", 700));
 
+
     });
+
 
     // 折叠指示
 
+
     g.appendChild(el("circle", { cx:x+CARD_W-14, cy:chainY+14, r:7, fill:"rgba(255,255,255,.9)", stroke:"none" }));
+
 
     g.appendChild(txt(x+CARD_W-14, chainY+14.5, stageCollapsed ? String(st.items.length) : "−", 9, st.color, 800, "middle"));
 
+
     g.style.cursor = "pointer";
+
 
     g.addEventListener("click", ev => {
 
+
       ev.stopPropagation();
+
 
       if (state.collapsedStage.has(i)) state.collapsedStage.delete(i);
 
+
       else state.collapsedStage.add(i);
+
 
       render(true);   // 保持当前缩放/平移，不重置视图
 
+
     });
+
 
     gN.appendChild(g);
 
 
 
+
+
     // 竖线：阶段卡 -> 环节
+
 
     if (!stageCollapsed && col.items.length){
 
+
       const firstY = col.items[0].y;
+
 
       gN.appendChild(el("line", {
 
+
         x1:x+34, y1:chainY+CARD_H+2, x2:x+34, y2:firstY,
+
 
         stroke:st.color, "stroke-width":1.4, opacity:.35
 
+
       }));
+
 
     }
 
 
 
+
+
     // 环节
+
 
     col.items.forEach(row => {
 
+
       const cx = x + 8;
+
 
       const gI = el("g", {});
 
+
       gI.appendChild(el("rect", {
+
 
         x:cx, y:row.y, width:ITEM_W, height:row.h, rx:7,
 
+
         fill:"#fff", stroke:st.color, "stroke-width":1, "stroke-opacity":.45
+
 
       }));
 
+
       gI.appendChild(el("rect", { x:cx, y:row.y+5, width:3, height:row.h-10, rx:1.5, fill:st.color }));
+
 
       const ilh = FS_ITEM*1.32;
 
+
       const isy = row.y + row.h/2 - (row.lines.length-1)*ilh/2;
+
 
       row.lines.forEach((ln,k) => {
 
+
         gI.appendChild(txt(cx+12, isy + k*ilh, ln, FS_ITEM, "#1f2937", 600));
 
+
       });
+
 
       if (row.it.details.length){
 
+
         gI.appendChild(el("circle", { cx:cx+ITEM_W-13, cy:row.y+row.h/2, r:6, fill:"#fff", stroke:st.color, "stroke-width":1, "stroke-opacity":.7 }));
+
 
         gI.appendChild(txt(cx+ITEM_W-13, row.y+row.h/2+0.5, row.open ? "−" : String(row.it.details.length), 8, st.color, 700, "middle"));
 
+
       } else {
+
 
         /* 无细节的环节 = 叶子，加学习状态按钮 */
 
+
         markBtn(gI, cx+ITEM_W-13, row.y+row.h/2, row.it.p, 6.5);
+
 
       }
 
+
       gI.style.cursor = "pointer";
+
 
       gI.addEventListener("click", ev => {
 
+
         ev.stopPropagation();
+
 
         if (!row.it.details.length) return;
 
+
         if (state.collapsedItem.has(row.key)) state.collapsedItem.delete(row.key);
+
 
         else state.collapsedItem.add(row.key);
 
+
         render(true);   // 保持当前缩放/平移，不重置视图
 
+
       });
+
 
       gN.appendChild(gI);
 
 
 
+
+
       // 细节
+
 
       row.dets.forEach(dd => {
 
+
         const dmk = markOf(dd.p);
+
 
         gN.appendChild(el("rect", {
 
+
           "data-p": dd.p, x:cx+14, y:dd.y, width:DETAIL_W, height:dd.h, rx:5,
+
 
           fill: dmk ? MARK_TINTS[dmk] : "#f6f4ef",
 
+
           stroke: dmk ? MARK_COLORS[dmk] : st.color,
+
 
           "stroke-width": dmk ? 1.4 : .8,
 
+
           "stroke-opacity": dmk ? .9 : .28
+
 
         }));
 
+
         const dlh = FS_DETAIL*1.3;
+
 
         const dsy = dd.y + dd.h/2 - (dd.lines.length-1)*dlh/2;
 
+
         dd.lines.forEach((ln,kk) => {
+
 
           gN.appendChild(txt(cx+22, dsy + kk*dlh, ln, FS_DETAIL, dmk === 1 ? "#b91c1c" : "#5b6472", 400));
 
+
         });
+
 
         markBtn(gN, cx+14+DETAIL_W-13, dd.y+dd.h/2, dd.p, 6.5);
 
+
       });
+
 
     });
 
+
   });
+
 
   scene.appendChild(gN);
 
 
 
+
+
   if (keep){ state.scale = keep.s; state.tx = keep.x; state.ty = keep.y; apply(); }
+
 
   else { CONTENT.w = 0; }
 
 
 
+
+
   // 记录精确内容框，供 fit() 使用（getBBox 在这种大量分组下不准）
+
 
   CONTENT.w = (main.length-1)*(CARD_W+COL_GAP) + CARD_W;
 
+
   CONTENT.y0 = 0;
+
 
   CONTENT.h = topPad + maxH + 46;
 
+
   if (keep){ state.scale = keep.s; state.tx = keep.x; state.ty = keep.y; apply(); }
+
 
   else fit();
 
+
   updateStats();
 
+
 }
+
+
 
 
 
 function CAPTION_BG(i, c){
 
+
   // 直接用阶段色，稍作区分
+
 
   return c;
 
+
 }
+
+
 
 
 
 function apply(){
 
+
   scene.setAttribute("transform", `translate(${state.tx},${state.ty}) scale(${state.scale})`);
+
 
   document.getElementById("zoomval").textContent = Math.round(state.scale*100)+"%";
 
+
 }
+
+
 
 
 
 function fit(){
 
+
   const W = svg.clientWidth, H = svg.clientHeight;
+
 
   const clean = (new URLSearchParams(location.search)).get("clean") === "1";
 
+
   const padX = clean ? 40 : 54, padTop = clean ? 34 : topPadPx(20), padBottom = 46;
+
 
   if (!CONTENT.w) return;
 
+
   const s = Math.min((W-padX*2)/CONTENT.w, (H-padTop-padBottom)/CONTENT.h, 3);
+
 
   state.scale = Math.max(s, 0.12);
 
+
   const cw = CONTENT.w*state.scale, ch = CONTENT.h*state.scale;
+
 
   state.tx = Math.round((W - cw)/2);
 
+
   state.ty = Math.round(padTop + (H - padTop - padBottom - ch)/2 - CONTENT.y0*state.scale);
+
 
   apply();
 
+
   window.__MM_GEOM = {scale:state.scale,tx:state.tx,ty:state.ty,cw:CONTENT.w,ch:CONTENT.h,vw:svg.clientWidth,vh:svg.clientHeight};
 
+
 }
+
+
+
+
 
 
 
@@ -1163,6 +1412,7 @@ function fit(){
 
 
 return { render: render, fit: fit, apply: apply, state: state, setData: setData };
+
 
 })();
 

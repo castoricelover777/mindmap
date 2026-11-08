@@ -223,7 +223,8 @@ html_head = """<!DOCTYPE html>
     
       <a href="llm.html">数据分析</a>
       <a href="fastapi.html">FastAPI</a>
-      <a href="ml.html">机器学习</a></div>
+      <a href="ml.html">机器学习</a>
+      <a href="dqn.html">魔方DQN</a></div>
     <div class="btns">
       <button id="btn-expand">全部展开</button>
       <button id="btn-collapse">只看阶段</button>

@@ -341,7 +341,8 @@ BODY = r"""
     
       <a href="llm.html" style="margin-left:6px">数据分析</a>
       <a href="fastapi.html" style="margin-left:6px">FastAPI</a>
-      <a href="ml.html" style="margin-left:6px">机器学习</a></div>
+      <a href="ml.html" style="margin-left:6px">机器学习</a>
+      <a href="dqn.html" style="margin-left:6px">魔方DQN</a></div>
     <div class="chips" id="chips"></div>
     <div class="stats" id="stats"></div>
     <button id="btn-src">源码</button>

@@ -1,0 +1,88 @@
+# -*- coding: utf-8 -*-
+"""
+build_dqn_page.py —— 生成独立的 dqn.html（二阶魔方 DQN 项目导图）
+
+复用 llm.html 的双向导图实现，内容来自 graph/data/dqn-tree.json（content_dqn.py 生成）。
+"""
+import io, json, os, re, sys
+
+sys.stdout.reconfigure(encoding="utf-8")
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+DATA = os.path.join(ROOT, "graph", "data", "dqn-tree.json")
+TPL = os.path.join(ROOT, "llm.html")
+OUT = os.path.join(ROOT, "dqn.html")
+
+sc = json.load(io.open(DATA, encoding="utf-8"))
+n_det = sum(len(st["details"]) for st in sc["steps"])
+
+root = {"t": "二阶魔方 DQN：从 3,674,160 个状态到 93.5% 端到端", "c": [], "color": "#0F172A"}
+for pi, ph in enumerate(sc["phases"]):
+    pnode = {"t": "%d. %s" % (pi + 1, ph["label"]), "c": [], "color": ph["color"]}
+    for st in sc["steps"]:
+        if st["phase"] != pi:
+            continue
+        snode = {"t": st["label"], "c": [], "color": ph["color"]}
+        for d in st["details"]:
+            snode["c"].append({"t": d, "c": [], "color": ph["color"]})
+        pnode["c"].append(snode)
+    root["c"].append(pnode)
+
+t = io.open(TPL, encoding="utf-8", newline="").read()
+nl = "\r\n" if "\r\n" in t else "\n"
+t = t.replace("\r\n", "\n")
+ok = True
+
+
+def rep(old, new, label):
+    global t, ok
+    if old not in t:
+        print("  FAIL", label)
+        ok = False
+        return
+    t = t.replace(old, new, 1)
+    print("  OK", label)
+
+
+rep("<title>Python 数据分析（第 1~20 节）· 思维导图</title>",
+    "<title>二阶魔方 DQN · 项目技术导图</title>", "title")
+rep("<h1>Python 数据分析</h1>", "<h1>二阶魔方 DQN</h1>", "h1")
+rep('<span class="sub">第 1~20 节 · 概述 + NumPy</span>',
+    '<span class="sub">%d 层 · %d 环节 · %d 细节 · 全数字可回溯原文</span>'
+    % (len(sc["phases"]), len(sc["steps"]), n_det), "sub")
+
+NAV = """<div class="seg">
+      <a href="index.html">全链路图</a>
+      <a href="graph.html?tab=mysql" title="MySQL 知识栏目">MySQL</a>
+      <a href="https://castoricelover777.github.io/blog/" target="_blank" rel="noopener">博客源码</a>
+      <a href="llm.html">数据分析</a>
+      <a href="fastapi.html">FastAPI</a>
+      <a href="ml.html">机器学习</a>
+      <a class="on">魔方DQN</a>
+    </div>"""
+t2, n = re.subn(r'(?s)<div class="seg">.*?</div>', NAV, t, count=1)
+if n == 0:
+    print("  FAIL 导航")
+    ok = False
+else:
+    t = t2
+    print("  OK 导航")
+
+line = json.dumps(root, ensure_ascii=False, separators=(",", ":"))
+m = re.search(r"^const DATA = .*;$", t, re.M)
+if not m:
+    print("  FAIL DATA")
+    ok = False
+else:
+    t = t[:m.start()] + "const DATA = " + line + ";" + t[m.end():]
+    print("  OK DATA（%d 节点）" % (1 + len(sc["phases"]) + len(sc["steps"]) + n_det))
+
+rep('const LS_KEY = "mm-marks-llm-v1";', 'const LS_KEY = "mm-marks-dqn-v1";', "LS_KEY")
+rep('const LS_SEEDED = "mm-marks-seeded-v1";',
+    'const LS_SEEDED = "mm-marks-dqn-seeded-v1";', "LS_SEEDED")
+t = t.replace("mm-marks-llm-backup-v1", "mm-marks-dqn-backup-v1")
+
+if not ok:
+    print("  !! 有失败项，未写出")
+    sys.exit(1)
+io.open(OUT, "w", encoding="utf-8", newline=nl).write(t.replace("\n", nl))
+print("  写出 %s（%.1f KB）" % (OUT, os.path.getsize(OUT) / 1024))
