@@ -27,8 +27,24 @@ root = {
     "c": [],
     "color": "#0F172A",
 }
+
+# ① 核心术语（答辩必背的大词，单拎成节点：名字 + 大白话合成一张卡）
+CORE_COLOR = "#0F766E"
+core = {"t": "核心术语（先把大词拎清楚）", "c": [], "color": CORE_COLOR}
+for term in sc["core_terms"]:
+    core["c"].append({"t": term["t"] + " —— " + term["d"], "c": [], "color": CORE_COLOR})
+root["c"].append(core)
+
+# ② 项目事实数字（答辩报数用）
+FACT_COLOR = "#9A3412"
+facts = {"t": "项目事实数字（报数口径）", "c": [], "color": FACT_COLOR}
+for f in sc["facts"]:
+    facts["c"].append({"t": f["t"] + " —— " + f["d"], "c": [], "color": FACT_COLOR})
+root["c"].append(facts)
+
+# ③ 12 站数据流（只有这些站进入 chain 视图）
 for st in sc["stations"]:
-    snode = {"t": st["label"], "c": [], "color": st["color"]}
+    snode = {"t": st["label"], "c": [], "color": st["color"], "tech": 1}
     for leg in st["legs"]:
         lnode = {"t": leg["t"], "c": [], "color": st["color"]}
         for d in leg["d"]:
@@ -131,17 +147,17 @@ else:
 # 默认打开长链模式
 OLD_MODE = re.search(r'if \(q\.get\("mode"\) === "chain".*?catch\(e\)\{\}\s*\}', t, re.S)
 OLD_MODE = OLD_MODE.group(0) if OLD_MODE else ""
-NEW_MODE = '''if (q.get("mode") === "mind") m = "mind";
-  else m = "chain";            /* 蜈蚣图默认横版长链，?mode=mind 可切回脑图 */'''
+NEW_MODE = '''if (q.get("mode") === "chain") m = "chain";
+  else m = "mind";             /* 技术蜈蚣默认脑图；?mode=chain 看横向主干 */'''
 if OLD_MODE in t:
     t = t.replace(OLD_MODE, NEW_MODE, 1)
-    print("  OK 默认打开长链模式")
+    print("  OK 默认打开脑图模式")
 else:
     print("  FAIL 找不到 mode 初始化块")
     ok = False
 
 # 链视图取全部一级分支
-rep("const CHAIN = DATA.c.slice(1, 7).map(", "const CHAIN = DATA.c.map(", "链视图取全部站点")
+rep("const CHAIN = DATA.c.slice(1, 7).map(", "const CHAIN = DATA.c.filter(st => st.tech).map(", "链视图只取 12 站")
 
 # 站与站之间的传递物标签（11 条，对应 12 站）
 FLOW_JS = "const FLOW = " + json.dumps(sc["flow"], ensure_ascii=False) + ";"
@@ -159,9 +175,9 @@ rep('"响应 JSON + 200 回到前端，渲染提示"',
 
 # 顶栏文案
 rep('<span class="sub" id="brandsub">用户注册案例 · 六段式时序</span>',
-    '<span class="sub" id="brandsub">12 站主干 · 61 条技术腿 · 每条腿挂术语毛</span>', "副标题(HTML)")
+    '<span class="sub" id="brandsub">核心术语 + 数据流 12 站 · 一层层展开</span>', "副标题(HTML)")
 rep('$("brandsub").textContent = mind ? "用户注册案例 · 六段式时序" : "用户注册案例 · 一条链走完 6 个阶段";',
-    '$("brandsub").textContent = mind ? "技术蜈蚣 · 脑图总览" : "12 站主干 · 61 条技术腿 · 每条腿挂术语毛";',
+    '$("brandsub").textContent = mind ? "核心术语 + 数据流 12 站 · 一层层展开" : "12 站主干 · 每站挂技术腿与术语毛";',
     "副标题(JS)")
 rep('document.title = "前后端数据沟通全链路 · " + (mind ? "思维导图" : "长链图");',
     'document.title = "二阶魔方 DQN · 技术蜈蚣";', "document.title")
@@ -178,10 +194,11 @@ t = t.replace(
 
 # 初始视图：整条主干太长，默认按可读比例展示 A.1 起头，用户拖拽/滚轮看全链；「适应窗口」看全景
 INIT = '''<script>
-/* 初始视图：优先保证技术腿文字可读（点「适应窗口」可看整条主干全景） */
+/* 初始视图：脑图默认收起到「大类 / 12 站」，先看全局；点站再展开技术腿与术语毛。长链模式按可读比例显示。 */
 (function(){
   function readableInitial(){
     try{
+      if (typeof MODE !== "undefined" && MODE === "mind") return;   /* 脑图模式不做初始缩放 */
       var st = ChainView.state;
       if (!st || typeof svg === "undefined" || !svg.clientWidth) return;
       var TARGET = 0.72;
@@ -194,8 +211,22 @@ INIT = '''<script>
       if (z) z.textContent = Math.round(TARGET*100) + "%";
     }catch(e){}
   }
-  if (document.readyState === "complete") setTimeout(readableInitial, 220);
-  else window.addEventListener("load", function(){ setTimeout(readableInitial, 220); });
+  function mindOverview(){
+    try{
+      if (typeof MODE === "undefined" || MODE !== "mind") return;
+      var changed = false;
+      DATA.c.forEach(function(n){
+        if (n.tech && !mindState.collapsed.has(n)){ mindState.collapsed.add(n); changed = true; }
+      });
+      if (changed){ renderMind(false); }
+    }catch(e){}
+  }
+  function boot(){
+    setTimeout(readableInitial, 220);   /* 长链模式：可读比例起头 */
+    setTimeout(mindOverview, 260);      /* 脑图模式：收起到大类 / 12 站 */
+  }
+  if (document.readyState === "complete") boot();
+  else window.addEventListener("load", boot);
 })();
 </script>
 </body>'''
@@ -211,6 +242,8 @@ if not ok:
     sys.exit(1)
 io.open(OUT, "w", encoding="utf-8", newline=nl).write(t.replace("\n", nl))
 print("  写出 %s（%.1f KB）" % (OUT, os.path.getsize(OUT) / 1024))
-print("  %d 站 / %d 技术腿 / %d 条说明 / %d 个树节点"
-      % (len(sc["stations"]), n_legs, n_desc,
-         1 + len(sc["stations"]) + n_legs + n_desc))
+n_core = len(sc["core_terms"])
+n_facts = len(sc["facts"])
+print("  %d 站 / %d 技术腿 / %d 条说明 / 核心术语 %d / 事实 %d / 树节点 %d"
+      % (len(sc["stations"]), n_legs, n_desc, n_core, n_facts,
+         1 + len(sc["stations"]) + n_legs + n_desc + 2 + n_core + n_facts))
