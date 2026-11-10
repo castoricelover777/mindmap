@@ -83,9 +83,32 @@ else:
     print("  OK DATA（%d 节点）" % (1 + len(sc["phases"]) + len(sc["steps"]) + n_det))
 
 rep('const LS_KEY = "mm-marks-llm-v1";', 'const LS_KEY = "mm-marks-ml-v1";', "LS_KEY")
-rep('const LS_SEEDED = "mm-marks-seeded-v1";',
-    'const LS_SEEDED = "mm-marks-ml-seeded-v1";', "LS_SEEDED")
+
+# 播种键：llm.html 模板已升到自己的 v2；机器学习页再换成 ml 专用 v2（避免两边串号）
+_m = re.search(r'^const LS_SEEDED = "[^"]+";$', t, re.M)
+if _m:
+    t = t[:_m.start()] + 'const LS_SEEDED = "mm-marks-ml-seeded-v2";' + t[_m.end():]
+    print("  OK LS_SEEDED")
+else:
+    print("  FAIL LS_SEEDED")
+    ok = False
 t = t.replace("mm-marks-llm-backup-v1", "mm-marks-ml-backup-v1")
+
+# 内置标记：把作者默认基线内联成 MARK_DEFAULTS（模板自带的是 llm 的，整行替换）
+MARKS = os.path.join(ROOT, "graph", "data", "ml-marks.json")
+if os.path.exists(MARKS):
+    marks = json.load(io.open(MARKS, encoding="utf-8"))["marks"]
+    mk_line = json.dumps(marks, ensure_ascii=False, separators=(",", ":"))
+    m2 = re.search(r"^const MARK_DEFAULTS = .*;$", t, re.M)
+    if m2:
+        t = t[:m2.start()] + "const MARK_DEFAULTS = " + mk_line + ";" + t[m2.end():]
+        print("  OK MARK_DEFAULTS（%d 条）" % len(marks))
+    else:
+        print("  FAIL 找不到 MARK_DEFAULTS")
+        ok = False
+else:
+    print("  FAIL 缺少 %s" % MARKS)
+    ok = False
 
 if not ok:
     print("  !! 有失败项，未写出")

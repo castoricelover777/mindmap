@@ -85,14 +85,20 @@ else:
     print("  OK DATA（%d 节点）" % (1 + len(sc["phases"]) + len(sc["steps"]) + n_det))
 
 rep('const LS_KEY = "mm-marks-llm-v1";', 'const LS_KEY = "mm-marks-dqn-v1";', "LS_KEY")
-rep('const LS_SEEDED = "mm-marks-seeded-v1";',
-    'const LS_SEEDED = "mm-marks-dqn-seeded-v1";', "LS_SEEDED")
+# 模板（llm.html）现在自带作者默认标记，播种键已升到 llm 专用 v2；这里按「任意旧值」替换
+_m = re.search(r'^const LS_SEEDED = "[^"]+";$', t, re.M)
+if _m:
+    t = t[:_m.start()] + 'const LS_SEEDED = "mm-marks-dqn-seeded-v1";' + t[_m.end():]
+    print("  OK LS_SEEDED")
+else:
+    print("  FAIL LS_SEEDED")
+    ok = False
 t = t.replace("mm-marks-llm-backup-v1", "mm-marks-dqn-backup-v1")
 
 # 内置标记：把导出快照内联成 MARK_DEFAULTS
 if _marks:
     _mk_line = json.dumps(_marks, ensure_ascii=False, separators=(",", ":"))
-    _hit = re.search(r"^const MARK_DEFAULTS = \{\};$", t, re.M)
+    _hit = re.search(r"^const MARK_DEFAULTS = .*;$", t, re.M)
     if _hit:
         t = t[:_hit.start()] + "const MARK_DEFAULTS = " + _mk_line + ";" + t[_hit.end():]
         print("  OK MARK_DEFAULTS（%d 条）" % len(_marks))
