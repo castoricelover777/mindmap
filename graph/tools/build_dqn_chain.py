@@ -17,7 +17,7 @@ sc = json.load(io.open(DATA_SRC, encoding="utf-8"))
 n_det = sum(len(st["details"]) for st in sc["steps"])
 
 root = {
-    "t": "二阶魔方 DQN：从 2.4% 到 94.75% 的全流程复盘（七章）",
+    "t": "二阶魔方 DQN：从 2.4% 到 94.75% 的全流程复盘（八章）",
     "c": [],
     "color": "#0F172A",
 }
@@ -130,14 +130,14 @@ else:
     ok = False
 
 
-# 链视图只取 DATA.c.slice(1,7)：改成全部 8 章
+# 链视图只取 DATA.c.slice(1,7)：改成全部章节（现在是 9 章）
 rep("const CHAIN = DATA.c.slice(1, 7).map(", "const CHAIN = DATA.c.map(", "链视图取全部章节")
 
-# 链上的传递物标签：换成 DQN 的讲解流向（7 条，对应 8 章之间的箭头）
+# 链上的传递物标签：换成 DQN 的讲解流向（8 条，对应 9 章之间的箭头）
 t2, _n2 = re.subn(
     r"const FLOW = \[[^\]]*\];",
     'const FLOW = ["排雷 2.4%→87.5%", "底层能跑（课程学习）", "顶层 IL 热启动", '
-    '"合体兜底 93.5%", "换标尺蒸馏 -46%", "负结果封存 94.75%", "面试话术"];',
+    '"合体兜底 93.5%", "换标尺蒸馏 -46%", "负结果封存 94.75%", "宏观×微观融合", "面试话术"];',
     t, count=1)
 if _n2:
     t = t2
@@ -148,9 +148,9 @@ else:
 
 # 副标题
 rep('<span class="sub" id="brandsub">用户注册案例 · 六段式时序</span>',
-    '<span class="sub" id="brandsub">七章讲解 · 一条链从 2.4% 走到 94.75%</span>', "副标题(HTML)")
+    '<span class="sub" id="brandsub">八章讲解 · 一条链从 2.4% 走到 94.75%</span>', "副标题(HTML)")
 rep('$("brandsub").textContent = mind ? "用户注册案例 · 六段式时序" : "用户注册案例 · 一条链走完 6 个阶段";',
-    '$("brandsub").textContent = mind ? "七章讲解 · 脑图总览" : "七章讲解 · 一条链从 2.4% 走到 94.75%";',
+    '$("brandsub").textContent = mind ? "八章讲解 · 脑图总览" : "八章讲解 · 一条链从 2.4% 走到 94.75%";',
     "副标题(JS)")
 
 if not ok:
