@@ -153,6 +153,10 @@ else:
     print("  FAIL 找不到 FLOW")
     ok = False
 
+# 底部回流箭头（模板里是「响应 JSON 回到前端」）：这里改成训练循环的语义
+rep('"响应 JSON + 200 回到前端，渲染提示"',
+    '"一次迭代完成 → 采下一个 batch，进入下一轮训练循环"', "回流箭头文案")
+
 # 顶栏文案
 rep('<span class="sub" id="brandsub">用户注册案例 · 六段式时序</span>',
     '<span class="sub" id="brandsub">12 站主干 · 技术腿垂直挂载</span>', "副标题(HTML)")
@@ -185,7 +189,7 @@ INIT = '''<script>
       st.scale = TARGET;
       st.tx = 46;
       st.ty = 112;
-      ChainView.apply();
+      ChainView.render(true);   /* 按目标缩放整页重绘一次，避免只改 transform 造成的文字重影 */
       var z = document.getElementById("zoomval");
       if (z) z.textContent = Math.round(TARGET*100) + "%";
     }catch(e){}

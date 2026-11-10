@@ -727,7 +727,7 @@ function render(keepView){
     fill:"none", stroke:"#cbb8a6", "stroke-width":1.6, "stroke-dasharray":"5 4",
     "marker-end":"url(#arwR)"
   }));
-  gE.appendChild(txt((rx1+rx2)/2, retY - 10, "响应 JSON + 200 回到前端，渲染提示", 10.5, "#a08b76", 600, "middle"));
+  gE.appendChild(txt((rx1+rx2)/2, retY - 10, "一次迭代完成 → 采下一个 batch，进入下一轮训练循环", 10.5, "#a08b76", 600, "middle"));
   scene.appendChild(gE);
 
   // ---------- 每列 ----------
@@ -1068,7 +1068,7 @@ window.addEventListener("resize", () => { clearTimeout(window._t); window._t = s
       st.scale = TARGET;
       st.tx = 46;
       st.ty = 112;
-      ChainView.apply();
+      ChainView.render(true);   /* 按目标缩放整页重绘一次，避免只改 transform 造成的文字重影 */
       var z = document.getElementById("zoomval");
       if (z) z.textContent = Math.round(TARGET*100) + "%";
     }catch(e){}
