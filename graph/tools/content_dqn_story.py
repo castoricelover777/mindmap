@@ -32,42 +32,39 @@ STEPS = [
         "仓库：sebastianbrzustowicz/Rubik2x2-DQN，MIT 协议，2025-10 建，README 自述「multiparadigm DQN + IL」。",
         "设计：RL agent 负责第一层；IL 模型用预定义算法（CLL / Y-perm / J-perm + 镜像旋转增强）解第二层，full 数据集共 648 个算法。",
         "规模：Q 网络 144→256→256→18 共 107,538 参数；IL 分类器 144→512→648 类；动作空间 Discrete(18)。",
-        "工程素养：有单元测试 tests/test_cube_state.py、pyproject.toml、Makefile、CLI --quiet、LBL 求解器、MLflow 记录 —— 不是随手糊的仓库。",
-        "核对方式：直接读 main 分支源码（最新 commit 1448d8d，2025-11-28），与本地审计文档同一版本。",
+        "工程：有单元测试 tests/test_cube_state.py、pyproject.toml、Makefile、CLI --quiet、LBL 求解器、MLflow 记录。",
+        "核对版本：main 分支 HEAD 1448d8d（2025-11-28），与本地审计文档同一版本。",
     ]),
-    ("1.2 坑一：ε 默认 0.5 是「函数默认值」，不是作者的实验配置", 0, [
-        "事实：train_rl_agent() 的函数默认 epsilon_end=0.5；DQNAgent 默认 0.1；作者自己的实验脚本 rl_experiment_planner.py 用的是 epsilon_start=0.3、epsilon_end=0.01。",
-        "所以「作者设成 0.5 导致永远一半瞎拧」这个说法不准确——0.5 只是库函数回调默认值，作者跑实验时覆盖成了 0.01。",
-        "我们的复现：不传参、直接用函数默认值跑，确实学不动；换成 planner 配置（0.01 + bottom_layer_corners + 300 万步）才起死回生。",
-        "教训：读开源项目要分清「函数默认值」和「作者推荐配置」，否则很容易冤枉人。",
+    ("1.2 原始配置：函数默认值 ≠ 推荐参数", 0, [
+        "函数默认：train_rl_agent() 的 epsilon_end=0.5、reward_mode=\"sticker_plus_face\"、batch=128、lr=1e-3。",
+        "推荐配置：作者的实验脚本 rl_experiment_planner.py 用 epsilon_start=0.3、epsilon_end=0.01、bottom_layer_corners、batch=256、lr=1e-4。",
+        "DQNAgent 自己的默认 epsilon_end 是 0.1。",
+        "复现时用哪一套参数，结果差一个数量级——这是第一章最需要说清的事。",
     ]),
-    ("1.3 坑二：奖励默认 sticker_plus_face，但作者推荐的是进度型", 0, [
-        "事实：train_rl_agent() 默认 reward_mode=\"sticker_plus_face\"（绝对值型），env 默认 \"basic\"（稀疏）；作者 planner 与 run_pipeline 用的都是 bottom_layer_corners。",
-        "关键：bottom_layer_corners 里**本来就含 delta 项**（README 也写明「a delta term tracks progress between consecutive states」）——进度塑形是作者已有的设计。",
-        "我们的贡献：用 5 种模式 × 3 seed 做消融，量化出「绝对值型会被农场化（0.2%~7.8%）、进度型才有效（88.5%±2.3）」。",
-        "要正名：奖励骨架是作者的，我们做的是验证与调参，不是从零发明。",
+    ("1.3 奖励模式：默认 sticker_plus_face，推荐 bottom_layer_corners", 0, [
+        "train_rl_agent() 默认 reward_mode=\"sticker_plus_face\"（绝对值型），env 默认 \"basic\"（稀疏）。",
+        "作者 planner 与 run_pipeline 用的是 bottom_layer_corners，其中包含 delta 进度项（README 写明 a delta term tracks progress between consecutive states）。",
+        "我们的工作：用 5 种模式 × 3 seed 消融，量化出绝对值型 0.2%~7.8%、进度型 88.5%±2.3。",
     ]),
-    ("1.4 坑三：total_steps 是死参数，但「永不退出」说过了头", 0, [
-        "事实：train(total_steps=...) 收到参数后从未被使用；主循环是 while True。",
-        "但退出条件确实存在：best_scramble_len 到达 scramble_max、且 best_success_rate ≥ 0.99、且该档已跑满 5000 局，才 break。",
-        "准确说法：total_steps 是死参数；正常训练只有「在最高难度上打到 99%」才自然结束，实际很难触发，所以一般靠手动 kill。",
-        "教训：批评要精确到条件，不能一句「永不退出」了事。",
+    ("1.4 训练循环：total_steps 未被使用，退出条件在最高难度 99%", 0, [
+        "train(total_steps=...) 收到参数后从未被使用；主循环是 while True。",
+        "退出条件：best_scramble_len 达到 scramble_max、best_success_rate ≥ 0.99、该档已跑满 5000 局，三者同时满足才 break。",
+        "实际效果：正常训练只有在最高难度上打到 99% 才自然结束，通常等不到，所以多数情况靠手动停止。",
     ]),
-    ("1.5 坑四：细粒度日志绑 MLflow，但不是完全静默", 0, [
-        "事实：每 10k 步的指标（ε / avgR / success_rate / scramble）只在 use_mlflow=True 时打印并写 MLflow。",
-        "仍有少量无条件 print：新最优模型保存、训练结束、模型保存路径。",
-        "准确说法：细粒度日志被绑在 MLflow 上；关掉 MLflow 后只剩零星 print，看起来像卡住。",
+    ("1.5 日志：细粒度指标在 MLflow，关闭后只剩零星 print", 0, [
+        "每 10k 步的指标（ε / avgR / success_rate / current_scramble）只在 use_mlflow=True 时打印并写 MLflow。",
+        "不依赖 MLflow 的打印只有三处：新最优模型保存、训练结束、模型保存路径。",
+        "所以关掉 MLflow 跑起来像卡住，实际还在训练。",
     ]),
-    ("1.6 评估口径：99% 是 README 明写的，不是偷改（给作者正名）", 0, [
-        "README 的 Results 表同时列了两个口径：max_steps=30 → 训练 97% / 评估 69%；max_steps=100 → 评估 ~99%。",
-        "并且明确解释了原因：短评估视野下长打乱的局跑不完，所以评估低；拉长到 100 步才能收敛。",
-        "结论：这是口径差异被作者**如实披露**，属于「指标选择」问题，不是造假；我们项目统一用 30 步口径做横向对比，并注明来源。",
-        "要正名：把「作者号称 99% 是造假」改成「作者给了长短两套评估视野，我们只用短的那套」。",
+    ("1.6 评估口径：README 同时给了 30 步与 100 步两套结果", 0, [
+        "README 的 Results 表：max_steps=30 → 训练 97% / 评估 69%；max_steps=100 → 评估 ~99%。",
+        "README 给出的解释：评估视野短时，长打乱的局在步数内跑不完，所以评估低；放宽到 100 步才能收敛。",
+        "我们的口径：统一用 30 步做横向对比，并在汇报里注明来源；100 步的数字不作为能力依据。",
     ]),
-    ("1.7 我们在函数默认值下的复现结果", 0, [
-        "用 train_rl_agent() 默认参数（ε_end=0.5、sticker_plus_face、batch=128、lr=1e-3）跑 18 万步，成功率只有 2.4%。",
-        "这不是「作者算法不行」，而是「默认值与推荐配置不一致」——换成 planner 配置后，同一套代码能到 README 的 97% 训练准确率。",
-        "所以第一章的结论应该是：坑在默认值，不在思路；复现前先对齐作者推荐超参。",
+    ("1.7 我们在默认参数下的复现：18 万步 2.4%", 0, [
+        "用 train_rl_agent() 默认参数（ε_end=0.5、sticker_plus_face、batch=128、lr=1e-3）跑 18 万步，成功率 2.4%。",
+        "换成 planner 配置后，同一套代码能到 README 的 97% 训练准确率。",
+        "结论：默认值与推荐配置不一致，复现前先对齐超参，再谈模型改动。",
     ]),
     ("1.8 名词科普：后面会反复出现的四个词", 0, [
         "Replay Buffer（经验回放池）：学霸的错题本，把走过的路随机抽出来复习，打破时间相关性。",
@@ -106,7 +103,7 @@ STEPS = [
     ]),
     ("3.2 为什么绝对值奖励会被「农场化」", 2, [
         "绝对值奖励按「当前拼对多少贴纸」给分，AI 发现停在某个还不错的状态反复微调，就能持续拿分——这叫 Reward Hacking。",
-        "进度塑形奖励（Δ）只看「这一步比上一步多了多少」，原地打转拿不到分，逼它真往前走（这个 delta 项作者已实现在 bottom_layer_corners 里，我们做的是验证与调参）。",
+        "进度塑形奖励（Δ）只看「这一步比上一步多了多少」，原地打转拿不到分，逼它真往前走（bottom_layer_corners 里已有这个 delta 项）。",
         "数据：5 种奖励模式 × 3 seed 消融，进度型 88.5%±2.3，绝对值型只有 0.2%~7.8%，差 11~400 倍。",
         "面试话术：稀疏奖励先做塑形，塑形一定用增量而不是绝对值，并且必须用消融实验证明——单 seed 会骗人（有个模式单跑 13%，三 seed 平均 3.7%）。",
     ]),

@@ -695,49 +695,47 @@
    ]
   },
   {
-   "label": "10.1 核对方法与版本",
+   "label": "10.1 仓库与核对范围",
    "phase": 9,
    "concepts": [],
    "details": [
-    "对象：github.com/sebastianbrzustowicz/Rubik2x2-DQN @ main，最新 commit 1448d8d（2025-11-28），与我们审计用的 repo_copy 同一版本。",
-    "方法：直接读源码（train_rl / dqn_agent / env / reward_interface / run_pipeline / train_il / q_network / replay_buffer / cube_state / Makefile）逐条对照审计结论。",
-    "结果：确认 6 条真缺陷、收回/修正 5 条误判，并给作者补上应得的正名。"
+    "对象：github.com/sebastianbrzustowicz/Rubik2x2-DQN @ main，HEAD 1448d8d（2025-11-28），MIT。",
+    "读了：train_rl / dqn_agent / q_network / replay_buffer / env / reward_interface / run_pipeline / train_il / cube_state / evaluate_rl_model / Makefile / README。"
    ]
   },
   {
-   "label": "10.2 确认成立的真缺陷",
+   "label": "10.2 原始实现的实际情况",
    "phase": 9,
    "concepts": [],
    "details": [
-    "total_steps 是死参数：train() 收到参数后从未使用，主循环 while True（退出条件是最高难度上 99% + 5000 局，实际很难触发）。",
-    "细粒度日志绑 MLflow：10k 步指标只在 use_mlflow=True 时输出，关掉后只剩零星 print。",
-    "IL 没有留出集：train() 的 accuracy 算在同一条数据集上；README 说的是「augmented dataset 上 100%」，诚实但没有 train/test 划分。",
-    "is_solved() 判定宽松：只校验底面 4 块 + 前面底部 2 块（4 个侧面里只查了 2 个），是步数冗长的根源。",
-    "环境兼容性：Makefile 用 python3 与 .venv/bin（仅 Unix）；emoji print（🚀 ✅ 🟢）在 GBK 中文控制台会崩，需要 PYTHONUTF8=1。",
-    "超参默认值与推荐配置不一致：函数默认 ε_end=0.5 / reward=sticker_plus_face / batch=128 / lr=1e-3，而作者推荐 ε_end=0.01 / bottom_layer_corners / batch=256 / lr=1e-4。"
+    "total_steps 参数在 train() 里从未被使用；退出条件是满档 + 成功率 ≥0.99 + 该档 5000 局。",
+    "细粒度指标（10k 步）只在 use_mlflow=True 时输出；其余 print 只有三处。",
+    "IL 的 accuracy 算在同一份增强数据集上，没有留出集；README 也写明是 augmented dataset。",
+    "is_solved() 校验底面 4 块 + 前面底部 2 块，四个侧面只查了两个，所以「底层完成」的判定偏松。",
+    "函数默认 ε_end=0.5 / sticker_plus_face / batch=128 / lr=1e-3；作者实验脚本与 run_pipeline 用 0.01 / bottom_layer_corners / 256 / 1e-4。",
+    "Makefile 用 python3 与 .venv/bin（Unix）；emoji print 在 GBK 控制台会崩，需 PYTHONUTF8=1。",
+    "README 的 Results 表同时列出 max_steps=30（评估 69%）与 100（评估 ~99%），并说明短视野跑不完长打乱。"
    ]
   },
   {
-   "label": "10.3 要收回或修正的误判（给作者正名）",
+   "label": "10.3 我们在原作基础上做的事",
    "phase": 9,
    "concepts": [],
    "details": [
-    "❌「99% 口径造假」→ 收回：README 的 Results 表同时列出 max_steps=30 的 69% 与 100 的 ~99%，并解释了短视野跑不完长打乱的原因，属于如实披露的两种口径。",
-    "❌「ε_end=0.5 所以永远一半瞎拧」→ 修正：0.5 只是 train_rl_agent 的函数默认值；DQNAgent 默认 0.1，作者实验脚本 planner 用 0.01。",
-    "❌「默认奖励是绝对值、作者只会刷分」→ 修正：函数默认是 sticker_plus_face，但作者推荐的 bottom_layer_corners 本来就含 delta 进度项，README 也写明了。",
-    "❌「while True 永不退出」→ 修正：有 break，条件是「满档 + 成功率 ≥0.99 + 该档 5000 局」。",
-    "❌「pipeline 完全不检查就调 IL」→ 修正：run_pipeline 末端会用 is_entire_cube_solved() 校验，解不出直接 RuntimeError；只是它不校验「底层是否真的完成」。"
+    "对齐超参：用 planner 的 ε_end=0.01、bottom_layer_corners、batch=256、lr=1e-4 复现，18 万步从 2.4% 起跳。",
+    "收紧判定：把「底层完成」换成严格第一层（四个底边全对齐），用 BFS 距离场做 Oracle。",
+    "补蒸馏与容灾：On-policy 采样 + BFS 打标 + CE 蒸馏；A 失败时 Fallback 交 B。",
+    "补评估：留出集、逐档评估、端到端评估、5 种口径标注，以及 5 种奖励 × 3 seed 的消融。"
    ]
   },
   {
-   "label": "10.4 给作者的正名与我们的定位",
+   "label": "10.4 结论",
    "phase": 9,
    "concepts": [],
    "details": [
-    "作者的正名：README 技术细节完整（状态编码 144 维、11 步状态熵、课程学习、奖励设计、IL 覆盖），有单元测试、pyproject、CLI、LBL 求解器、MLflow 记录，MIT 开源。",
-    "我们的定位：不是「推翻原作者」，而是在**默认参数与推荐配置不一致**的地方做工程修正（ε、奖励、评估口径），并补上作者没做的严格标尺 + 蒸馏 + 容灾。",
-    "汇报话术：「原项目 architecture 合理、README 诚实；我们主要做三件事——对齐默认参数、把判定标尺收紧、用 BFS 蒸馏把步数压下来。」",
-    "价值：这比「原代码全是坑」更可信，也更经得起面试官追问细节。"
+    "原仓库的架构与文档是完整的：README 有状态编码、课程学习、奖励设计、IL 覆盖说明，还有单元测试、pyproject、CLI、LBL 求解器。",
+    "我们改的是三处工程问题：默认超参与推荐配置不一致、底层判定偏松、缺少「步数」这个优化目标。",
+    "对外表述：在原作架构上对齐超参、收紧判定、加蒸馏与容灾，端到端从 93.5% 到 94.75%，步数 30.1 → 15.5。"
    ]
   }
  ]
