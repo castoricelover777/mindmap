@@ -159,14 +159,14 @@ rep('"响应 JSON + 200 回到前端，渲染提示"',
 
 # 顶栏文案
 rep('<span class="sub" id="brandsub">用户注册案例 · 六段式时序</span>',
-    '<span class="sub" id="brandsub">12 站主干 · 技术腿垂直挂载</span>', "副标题(HTML)")
+    '<span class="sub" id="brandsub">12 站主干 · 61 条技术腿 · 每条腿挂术语毛</span>', "副标题(HTML)")
 rep('$("brandsub").textContent = mind ? "用户注册案例 · 六段式时序" : "用户注册案例 · 一条链走完 6 个阶段";',
-    '$("brandsub").textContent = mind ? "技术蜈蚣 · 脑图总览" : "12 站主干 · 技术腿垂直挂载";',
+    '$("brandsub").textContent = mind ? "技术蜈蚣 · 脑图总览" : "12 站主干 · 61 条技术腿 · 每条腿挂术语毛";',
     "副标题(JS)")
 rep('document.title = "前后端数据沟通全链路 · " + (mind ? "思维导图" : "长链图");',
     'document.title = "二阶魔方 DQN · 技术蜈蚣";', "document.title")
 rep("<b>点阶段</b>收起/展开环节 · <b>点环节</b>看细节 · <b>滚轮</b>缩放 · <b>拖拽</b>平移",
-    "<b>点站点</b>收起/展开技术腿 · <b>点技术腿</b>看说明 · <b>滚轮</b>缩放 · <b>拖拽</b>平移",
+    "<b>点站点</b>收起/展开技术腿 · <b>点技术腿</b>看详解与术语毛 · <b>滚轮</b>缩放 · <b>拖拽</b>平移",
     "操作提示")
 
 # 本页不参与标记（无快照、chain 视角也没有标记入口）：隐藏标记按钮、统计圆点，保持顶栏干净
