@@ -11,7 +11,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 DATA = os.path.join(ROOT, "graph", "data", "dqn-tree.json")
 TPL = os.path.join(ROOT, "llm.html")
 MARKS = os.path.join(ROOT, "graph", "data", "dqn-marks.json")
-OUT = os.path.join(ROOT, "dqn.html")
+OUT = os.path.join(ROOT, "dqn-ref.html")
 
 sc = json.load(io.open(DATA, encoding="utf-8"))
 n_det = sum(len(st["details"]) for st in sc["steps"])
@@ -51,8 +51,8 @@ def rep(old, new, label):
 
 
 rep("<title>Python 数据分析（第 1~20 节）· 思维导图</title>",
-    "<title>二阶魔方 DQN · 项目技术导图</title>", "title")
-rep("<h1>Python 数据分析</h1>", "<h1>二阶魔方 DQN</h1>", "h1")
+    "<title>二阶魔方 DQN · 技术细节版（10 层知识树）</title>", "title")
+rep("<h1>Python 数据分析</h1>", "<h1>二阶魔方 DQN · 细节版</h1>", "h1")
 rep('<span class="sub">第 1~20 节 · 概述 + NumPy</span>',
     '<span class="sub">%d 层 · %d 环节 · %d 细节 · 全数字可回溯原文</span>'
     % (len(sc["phases"]), len(sc["steps"]), n_det), "sub")
@@ -64,7 +64,8 @@ NAV = """<div class="seg">
       <a href="llm.html">数据分析</a>
       <a href="fastapi.html">FastAPI</a>
       <a href="ml.html">机器学习</a>
-      <a class="on">魔方DQN</a>
+      <a href="dqn.html">魔方DQN</a>
+      <a class="on">细节版</a>
     </div>"""
 t2, n = re.subn(r'(?s)<div class="seg">.*?</div>', NAV, t, count=1)
 if n == 0:
