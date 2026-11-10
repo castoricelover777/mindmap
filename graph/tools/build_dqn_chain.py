@@ -62,6 +62,7 @@ NAV = """<div class="seg">
       <a href="ml.html">机器学习</a>
       <a class="on">魔方DQN</a>
       <a href="dqn-ref.html" title="技术细节版（10 层知识树）">细节版</a>
+      <a href="dqn-tech.html" title="技术蜈蚣（横向主干 + 垂直技术腿）">蜈蚣图</a>
     </div>"""
 t2, _n = re.subn(r'(?s)<div class="seg">.*?</div>', NAV, t, count=1)
 if _n == 0:

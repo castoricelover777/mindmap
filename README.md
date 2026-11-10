@@ -15,7 +15,8 @@
 | **FastAPI 后端** | `fastapi.html` | Python Web：7 阶段 47 环节 235 细节，每条标注 JavaWeb 对应物；内置 175 条标记快照 |
 | **机器学习** | `ml.html` | 吴恩达 2025 前 32 集 · 大白话版：5 分支 26 环节 104 细节，每个概念配生活类比 + 科研提示；内置 104 条作者默认基线 |
 | **魔方 DQN（讲解版）** | `dqn.html` | 七章 + 终章 + **技术蜈蚣附录** 长链图：9 个一级分支 / 49 环节 / 221 细节（附录 = 144 维数据全链路：前向 → 双 Loss → 反向 → 优化器），按讲解流程走（2.4% → 94.75%） |
-| **魔方 DQN（细节版）** | `dqn-ref.html` | 技术细节知识树：10 层 61 环节 265 细节，含 150 条标记快照 |
+| **魔方 DQN（细节版）** | `dqn-ref.html` | 技术细节知识树：10 层 61 环节 264 细节，含 150 条标记快照 |
+| **魔方 DQN（技术蜈蚣）** | `dqn-tech.html` | **横向一条主干 + 垂直技术腿**：12 站数据流（144 维入 → 前向 → 双 Loss → 反向 → 优化器）× 61 条技术腿，每条腿一句人话说明 |
 | 旧链接桩 | `chain.html` | 自动跳转到 `index.html?mode=chain` |
 
 两个 `graph.html` / `index.html` 由脚本从 `source.md` 与 `graph/data/*.json` 生成，
@@ -52,6 +53,7 @@
 - 场景：用户注册全链路、部门管理 CRUD、员工管理 CRUD、班级与学员管理、登录与权限校验、业务规则守卫、AI 智能助手接入、参考与附录
 - 独立页：`fastapi.html`（`mm-marks-fastapi-v1`）、`ml.html` 机器学习（`mm-marks-ml-v1`）、
   `dqn.html` 魔方 DQN 讲解版（`mm-marks-dqn-story-v1`）、`dqn-ref.html` 细节版（`mm-marks-dqn-v1`）
+- 技术蜈蚣：`dqn-tech.html`（12 站主干 × 61 条技术腿，横向主干 + 垂直腿；不参与标记）
 - 源码索引：48 个文件（`tlias` 后端 + `webcase` 案例）
 - MySQL：5 章 13 组 84 知识点 101 段代码
 
