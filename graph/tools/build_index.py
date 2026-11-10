@@ -1,17 +1,32 @@
 # -*- coding: utf-8 -*-
 """Build merged index.html: mindmap + chain in one page, one bottom-right mode switch."""
-import io, re, sys
+import io, os, re, sys
 
-BASE = r"E:\mindmap"
-SRC = r"E:\mindmap\graph\_src\_orig"   # 原始未合并版（构建源，勿改）
+# 路径从脚本自身位置推导：本文件在 <repo>/graph/tools/build_index.py
+TOOLS = os.path.dirname(os.path.abspath(__file__))   # <repo>/graph/tools
+GRAPH = os.path.dirname(TOOLS)                       # <repo>/graph
+BASE = os.path.dirname(GRAPH)                        # <repo>（部署根目录）
+SRC = os.path.join(GRAPH, "_src", "_orig")           # 原始未合并版（构建源，勿改）
+
+def out_path(argv):
+    """默认产出 <repo>/index.html；可用 --out <path> 或第一个位置参数重定向（重建对比时勿覆盖线上生成物）。"""
+    for i, a in enumerate(argv):
+        if a == "--out" and i + 1 < len(argv):
+            return argv[i + 1]
+    if argv and not argv[0].startswith("-"):
+        return argv[0]
+    return os.path.join(BASE, "index.html")
+
+OUT = out_path(sys.argv[1:])
+
 def read(p):
     with io.open(p, encoding="utf-8") as f:
         return f.read()
 
 MOBILE_CSS_4COL = '/* === 移动端切换栏 grid 修复 v3（独立站点）=== */\n@media (max-width: 900px){\n  .topbar{flex-wrap:wrap !important;height:auto !important;overflow:visible !important;\n          padding:6px 8px !important;gap:5px !important}\n  .brand{flex:1 0 100% !important;margin-bottom:2px}\n  .spacer{display:none !important}\n  .seg{display:grid !important;grid-template-columns:repeat(4,1fr) !important;\n       gap:4px !important;width:100% !important;flex:1 0 100% !important;\n       order:-1 !important;padding:3px !important;box-sizing:border-box}\n  .seg a{min-width:0 !important;width:auto !important;flex:none !important;\n         text-align:center !important;padding:7px 2px !important;\n         font-size:11.5px !important;line-height:1.2;white-space:nowrap;\n         overflow:hidden;text-overflow:ellipsis;background:transparent;border-radius:6px}\n  .seg a.on{background:#fff;box-shadow:0 1px 3px rgba(17,24,39,.14)}\n  .btns{flex-wrap:nowrap !important;overflow-x:auto !important;width:100%}\n  .btns::-webkit-scrollbar{display:none}\n  button{flex:none;font-size:11px;padding:5px 8px;white-space:nowrap}\n  .stats{flex:1 0 100% !important;justify-content:center !important;font-size:9.5px !important}\n  .legend{display:none !important}\n  .hint{font-size:10px;left:8px;bottom:8px;padding:4px 8px;max-width:calc(100% - 16px)}\n}'
 
-idx = read(SRC + r"\index.html")
-chn = read(SRC + r"\chain.html")
+idx = read(os.path.join(SRC, "index.html"))
+chn = read(os.path.join(SRC, "chain.html"))
 
 def script_of(html):
     return re.search(r"<script>(.*)</script>", html, re.S).group(1)
@@ -656,7 +671,11 @@ if "移动端切换栏" not in out:
 if "llm.html" not in out:
     out = out.replace("</a>\n    </div>", '</a>\n      <a href="llm.html">数据分析</a>\n    </div>', 1)
 mo = re.search(r"<style>(.*?)</style>", out, re.S)
-io.open(BASE + r"\index.html", "w", encoding="utf-8", newline="\n").write(out)
+_out_dir = os.path.dirname(OUT)
+if _out_dir and not os.path.isdir(_out_dir):
+    os.makedirs(_out_dir)
+io.open(OUT, "w", encoding="utf-8", newline="\n").write(out)
+print("written:", OUT)
 print("written index.html:", len(out.encode("utf-8")), "bytes")
 print("DATA literal chars:", len(DATA_LIT))
 print("MARK literal chars:", len(MARK_LIT))
